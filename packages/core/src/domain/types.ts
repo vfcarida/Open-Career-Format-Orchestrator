@@ -32,107 +32,24 @@
  * interoperable with any LLM or agent that can read Markdown + YAML.
  */
 
-import { z } from 'zod';
 
-// ─── OKF Document Types ────────────────────────────────────────────────────────
 
-/**
- * Career-specific OKF document types.
- *
- * Per OKF v0.1 spec §4.1: "Type values are not registered centrally.
- * Producers SHOULD pick values that are descriptive and self-explanatory."
- */
-export const OKFDocumentType = {
-  Skill: 'Skill',
-  Experience: 'Experience',
-  Education: 'Education',
-  Preference: 'Preference',
-  Application: 'Application',
-  Certificate: 'Certificate',
-  Project: 'Project',
-} as const;
+// Constants and Schemas are imported and re-exported from schemas.js
 
-export type OKFDocumentType = (typeof OKFDocumentType)[keyof typeof OKFDocumentType];
-
-/**
- * Application pipeline stages for Kanban tracking.
- */
-export const ApplicationStatus = {
-  Saved: 'Saved',
-  Applied: 'Applied',
-  Screening: 'Screening',
-  Interview: 'Interview',
-  Offer: 'Offer',
-  Rejected: 'Rejected',
-  Withdrawn: 'Withdrawn',
-} as const;
-
-export type ApplicationStatus = (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
-
-/**
- * Skill proficiency levels for granular capability assessment.
- */
-export const SkillLevel = {
-  Beginner: 'Beginner',
-  Intermediate: 'Intermediate',
-  Advanced: 'Advanced',
-  Expert: 'Expert',
-} as const;
-
-export type SkillLevel = (typeof SkillLevel)[keyof typeof SkillLevel];
-
-// ─── Zod Schemas ────────────────────────────────────────────────────────────────
-
-/**
- * Base frontmatter schema per OKF v0.1 spec §4.1.
- * Only `type` is required; all other fields are recommended or optional.
- */
-export const OKFFrontmatterSchema = z.object({
-  type: z.string().min(1, 'The "type" field is required by OKF v0.1 spec §4.1'),
-  title: z.string().optional(),
-  description: z.string().optional(),
-  resource: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  timestamp: z.string().optional(),
-}).passthrough();
-
-/**
- * Extended frontmatter for Application documents.
- */
-export const ApplicationFrontmatterSchema = OKFFrontmatterSchema.extend({
-  type: z.literal(OKFDocumentType.Application),
-  company: z.string().optional(),
-  position: z.string().optional(),
-  url: z.string().url().optional(),
-  platform: z.string().optional(),
-  status: z.nativeEnum(ApplicationStatus).optional(),
-  appliedAt: z.string().optional(),
-  salary: z.string().optional(),
-  location: z.string().optional(),
-});
-
-/**
- * Extended frontmatter for Skill documents.
- */
-export const SkillFrontmatterSchema = OKFFrontmatterSchema.extend({
-  type: z.literal(OKFDocumentType.Skill),
-  level: z.nativeEnum(SkillLevel).optional(),
-  yearsOfExperience: z.number().optional(),
-  category: z.string().optional(),
-});
-
-/**
- * Extended frontmatter for Experience documents.
- */
-export const ExperienceFrontmatterSchema = OKFFrontmatterSchema.extend({
-  type: z.literal(OKFDocumentType.Experience),
-  company: z.string().optional(),
-  role: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  current: z.boolean().optional(),
-  location: z.string().optional(),
-});
+export {
+  OKFDocumentType,
+  ApplicationStatus,
+  SkillLevel,
+  OKFFrontmatterSchema,
+  ApplicationFrontmatterSchema,
+  SkillFrontmatterSchema,
+  ExperienceFrontmatterSchema,
+  EducationFrontmatterSchema,
+  CertificateFrontmatterSchema,
+  ProjectFrontmatterSchema,
+  PreferenceFrontmatterSchema,
+  CareerFrontmatterSchema,
+} from './schemas.js';
 
 // ─── TypeScript Interfaces ──────────────────────────────────────────────────────
 

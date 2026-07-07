@@ -230,8 +230,8 @@ export class OCFMcpServer {
           await this.docService.createDocument(appDoc);
 
           const statusMsg = dryRun
-            ? `Successfully compiled form details for "${result.jobTitle}" at "${result.company}" (Dry Run: Saved in OKF bundle).`
-            : `Successfully submitted application for "${result.jobTitle}" at "${result.company}" and registered submission in OKF bundle.`;
+            ? `[DEPRECATION WARNING: Use @ocf/mcp-automation-server tools instead] Successfully compiled form details for "${result.jobTitle}" at "${result.company}" (Dry Run: Saved in OKF bundle).`
+            : `[DEPRECATION WARNING: Use @ocf/mcp-automation-server tools instead] Successfully submitted application for "${result.jobTitle}" at "${result.company}" and registered submission in OKF bundle.`;
 
           return {
             content: [

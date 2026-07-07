@@ -1,0 +1,25 @@
+name: Feature Request
+description: Propose a new feature or enhancement for OCF
+title: "feat: <title>"
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: What feature would you like to propose?
+      placeholder: Describe the problem and proposed feature...
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale & Value
+      description: Why is this feature valuable for the OCF ecosystem?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative designs or workarounds you considered?

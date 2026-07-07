@@ -1,6 +1,7 @@
 // Domain
 export * from './domain/types.js';
 export * from './domain/errors.js';
+export * from './domain/schemas.js';
 export type { IFileSystemAdapter, IFrontmatterParser, IOKFRepository, IIndexService, ILogService } from './domain/interfaces.js';
 
 // Infrastructure
@@ -17,3 +18,6 @@ export { LogService } from './services/log-service.js';
 
 // Factories
 export { OKFDocumentFactory } from './factories/okf-document-factory.js';
+
+// Observability
+export * from './observability/otel.js';
