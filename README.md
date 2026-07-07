@@ -17,7 +17,7 @@
 
 ## 📌 Table of Contents
 
-1. [Executive Context: From API-First to Agent-First](#1-executive-context-from-api-first-to-agent-first)
+1. [Strategic Overview: From API-First to Agent-First](#1-strategic-overview-from-api-first-to-agent-first)
 2. [Architectural Foundation: OKF and MCP](#2-architectural-foundation-okf-and-mcp)
 3. [The Reference Implementation: Career Management](#3-the-reference-implementation-career-management)
 4. [System Architecture](#4-system-architecture)
@@ -31,7 +31,7 @@
 
 ---
 
-## 1. Executive Context: From API-First to Agent-First
+## 1. Strategic Overview: From API-First to Agent-First
 
 For the past decade, the **"API-first"** strategy successfully drove cloud migration, microservices adoption, and application modernization. However, as software development transitions toward **Agentic AI**, traditional APIs reveal structural limitations. Standard APIs were designed for deterministic, human-authored integrations and often lack the dynamic, self-describing interfaces required for autonomous systems to discover and interact with tools at runtime.
 
