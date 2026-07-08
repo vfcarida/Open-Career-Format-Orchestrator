@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ServerCog, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { ServerCog, CheckCircle, XCircle, RefreshCw, AlertTriangle, FileText, Clock, MapPin } from 'lucide-react';
 
 export function SystemHealth() {
   const [validating, setValidating] = useState(false);
@@ -16,7 +16,15 @@ export function SystemHealth() {
       if (data.isError || !res.ok) {
         throw new Error(data.content?.[0]?.text || data.error);
       }
-      setReport(JSON.parse(data.content[0].text));
+      
+      const parsed = JSON.parse(data.content[0].text);
+      if (parsed.ok === false && parsed.error) {
+        // It's a ToolFailure
+        throw new Error(parsed.error.message);
+      }
+
+      // parsed is ToolSuccess
+      setReport(parsed.data);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -38,8 +46,14 @@ export function SystemHealth() {
       if (data.isError || !res.ok) {
         throw new Error(data.content?.[0]?.text || data.error);
       }
-      // Migration tool just returns text in our implementation, let's parse or show it
-      setReport({ migrationText: data.content[0].text });
+      
+      const parsed = JSON.parse(data.content[0].text);
+      if (parsed.ok === false && parsed.error) {
+        throw new Error(parsed.error.message);
+      }
+
+      // We expect the migration tool to return a report object
+      setReport({ migrationReport: parsed.data });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -48,7 +62,7 @@ export function SystemHealth() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
           <ServerCog className="w-6 h-6 text-neon-blue" />
@@ -68,7 +82,7 @@ export function SystemHealth() {
           <button
             onClick={handleValidate}
             disabled={validating || migrating}
-            className="w-full py-2 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue font-medium rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
+            className="w-full py-2 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue font-medium rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             {validating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
             {validating ? 'Validating...' : 'Run Validation'}
@@ -83,7 +97,7 @@ export function SystemHealth() {
           <button
             onClick={handleMigrate}
             disabled={validating || migrating}
-            className="w-full py-2 bg-neon-indigo/20 hover:bg-neon-indigo/30 text-neon-indigo font-medium rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
+            className="w-full py-2 bg-neon-indigo/20 hover:bg-neon-indigo/30 text-neon-indigo font-medium rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             {migrating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             {migrating ? 'Migrating...' : 'Run Migration'}
@@ -99,42 +113,102 @@ export function SystemHealth() {
       )}
 
       {report && (
-        <div className="glass-panel p-6 rounded-2xl space-y-4">
-          <h3 className="font-medium text-zinc-200 border-b border-white/10 pb-2">Execution Report</h3>
+        <div className="glass-panel p-6 rounded-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <h3 className="font-medium text-zinc-200 text-lg">Execution Report</h3>
+            {report.checkedAt && (
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <Clock className="w-3.5 h-3.5" />
+                {new Date(report.checkedAt).toLocaleString()}
+              </div>
+            )}
+          </div>
           
-          {report.migrationText ? (
-            <pre className="text-sm text-zinc-300 font-mono whitespace-pre-wrap">
-              {report.migrationText}
-            </pre>
-          ) : (
+          {report.migrationReport ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-zinc-800/50 p-3 rounded-lg border border-white/5">
-                  <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Valid Documents</div>
-                  <div className="text-2xl text-emerald-400">{report.validCount ?? 0}</div>
+              <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
+                <h4 className="text-emerald-400 font-medium">Migration Successful</h4>
+                <p className="text-emerald-400/80 text-xs mt-1">Files Checked: {report.migrationReport.filesChecked}</p>
+                <p className="text-emerald-400/80 text-xs">Files Migrated: {report.migrationReport.filesMigrated}</p>
+              </div>
+              <pre className="text-sm text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-900 p-4 rounded-xl border border-white/5">
+                {JSON.stringify(report.migrationReport.changes, null, 2)}
+              </pre>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              
+              {report.bundlePath && (
+                <div className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-900/50 p-2 rounded-lg border border-white/5">
+                  <MapPin className="w-4 h-4 text-neon-blue" />
+                  <span className="truncate">{report.bundlePath}</span>
                 </div>
-                <div className="bg-zinc-800/50 p-3 rounded-lg border border-white/5">
-                  <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Invalid Documents</div>
-                  <div className="text-2xl text-red-400">{report.invalidCount ?? 0}</div>
+              )}
+
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5 flex flex-col items-center text-center">
+                  <div className="text-xs text-zinc-500 uppercase tracking-wider mb-2 font-semibold">Total Checked</div>
+                  <div className="text-3xl text-zinc-200">{report.summary?.filesChecked ?? 0}</div>
                 </div>
-                <div className="bg-zinc-800/50 p-3 rounded-lg border border-white/5">
-                  <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Total Checked</div>
-                  <div className="text-2xl text-zinc-300">{(report.validCount || 0) + (report.invalidCount || 0)}</div>
+                <div className="bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 flex flex-col items-center text-center">
+                  <div className="text-xs text-emerald-500/70 uppercase tracking-wider mb-2 font-semibold">Valid</div>
+                  <div className="text-3xl text-emerald-400">{report.summary?.validDocuments ?? 0}</div>
+                </div>
+                <div className="bg-red-500/5 p-4 rounded-xl border border-red-500/10 flex flex-col items-center text-center">
+                  <div className="text-xs text-red-500/70 uppercase tracking-wider mb-2 font-semibold">Invalid</div>
+                  <div className="text-3xl text-red-400">{report.summary?.invalidDocuments ?? 0}</div>
+                </div>
+                <div className="bg-amber-500/5 p-4 rounded-xl border border-amber-500/10 flex flex-col items-center text-center">
+                  <div className="text-xs text-amber-500/70 uppercase tracking-wider mb-2 font-semibold">Warnings</div>
+                  <div className="text-3xl text-amber-400">{report.summary?.warnings ?? 0}</div>
                 </div>
               </div>
 
-              {report.errors && report.errors.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-red-400 mb-2 flex items-center gap-2">
-                    <XCircle className="w-4 h-4" /> Validation Errors
+              {report.diagnostics && report.diagnostics.length > 0 && (
+                <div className="mt-6 space-y-3">
+                  <h4 className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-400" /> 
+                    Diagnostics ({report.diagnostics.length})
                   </h4>
-                  <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-3 max-h-60 overflow-y-auto">
-                    <ul className="list-disc list-inside space-y-1">
-                      {report.errors.map((err: string, i: number) => (
-                        <li key={i} className="text-xs text-red-300/90">{err}</li>
-                      ))}
-                    </ul>
+                  <div className="space-y-2 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                    {report.diagnostics.map((d: any, i: number) => (
+                      <div key={i} className={`p-3 rounded-lg border ${d.severity === 'error' ? 'bg-red-500/5 border-red-500/20' : 'bg-amber-500/5 border-amber-500/20'} flex gap-3 items-start`}>
+                        {d.severity === 'error' ? (
+                          <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-mono text-zinc-400 flex items-center gap-1.5 truncate">
+                              <FileText className="w-3.5 h-3.5" /> {d.file}
+                            </span>
+                            {d.code && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/40 text-zinc-500 font-mono tracking-wider">
+                                {d.code}
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-sm ${d.severity === 'error' ? 'text-red-200' : 'text-amber-200'} leading-relaxed`}>
+                            {d.message}
+                          </p>
+                          {d.suggestion && (
+                            <p className="text-xs text-zinc-500 mt-2 italic">
+                              Suggestion: {d.suggestion}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                </div>
+              )}
+              
+              {report.ok && report.diagnostics?.length === 0 && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-xl text-center">
+                  <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto mb-3 opacity-80" />
+                  <h4 className="text-emerald-400 font-medium text-lg mb-1">Bundle is perfectly healthy!</h4>
+                  <p className="text-emerald-400/70 text-sm">All career records are strictly schema compliant with OCF Profile v1.</p>
                 </div>
               )}
             </div>
