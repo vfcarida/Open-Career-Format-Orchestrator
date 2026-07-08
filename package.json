@@ -24,9 +24,9 @@
     "dev:dashboard": "pnpm --filter @ocf/dashboard dev"
   },
   "devDependencies": {
-    "typescript": "^5.8.0",
-    "@types/node": "^22.0.0",
-    "vitest": "^3.2.0",
+    "typescript": "^6.0.3",
+    "@types/node": "^26.1.1",
+    "vitest": "^4.1.10",
     "prettier": "^3.5.0"
   }
 }

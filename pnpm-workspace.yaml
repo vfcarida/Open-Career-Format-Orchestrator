@@ -2,8 +2,8 @@ packages:
   - "packages/*"
 
 catalog:
-  typescript: ^5.8.0
-  vitest: ^3.2.7
-  zod: ^3.25.0
+  typescript: ^6.0.3
+  vitest: ^4.1.10
+  zod: ^4.4.3
   prettier: ^3.5.0
-  "@types/node": ^22.0.0
+  "@types/node": ^26.1.1
