@@ -80,6 +80,8 @@ export class EvalsHarness {
   }
 }
 
+import { runPromptInjectionScenarios } from './prompt-injection-scenario.js';
+
 async function main() {
   const harness = new EvalsHarness();
 
@@ -101,6 +103,9 @@ async function main() {
     await new Promise(r => setTimeout(r, 800));
     return { success: false, hitlTriggered: false, schemaValid: false, tokens: 600 };
   });
+
+  // Run Adversarial Prompt Injection Scenarios
+  await runPromptInjectionScenarios(harness);
 
   const reportDir = path.resolve(__dirname, '../../reports');
   if (!fs.existsSync(reportDir)) {
