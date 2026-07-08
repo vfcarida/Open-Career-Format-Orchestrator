@@ -5,8 +5,8 @@ allowBuilds:
   better-sqlite3: set this to true or false
 
 catalog:
-  typescript: ^5.8.0
-  vitest: ^3.2.7
-  zod: ^3.25.0
+  typescript: ^7.0.2
+  vitest: ^4.1.10
+  zod: ^4.4.3
   prettier: ^3.5.0
-  "@types/node": ^22.0.0
+  "@types/node": ^26.1.1

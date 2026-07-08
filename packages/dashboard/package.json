@@ -17,7 +17,7 @@
     "cors": "^2.8.6",
     "d3": "^7.9.0",
     "express": "^5.2.1",
-    "lucide-react": "^0.475.0",
+    "lucide-react": "^1.23.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
@@ -27,14 +27,14 @@
     "@types/cors": "^2.8.19",
     "@types/d3": "^7.4.3",
     "@types/express": "^5.0.6",
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
-    "oxlint": "^1.71.0",
+    "oxlint": "^1.73.0",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.23.0",
-    "typescript": "^5.8.0",
+    "typescript": "^7.0.2",
     "vite": "^8.1.1"
   }
 }
