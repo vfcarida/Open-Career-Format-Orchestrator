@@ -1,4 +1,4 @@
-# 🌌 Open Career Format Orchestrator (OCF)
+# 🌌 Agent-ready Knowledge Reference Architecture
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License Badge" />
