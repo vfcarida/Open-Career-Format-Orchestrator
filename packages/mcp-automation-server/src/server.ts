@@ -5,6 +5,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import crypto from 'node:crypto';
 import {
   OKFDocumentService,
   OKFDocumentFactory,
@@ -14,6 +15,9 @@ import {
   automationAttemptsCounter,
   automationApprovalRequiredCounter,
   automationSubmissionSuccessCounter,
+  createToolSuccess,
+  createToolFailure,
+  withToolTracing
 } from '@ocf/core';
 import { BrowserOrchestrator } from './automation/browser-orchestrator.js';
 import { ApprovalStore } from './approval/approval-store.js';
@@ -54,25 +58,37 @@ export class OCFMcpAutomationServer {
         jobUrl: z.string().url().describe('The job posting vacancy URL to preview'),
       },
       async ({ jobUrl }) => {
+        const reqId = crypto.randomUUID();
+        const toolName = 'preview_application';
+        const toolVersion = '0.1.0';
         mcpToolCallsCounter.add(1);
+
         try {
-          const platform = this.detectPlatform(jobUrl);
+          const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+            const platform = this.detectPlatform(jobUrl);
+            return {
+              jobUrl,
+              platform,
+              requiredFields: ['first_name', 'last_name', 'email', 'resume_file', 'phone'],
+              estimatedAutonomyLevel: 'act-with-approval',
+            };
+          });
+
           return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  jobUrl,
-                  platform,
-                  requiredFields: ['first_name', 'last_name', 'email', 'resume_file', 'phone'],
-                  estimatedAutonomyLevel: 'act-with-approval',
-                }, null, 2),
-              },
-            ],
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2) 
+            }],
           };
         } catch (err: any) {
           mcpToolFailuresCounter.add(1);
-          return { isError: true, content: [{ type: 'text', text: err.message }] };
+          return { 
+            isError: true, 
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolFailure(err.message, 'PREVIEW_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+            }] 
+          };
         }
       }
     );
@@ -84,64 +100,73 @@ export class OCFMcpAutomationServer {
         jobUrl: z.string().url().describe('The target job posting vacancy URL'),
       },
       async ({ jobUrl }) => {
+        const reqId = crypto.randomUUID();
+        const toolName = 'prepare_application';
+        const toolVersion = '0.1.0';
         mcpToolCallsCounter.add(1);
         automationAttemptsCounter.add(1);
         automationApprovalRequiredCounter.add(1);
-        const startTime = Date.now();
-        const policy = checkPolicy('prepare_application');
-
+        
         try {
-          const context = await this.docService.getCareerContext();
-          
-          const pref = context.preferences[0];
-          const roles = pref?.frontmatter['roles'] || [];
-          
-          const preparedFields = {
-            rolesApplied: Array.isArray(roles) ? roles.join(', ') : 'Software Engineer',
-            status: 'Draft',
-          };
+          const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+            const policy = checkPolicy('prepare_application');
+            const context = await this.docService.getCareerContext();
+            
+            const pref = context.preferences[0];
+            const roles = pref?.frontmatter['roles'] || [];
+            
+            const preparedFields = {
+              rolesApplied: Array.isArray(roles) ? roles.join(', ') : 'Software Engineer',
+              status: 'Draft',
+            };
 
-          const payload = { jobUrl, context, preparedFields };
-          const metadata = { jobUrl, platform: this.detectPlatform(jobUrl) };
-          const token = approvalStore.generateToken('confirm_application_submission', payload, metadata);
+            const payload = { jobUrl, context, preparedFields };
+            const metadata = { jobUrl, platform: this.detectPlatform(jobUrl) };
+            const token = approvalStore.generateToken('confirm_application_submission', payload, metadata);
+
+            return { token, preparedFields, policy };
+          });
 
           auditLogger.log({
-            requestId: token,
+            requestId: data.token,
             toolName: 'prepare_application',
-            autonomyLevel: policy?.approvalMode === 'required' ? 'act-with-approval' : 'advise',
+            autonomyLevel: data.policy?.approvalMode === 'required' ? 'act-with-approval' : 'advise',
             approvalRequired: false,
-            sideEffectLevel: policy?.sideEffectLevel || 'external-read',
+            sideEffectLevel: data.policy?.sideEffectLevel || 'external-read',
             status: 'success',
-            durationMs: Date.now() - startTime,
+            durationMs,
           });
 
           return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  ok: true,
-                  message: 'Application pre-filled and locked. Explicit human authorization is required to submit.',
-                  approvalToken: token,
-                  autonomyLevel: 'act-with-approval',
-                  preparedFields,
-                }, null, 2),
-              },
-            ],
+            content: [{
+              type: 'text',
+              text: JSON.stringify(createToolSuccess({
+                message: 'Application pre-filled and locked. Explicit human authorization is required to submit.',
+                approvalToken: data.token,
+                autonomyLevel: 'act-with-approval',
+                preparedFields: data.preparedFields,
+              }, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2)
+            }],
           };
         } catch (err: any) {
           mcpToolFailuresCounter.add(1);
           auditLogger.log({
-            requestId: 'unknown',
+            requestId: reqId,
             toolName: 'prepare_application',
             autonomyLevel: 'advise',
             approvalRequired: false,
             sideEffectLevel: 'external-read',
             status: 'failure',
-            durationMs: Date.now() - startTime,
+            durationMs: 0,
             details: { error: err.message }
           });
-          return { isError: true, content: [{ type: 'text', text: err.message }] };
+          return { 
+            isError: true, 
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolFailure(err.message, 'PREPARE_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+            }] 
+          };
         }
       }
     );
@@ -155,93 +180,62 @@ export class OCFMcpAutomationServer {
         dryRun: z.boolean().optional().default(false),
       },
       async ({ approvalToken, jobUrl, dryRun }) => {
+        const reqId = crypto.randomUUID();
+        const toolName = 'confirm_application_submission';
+        const toolVersion = '0.1.0';
         mcpToolCallsCounter.add(1);
-        const startTime = Date.now();
         const policy = checkPolicy('confirm_application_submission');
 
         try {
-          // Re-fetch context to rebuild the exact payload that was hashed
-          const context = await this.docService.getCareerContext();
-          const pref = context.preferences[0];
-          const roles = pref?.frontmatter['roles'] || [];
-          const preparedFields = {
-            rolesApplied: Array.isArray(roles) ? roles.join(', ') : 'Software Engineer',
-            status: 'Draft',
-          };
-
-          const expectedPayload = { jobUrl, context, preparedFields };
-          
-          const isValid = approvalStore.validateAndConsume(approvalToken, 'confirm_application_submission', expectedPayload);
-
-          if (!isValid) {
-            const errorMsg = `Execution Blocked: Invalid, expired, or tampered approval token: ${approvalToken}`;
-            auditLogger.log({
-              requestId: approvalToken,
-              toolName: 'confirm_application_submission',
-              autonomyLevel: 'act-with-approval',
-              approvalRequired: true,
-              sideEffectLevel: policy?.sideEffectLevel || 'external-submit',
-              status: 'blocked',
-              durationMs: Date.now() - startTime,
-              details: { reason: 'token_validation_failed' }
-            });
-            throw new Error(errorMsg);
-          }
-          
-          const mode = process.env['AUTOMATION_RUNTIME_MODE'] || 'sandbox';
-          if (mode !== 'explicit-authorized-live' && !dryRun) {
-            const errorMsg = `Execution Blocked: AUTOMATION_RUNTIME_MODE is set to '${mode}'. Live application submissions are disabled unless mode is 'explicit-authorized-live' or dryRun is true.`;
-            auditLogger.log({
-              requestId: approvalToken,
-              toolName: 'confirm_application_submission',
-              autonomyLevel: 'act-with-approval',
-              approvalRequired: true,
-              sideEffectLevel: policy?.sideEffectLevel || 'external-submit',
-              status: 'blocked',
-              durationMs: Date.now() - startTime,
-              details: { reason: 'runtime_mode_blocked' }
-            });
-            throw new Error(errorMsg);
-          }
-
-          // Trigger Playwright browser automation
-          const result = await this.orchestrator.orchestrate(jobUrl, context, {
-            headless: true,
-            dryRun,
-          });
-
-          if (!result.success) {
-            auditLogger.log({
-              requestId: approvalToken,
-              toolName: 'confirm_application_submission',
-              autonomyLevel: 'act-with-approval',
-              approvalRequired: true,
-              sideEffectLevel: policy?.sideEffectLevel || 'external-submit',
-              status: 'failure',
-              durationMs: Date.now() - startTime,
-              details: { error: 'automation_failed' }
-            });
-            return {
-              isError: true,
-              content: [{ type: 'text', text: `Automation execution failed: ${result.errors?.join('\n')}` }],
+          const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+            // Re-fetch context to rebuild the exact payload that was hashed
+            const context = await this.docService.getCareerContext();
+            const pref = context.preferences[0];
+            const roles = pref?.frontmatter['roles'] || [];
+            const preparedFields = {
+              rolesApplied: Array.isArray(roles) ? roles.join(', ') : 'Software Engineer',
+              status: 'Draft',
             };
-          }
 
-          // Create and save OKF Application Document if not just a dry run (or if dry run saving is desired)
-          // The policy requires dry run to NOT generate a "success" state in terms of "Applied", so it's "Saved".
-          const appDoc = OKFDocumentFactory.createApplication(
-            result.company,
-            result.jobTitle,
-            jobUrl,
-            {
-              platform: result.platform,
-              status: dryRun ? ApplicationStatus.Saved : ApplicationStatus.Applied,
-              appliedAt: result.submittedAt,
+            const expectedPayload = { jobUrl, context, preparedFields };
+            
+            const isValid = approvalStore.validateAndConsume(approvalToken, 'confirm_application_submission', expectedPayload);
+
+            if (!isValid) {
+              throw new Error(`Execution Blocked: Invalid, expired, or tampered approval token: ${approvalToken}`);
             }
-          );
+            
+            const mode = process.env['AUTOMATION_RUNTIME_MODE'] || 'sandbox';
+            if (mode !== 'explicit-authorized-live' && !dryRun) {
+              throw new Error(`Execution Blocked: AUTOMATION_RUNTIME_MODE is set to '${mode}'. Live application submissions are disabled unless mode is 'explicit-authorized-live' or dryRun is true.`);
+            }
 
-          await this.docService.createDocument(appDoc);
-          automationSubmissionSuccessCounter.add(1);
+            // Trigger Playwright browser automation
+            const result = await this.orchestrator.orchestrate(jobUrl, context, {
+              headless: true,
+              dryRun,
+            });
+
+            if (!result.success) {
+              throw new Error(`Automation execution failed: ${result.errors?.join('\n')}`);
+            }
+
+            const appDoc = OKFDocumentFactory.createApplication(
+              result.company,
+              result.jobTitle,
+              jobUrl,
+              {
+                platform: result.platform,
+                status: dryRun ? ApplicationStatus.Saved : ApplicationStatus.Applied,
+                appliedAt: result.submittedAt,
+              }
+            );
+
+            await this.docService.createDocument(appDoc);
+            automationSubmissionSuccessCounter.add(1);
+
+            return { appDoc, dryRun };
+          });
 
           auditLogger.log({
             requestId: approvalToken,
@@ -250,45 +244,78 @@ export class OCFMcpAutomationServer {
             approvalRequired: true,
             sideEffectLevel: policy?.sideEffectLevel || 'external-submit',
             status: 'success',
-            durationMs: Date.now() - startTime,
+            durationMs,
           });
 
           return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  ok: true,
-                  message: dryRun
-                    ? 'Dry-run application completed successfully.'
-                    : 'Job application successfully submitted and registered in OKF bundle.',
-                  conceptId: appDoc.conceptId,
-                }, null, 2),
-              },
-            ],
+            content: [{
+              type: 'text',
+              text: JSON.stringify(createToolSuccess({
+                message: data.dryRun
+                  ? 'Dry-run application completed successfully.'
+                  : 'Job application successfully submitted and registered in OKF bundle.',
+                conceptId: data.appDoc.conceptId,
+              }, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2),
+            }],
           };
         } catch (err: any) {
           mcpToolFailuresCounter.add(1);
-          return { isError: true, content: [{ type: 'text', text: err.message }] };
+          
+          let failReason = 'automation_failed';
+          if (err.message.includes('Invalid, expired, or tampered')) failReason = 'token_validation_failed';
+          if (err.message.includes('AUTOMATION_RUNTIME_MODE')) failReason = 'runtime_mode_blocked';
+
+          auditLogger.log({
+            requestId: approvalToken,
+            toolName: 'confirm_application_submission',
+            autonomyLevel: 'act-with-approval',
+            approvalRequired: true,
+            sideEffectLevel: policy?.sideEffectLevel || 'external-submit',
+            status: failReason === 'automation_failed' ? 'failure' : 'blocked',
+            durationMs: 0,
+            details: { reason: failReason, error: err.message }
+          });
+          
+          return { 
+            isError: true, 
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolFailure(err.message, failReason.toUpperCase(), { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+            }] 
+          };
         }
       }
     );
 
     // Tool: capture_job_posting
     this.server.tool('capture_job_posting', { jobUrl: z.string().url() }, async () => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'capture_job_posting';
+      const toolVersion = '0.1.0';
       mcpToolCallsCounter.add(1);
-      return {
-        isError: true,
-        content: [{ type: 'text', text: 'NOT_IMPLEMENTED: Feature deferred.' }],
+      
+      return { 
+        isError: true, 
+        content: [{ 
+          type: 'text', 
+          text: JSON.stringify(createToolFailure('NOT_IMPLEMENTED: Feature deferred.', 'NOT_IMPLEMENTED', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+        }] 
       };
     });
 
     // Tool: extract_platform_metadata
     this.server.tool('extract_platform_metadata', { jobUrl: z.string().url() }, async () => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'extract_platform_metadata';
+      const toolVersion = '0.1.0';
       mcpToolCallsCounter.add(1);
-      return {
-        isError: true,
-        content: [{ type: 'text', text: 'NOT_IMPLEMENTED: Feature deferred.' }],
+
+      return { 
+        isError: true, 
+        content: [{ 
+          type: 'text', 
+          text: JSON.stringify(createToolFailure('NOT_IMPLEMENTED: Feature deferred.', 'NOT_IMPLEMENTED', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+        }] 
       };
     });
 
@@ -297,23 +324,33 @@ export class OCFMcpAutomationServer {
       'list_pending_approvals',
       {},
       async () => {
+        const reqId = crypto.randomUUID();
+        const toolName = 'list_pending_approvals';
+        const toolVersion = '0.1.0';
         mcpToolCallsCounter.add(1);
+
         try {
-          const pending = approvalStore.getPendingApprovals();
+          const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+            return approvalStore.getPendingApprovals();
+          });
+
           return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  ok: true,
-                  pending,
-                }, null, 2),
-              },
-            ],
+            content: [{
+              type: 'text',
+              text: JSON.stringify(createToolSuccess({
+                pending: data,
+              }, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2),
+            }],
           };
         } catch (err: any) {
           mcpToolFailuresCounter.add(1);
-          return { isError: true, content: [{ type: 'text', text: err.message }] };
+          return { 
+            isError: true, 
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolFailure(err.message, 'LIST_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+            }] 
+          };
         }
       }
     );

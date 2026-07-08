@@ -100,6 +100,11 @@ export class ApprovalStore {
     return true;
   }
 
+  revokeToken(token: string): boolean {
+    const result = this.db.prepare(`DELETE FROM pending_approvals WHERE token = ?`).run(token);
+    return result.changes > 0;
+  }
+
   private hashPayload(payload: unknown): string {
     const data = JSON.stringify(payload || {});
     return crypto.createHash('sha256').update(data).digest('hex');

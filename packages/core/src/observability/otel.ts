@@ -88,3 +88,44 @@ export const automationSubmissionBlockedCounter = meter.createCounter('ocf_autom
 export const mcpToolDurationHistogram = meter.createHistogram('ocf_mcp_tool_duration_ms', {
   description: 'Duration of MCP tool executions in milliseconds',
 });
+
+// ─── Tracing Helpers ─────────────────────────────────────────────────────────
+
+export const tracer = api.trace.getTracer('open-career-format');
+
+/**
+ * Wraps an async function with an OpenTelemetry span and records duration.
+ */
+export async function withToolTracing<T>(
+  toolName: string,
+  toolVersion: string,
+  requestId: string,
+  fn: () => Promise<T>
+): Promise<{ data: T; durationMs: number }> {
+  return tracer.startActiveSpan(`tool:${toolName}`, async (span) => {
+    span.setAttribute('tool.name', toolName);
+    span.setAttribute('tool.version', toolVersion);
+    span.setAttribute('request.id', requestId);
+    
+    const start = performance.now();
+    try {
+      const data = await fn();
+      const end = performance.now();
+      const durationMs = end - start;
+      mcpToolDurationHistogram.record(durationMs, { toolName });
+      span.setAttribute('tool.duration_ms', durationMs);
+      span.setStatus({ code: api.SpanStatusCode.OK });
+      return { data, durationMs };
+    } catch (err: any) {
+      const end = performance.now();
+      const durationMs = end - start;
+      mcpToolDurationHistogram.record(durationMs, { toolName });
+      span.setAttribute('tool.duration_ms', durationMs);
+      span.recordException(err);
+      span.setStatus({ code: api.SpanStatusCode.ERROR, message: err.message });
+      throw err;
+    } finally {
+      span.end();
+    }
+  });
+}

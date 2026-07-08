@@ -9,20 +9,43 @@ import { FileSystemAdapter } from '../infrastructure/file-system-adapter.js';
 import { FrontmatterParser } from '../infrastructure/frontmatter-parser.js';
 import { CareerFrontmatterSchema } from '../domain/schemas.js';
 
+type BundleValidationReport = {
+  ok: boolean;
+  bundlePath: string;
+  checkedAt: string;
+  summary: {
+    filesChecked: number;
+    validDocuments: number;
+    invalidDocuments: number;
+    warnings: number;
+  };
+  diagnostics: Array<{
+    severity: "error" | "warning" | "info";
+    file: string;
+    code: string;
+    message: string;
+    field?: string;
+    suggestion?: string;
+  }>;
+};
+
 async function main() {
   const args = process.argv.slice(2);
   let bundlePathEnv = process.env['OCF_BUNDLE_PATH'] || './.okf';
+  let format: 'text' | 'json' | 'markdown' = 'text';
   
-  const bundleIdx = args.indexOf('--bundle');
-  if (bundleIdx >= 0 && bundleIdx + 1 < args.length) {
-    bundlePathEnv = args[bundleIdx + 1];
-  } else if (args.length > 0 && !args[0].startsWith('--')) {
-    bundlePathEnv = args[0];
+  for (let i = 0; i < args.length; i++) {
+    const currentArg = args[i];
+    if (currentArg === '--bundle' && i + 1 < args.length) {
+      bundlePathEnv = args[i + 1]!;
+    } else if (currentArg === '--format' && i + 1 < args.length) {
+      format = args[i + 1] as any;
+    } else if (currentArg !== undefined && !currentArg.startsWith('--') && i === 0 && !args.includes('--bundle')) {
+      bundlePathEnv = currentArg;
+    }
   }
 
   const bundlePath = path.resolve(bundlePathEnv);
-
-  console.log(`[OCF Validator] Scanning bundle at: ${bundlePath}`);
 
   const fsAdapter = new FileSystemAdapter();
   const fmParser = new FrontmatterParser();
@@ -37,6 +60,7 @@ async function main() {
   
   let validCount = 0;
   let invalidCount = 0;
+  const diagnostics: BundleValidationReport['diagnostics'] = [];
 
   for (const relPath of relativeFiles) {
     if (!relPath.endsWith('.md') || RESERVED_FILENAMES.has(path.basename(relPath))) {
@@ -51,28 +75,74 @@ async function main() {
       const validation = CareerFrontmatterSchema.safeParse(doc.frontmatter);
 
       if (validation.success) {
-        console.log(`  ✓ [Valid] ${doc.conceptId} (${doc.frontmatter.type})`);
         validCount++;
       } else {
-        console.error(`  ✗ [Invalid] ${doc.conceptId} (${doc.frontmatter.type || 'Unknown'}):`);
-        console.error(`    Reason: ${validation.error.message}`);
         invalidCount++;
+        diagnostics.push({
+          severity: 'error',
+          file: relPath,
+          code: 'SCHEMA_INVALID',
+          message: validation.error.message,
+        });
       }
     } catch (err: any) {
-      console.error(`  ✗ [Error parsing] ${relPath}:`);
-      console.error(`    Reason: ${err.message}`);
       invalidCount++;
+      diagnostics.push({
+        severity: 'error',
+        file: relPath,
+        code: 'PARSE_ERROR',
+        message: err.message,
+      });
     }
   }
 
-  console.log(`\n[OCF Validator] Validation summary:`);
-  console.log(`  Valid concepts: ${validCount}`);
-  console.log(`  Invalid concepts: ${invalidCount}`);
+  const report: BundleValidationReport = {
+    ok: invalidCount === 0,
+    bundlePath,
+    checkedAt: new Date().toISOString(),
+    summary: {
+      filesChecked: validCount + invalidCount,
+      validDocuments: validCount,
+      invalidDocuments: invalidCount,
+      warnings: 0,
+    },
+    diagnostics,
+  };
 
-  if (invalidCount > 0) {
+  if (format === 'json') {
+    console.log(JSON.stringify(report, null, 2));
+  } else if (format === 'markdown') {
+    console.log(`# Bundle Validation Report\n`);
+    console.log(`- **Checked At:** ${report.checkedAt}`);
+    console.log(`- **Bundle Path:** ${report.bundlePath}`);
+    console.log(`- **Status:** ${report.ok ? '✅ Valid' : '❌ Invalid'}`);
+    console.log(`\n## Summary\n`);
+    console.log(`- Files Checked: ${report.summary.filesChecked}`);
+    console.log(`- Valid Documents: ${report.summary.validDocuments}`);
+    console.log(`- Invalid Documents: ${report.summary.invalidDocuments}`);
+    if (diagnostics.length > 0) {
+      console.log(`\n## Diagnostics\n`);
+      for (const d of diagnostics) {
+        console.log(`- **[${d.severity.toUpperCase()}]** \`${d.file}\`: ${d.message}`);
+      }
+    }
+  } else {
+    console.log(`[OCF Validator] Scanning bundle at: ${bundlePath}`);
+    for (const d of diagnostics) {
+      console.error(`  ✗ [Invalid] ${d.file}:`);
+      console.error(`    Reason: ${d.message}`);
+    }
+    console.log(`\n[OCF Validator] Validation summary:`);
+    console.log(`  Valid concepts: ${validCount}`);
+    console.log(`  Invalid concepts: ${invalidCount}`);
+    if (report.ok) {
+      console.log(`[OCF Validator] All checked career records are strictly schema compliant!`);
+    }
+  }
+
+  if (!report.ok) {
     process.exit(1);
   } else {
-    console.log(`[OCF Validator] All checked career records are strictly schema compliant!`);
     process.exit(0);
   }
 }

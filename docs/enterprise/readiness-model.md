@@ -1,24 +1,28 @@
 # Enterprise Readiness Model
 
-The Open Career Format Orchestrator follows a three-tier readiness model for organizational adoption:
+This document maps the Agent-Ready Knowledge Reference Architecture to the **NIST AI Risk Management Framework (AI RMF)**, providing a baseline for enterprise governance.
 
-## Level 1: Individual / OSS
-- **Knowledge**: Manual Markdown files.
-- **MCP**: Local tools running on the user's laptop.
-- **Security**: Relies on host OS security.
-- **Observability**: Standard out logs.
-- **Automation**: Sandbox only.
+## NIST AI RMF Core Mapping
 
-## Level 2: Team / Department
-- **Knowledge**: Validated OKF bundles in shared repositories.
-- **MCP**: Contract tests, API keys for server access.
-- **Security**: Documented Threat Model and HITL policies.
-- **Observability**: OTel traces and Prometheus metrics.
-- **Automation**: Approval required for all side effects.
+| Area | Current | Required for Enterprise | Gap | Control |
+|---|---|---|---|---|
+| **Data (Govern/Map)** | OKF bundle, local storage | Strict data classification, RBAC, Data Lifecycle Management | Partial | Data policies, Enterprise IAM integration |
+| **Agents (Govern/Map)** | MCP servers (Profile, Automation) | Granular Autonomy Levels, verifiable trust | Partial | Policy Engine hardening, Agent registration |
+| **Security (Map/Manage)** | Basic Sandbox, STRIDE | Threat model, Pen-testing, adversarial simulations | Partial | Continuous OWASP mapping + MCP Security guidelines |
+| **Observability (Measure)** | OTel metrics + spans | Distributed tracing (Jaeger/X-Ray), SLOs | Partial | Full OpenTelemetry backend ingestion |
+| **Governance (Govern)** | Local HITL policies | Risk Register, Enterprise compliance reviews | Partial | NIST AI RMF continuous audits |
 
-## Level 3: Enterprise / Governed
-- **Knowledge**: OKF integrated with internal HR/Knowledge graphs.
-- **MCP**: Centralized Enterprise Policy Engine.
-- **Security**: Continuous Assurance, NIST AI RMF alignment.
-- **Observability**: SLA/SLOs and PII redaction enforced.
-- **Automation**: Governed live operations via dedicated orchestration clusters.
+## Risk Register
+
+| Risk ID | Description | Likelihood | Impact | Mitigation Strategy | Owner |
+|---|---|---|---|---|---|
+| **RSK-001** | Unauthorized side effect execution by LLM | Low | High | Enforce single-use token HITL approvals via `confirm_application_submission`. | AppSec |
+| **RSK-002** | Prompt injection via malicious tool descriptor | Medium | High | Contract tests locking tool output to structured `ToolSuccess<T>`. | AI Eng |
+| **RSK-003** | PII leak in agent context | Medium | High | Run LLM locally (e.g. Gemma 4) or strict DLP redaction pipeline. | Privacy |
+| **RSK-004** | Brittle browser automation failures | High | Medium | Rely heavily on APIs where possible; use Playwright sandbox fallbacks. | QA |
+
+## Data Classification
+In the OCF Career domain, data is classified as:
+- **Confidential/PII**: `preferences`, `experiences` containing sensitive contact info.
+- **Internal**: `applications` statuses.
+- **Public**: `skills`, `projects` intended for public visibility.

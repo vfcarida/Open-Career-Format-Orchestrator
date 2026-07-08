@@ -1,72 +1,97 @@
-# OCF Profile v1.0 Specification
+# OCF Profile v1
 
-The **OCF Profile** is a strict, domain-specific implementation of the Open Knowledge Format (OKF). While OKF defines the general layout (Markdown + YAML frontmatter in a directory structure), the OCF Profile enforces semantic schemas specifically for career management.
+The Open Career Format (OCF) Profile v1 is an extension of the Open Knowledge Format (OKF) specification, heavily tailored for modeling professional career management data.
 
-## Base OKF Requirements
+## Base Conformance
+As per the OKF specification:
+- Every document MUST use valid UTF-8 Markdown.
+- Every document MUST have a YAML frontmatter block enclosed by `---`.
+- The `type` field in the frontmatter is REQUIRED.
+- Unknown keys MUST be preserved during parsing or round-trip serialization.
 
-Every document in an OCF Profile bundle MUST contain the following YAML frontmatter:
+## Profile Metadata
+A valid OCF bundle should specify the following in its configurations or root index:
+```yaml
+schemaVersion: "ocf.profile/v1"
+bundleVersion: "1.0.0"
+okfVersion: "0.1"
+bundleType: "career"
+profile: "career-management"
+```
 
-- `type` (string, required): The core entity type. Must be one of the registered OCF Profile types.
-- `schemaVersion` (string, required): MUST be `ocf.profile/v1`.
-- `title` (string, optional): A human-readable title.
-- `description` (string, optional): A brief summary.
-- `timestamp` (string, optional): ISO 8601 timestamp of last modification.
-- `tags` (array of strings, optional): Categorization keywords.
+## Standard Base Fields
+While OKF only strictly requires `type`, the OCF Profile RECOMMENDS the following standard OKF fields for all document types:
+- `title`: A human-readable title.
+- `description`: A brief summary of the document.
+- `tags`: An array of strings for categorization.
+- `timestamp`: The creation or modification date in ISO 8601 format.
 
-## Registered Types
+## Defined Collections (Types)
+The OCF Profile strictly defines the following types, typically stored in matching directory structures:
 
-The OCF Profile v1 defines exactly 7 document types. Any other `type` is considered invalid.
+### `Skill` (Directory: `skills/`)
+Models technical and core competencies.
+- **Fields**:
+  - `level`: (string) e.g., Beginner, Intermediate, Advanced, Expert.
+  - `yearsOfExperience`: (number)
+  - `category`: (string) e.g., Backend, Frontend, Leadership.
 
-### 1. Skill (`skills/*.md`)
-Models technical, soft, and core competencies.
-- `level` (string, required): "Beginner", "Intermediate", "Advanced", or "Expert".
-- `yearsOfExperience` (number, required): Years of practical application.
-- `category` (string, optional): High-level grouping (e.g., "Frontend", "Leadership").
+### `Experience` (Directory: `experiences/`)
+Models professional roles and job history.
+- **Fields**:
+  - `company`: (string)
+  - `role`: (string)
+  - `startDate`: (string - YYYY-MM)
+  - `endDate`: (string - YYYY-MM or 'Present')
+  - `current`: (boolean)
+  - `location`: (string)
+  - `technologies`: (array of strings)
 
-### 2. Experience (`experiences/*.md`)
-Models professional job history.
-- `company` (string, required): Employer name.
-- `role` (string, required): Job title.
-- `startDate` (string, required): ISO 8601 date.
-- `endDate` (string, optional): ISO 8601 date. Required if not current.
-- `current` (boolean, optional): True if currently employed here.
-- `location` (string, optional): Geographical or "Remote" location.
+### `Education` (Directory: `education/`)
+Models academic credentials and studies.
+- **Fields**:
+  - `institution`: (string)
+  - `degree`: (string)
+  - `field`: (string)
+  - `startDate`: (string)
+  - `endDate`: (string)
+  - `current`: (boolean)
+  - `location`: (string)
 
-### 3. Education (`education/*.md`)
-Models academic credentials.
-- `institution` (string, required): School/University name.
-- `degree` (string, required): "Bachelor's", "Master's", etc.
-- `field` (string, optional): Area of study.
-- `startDate` (string, optional): ISO 8601 date.
-- `endDate` (string, optional): ISO 8601 date.
-- `location` (string, optional): Geographical location.
+### `Certificate` (Directory: `certificates/`)
+Tracks verified certifications.
+- **Fields**:
+  - `issuer`: (string)
+  - `dateObtained`: (string)
+  - `credentialId`: (string)
+  - `url`: (string)
+  - `expirationDate`: (string)
 
-### 4. Certificate (`certificates/*.md`)
-Models verifiable industry certifications.
-- `issuer` (string, required): Issuing organization.
-- `dateObtained` (string, optional): ISO 8601 date.
-- `expirationDate` (string, optional): ISO 8601 date.
-- `credentialId` (string, optional): Verification ID.
-- `url` (string, optional): Link to verify credential.
+### `Project` (Directory: `projects/`)
+Models portfolio items and contributions.
+- **Fields**:
+  - `url`: (string)
+  - `technologies`: (array of strings)
+  - `startDate`: (string)
+  - `endDate`: (string)
+  - `role`: (string)
+  - `outcomes`: (array of strings)
 
-### 5. Project (`projects/*.md`)
-Models portfolio items and OSS contributions.
-- `url` (string, optional): Repository or live project link.
-- `technologies` (array of strings, optional): Key tech stack used.
-- `startDate` (string, optional): ISO 8601 date.
-- `endDate` (string, optional): ISO 8601 date.
+### `Preference` (Directory: `preferences/`)
+Models target search parameters and limits.
+- **Fields**:
+  - `locations`: (array of strings)
+  - `remote`: (boolean)
+  - `salaryRange`: (string)
+  - `roles`: (array of strings)
+  - `contractTypes`: (array of strings)
 
-### 6. Preference (`preferences/*.md`)
-Models target search constraints.
-- `locations` (array of strings, optional): Desired geographical locations.
-- `remote` (boolean, optional): Willingness for remote work.
-- `salaryRange` (string, optional): Target compensation.
-- `roles` (array of strings, optional): Target job titles.
-- `companySize` (string, optional): "Startup", "Enterprise", etc.
-
-### 7. Application (`applications/*.md`)
-Models submitted job applications (pipeline).
-- `platform` (string, optional): "LinkedIn", "Gupy", etc.
-- `status` (string, required): "Saved", "Applied", "Screening", "Interview", "Offer", "Rejected", "Withdrawn".
-- `appliedAt` (string, optional): ISO 8601 date.
-- `url` (string, optional): Link to the original job posting.
+### `Application` (Directory: `applications/`)
+Tracks candidates' pipeline funnel for job applications.
+- **Fields**:
+  - `platform`: (string)
+  - `status`: (string) e.g., Draft, Saved, Applied, Interviewing, Rejected.
+  - `appliedAt`: (string)
+  - `url`: (string)
+  - `company`: (string)
+  - `jobTitle`: (string)

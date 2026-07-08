@@ -6,6 +6,7 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import path from 'node:path';
 import { z } from 'zod';
+import crypto from 'node:crypto';
 import {
   OKFDocumentService,
   mcpToolCallsCounter,
@@ -17,7 +18,10 @@ import {
   FrontmatterParser,
   CareerFrontmatterSchema,
   OKFDocumentType,
-  IndexService
+  IndexService,
+  createToolSuccess,
+  createToolFailure,
+  withToolTracing
 } from '@ocf/core';
 
 export class OCFMcpProfileServer {
@@ -160,45 +164,75 @@ export class OCFMcpProfileServer {
   private registerTools(): void {
     // Tool list_documents
     this.server.tool('list_documents', {}, async () => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'list_documents';
+      const toolVersion = '1.0.0';
       mcpToolCallsCounter.add(1);
+      
       try {
-        const context = await this.docService.getCareerContext();
-        const docs = [
-          ...context.skills,
-          ...context.experiences,
-          ...context.applications,
-          ...context.preferences,
-          ...context.education,
-          ...context.certificates,
-          ...context.projects,
-        ];
-        const text = docs.map((d) => `- ${d.conceptId} (${d.frontmatter.type})`).join('\n');
-        return { content: [{ type: 'text', text }] };
+        const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+          const context = await this.docService.getCareerContext();
+          const docs = [
+            ...context.skills,
+            ...context.experiences,
+            ...context.applications,
+            ...context.preferences,
+            ...context.education,
+            ...context.certificates,
+            ...context.projects,
+          ];
+          return docs.map((d) => ({ id: d.conceptId, type: d.frontmatter.type }));
+        });
+        
+        return { 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2) 
+          }] 
+        };
       } catch (err: any) {
         mcpToolFailuresCounter.add(1);
-        return { isError: true, content: [{ type: 'text', text: err.message }] };
+        return { 
+          isError: true, 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolFailure(err.message, 'LIST_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+          }] 
+        };
       }
     });
 
     // Tool read_document
     this.server.tool('read_document', { conceptId: z.string() }, async ({ conceptId }) => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'read_document';
+      const toolVersion = '1.0.0';
       mcpToolCallsCounter.add(1);
+
       try {
-        const doc = await this.docService.getDocument(conceptId);
-        if (!doc) {
-          throw new Error(`Document not found: ${conceptId}`);
-        }
+        const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+          const doc = await this.docService.getDocument(conceptId);
+          if (!doc) {
+            throw new Error(`Document not found: ${conceptId}`);
+          }
+          return { frontmatter: doc.frontmatter, body: doc.body };
+        });
+
         return {
-          content: [
-            {
-              type: 'text',
-              text: `---\n${JSON.stringify(doc.frontmatter, null, 2)}\n---\n\n${doc.body}`,
-            },
-          ],
+          content: [{
+            type: 'text',
+            text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2),
+          }],
         };
       } catch (err: any) {
         mcpToolFailuresCounter.add(1);
-        return { isError: true, content: [{ type: 'text', text: err.message }] };
+        return { 
+          isError: true, 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolFailure(err.message, 'READ_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+          }] 
+        };
       }
     });
 
@@ -211,16 +245,33 @@ export class OCFMcpProfileServer {
         body: z.string(),
       },
       async ({ conceptId, frontmatter, body }) => {
+        const reqId = crypto.randomUUID();
+        const toolName = 'create_document';
+        const toolVersion = '1.0.0';
         mcpToolCallsCounter.add(1);
+
         try {
-          await this.docService.createDocument(frontmatter as any, body, conceptId);
+          const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+            await this.docService.createDocument(frontmatter as any, body, conceptId);
+            return { conceptId, action: 'created' };
+          });
+
           return {
-            content: [{ type: 'text', text: `Document '${conceptId}' successfully created.` }],
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2) 
+            }],
           };
         } catch (err: any) {
           mcpToolFailuresCounter.add(1);
           okfParseFailuresCounter.add(1);
-          return { isError: true, content: [{ type: 'text', text: err.message }] };
+          return { 
+            isError: true, 
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolFailure(err.message, 'CREATE_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+            }] 
+          };
         }
       }
     );
@@ -234,126 +285,219 @@ export class OCFMcpProfileServer {
         bodyUpdate: z.string().optional(),
       },
       async ({ conceptId, updates, bodyUpdate }) => {
+        const reqId = crypto.randomUUID();
+        const toolName = 'update_document';
+        const toolVersion = '1.0.0';
         mcpToolCallsCounter.add(1);
+
         try {
-          await this.docService.updateDocument(conceptId, updates, bodyUpdate);
+          const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+            await this.docService.updateDocument(conceptId, updates, bodyUpdate);
+            return { conceptId, action: 'updated' };
+          });
+
           return {
-            content: [{ type: 'text', text: `Document '${conceptId}' successfully updated.` }],
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2) 
+            }],
           };
         } catch (err: any) {
           mcpToolFailuresCounter.add(1);
-          return { isError: true, content: [{ type: 'text', text: err.message }] };
+          return { 
+            isError: true, 
+            content: [{ 
+              type: 'text', 
+              text: JSON.stringify(createToolFailure(err.message, 'UPDATE_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+            }] 
+          };
         }
       }
     );
 
     // Tool delete_document
     this.server.tool('delete_document', { conceptId: z.string() }, async ({ conceptId }) => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'delete_document';
+      const toolVersion = '1.0.0';
       mcpToolCallsCounter.add(1);
+
       try {
-        await this.docService.deleteDocument(conceptId);
+        const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+          await this.docService.deleteDocument(conceptId);
+          return { conceptId, action: 'deleted' };
+        });
+
         return {
-          content: [{ type: 'text', text: `Document '${conceptId}' successfully deleted.` }],
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2) 
+          }],
         };
       } catch (err: any) {
         mcpToolFailuresCounter.add(1);
-        return { isError: true, content: [{ type: 'text', text: err.message }] };
+        return { 
+          isError: true, 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolFailure(err.message, 'DELETE_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+          }] 
+        };
       }
     });
 
     // Tool validate_bundle
     this.server.tool('validate_bundle', {}, async () => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'validate_bundle';
+      const toolVersion = '1.0.0';
       mcpToolCallsCounter.add(1);
+
       try {
-        const bundlePath = this.docService.bundleRootPath;
-        const fsAdapter = new FileSystemAdapter();
-        const fmParser = new FrontmatterParser();
-        const relativeFiles = await fsAdapter.listFiles(bundlePath);
-        const RESERVED_FILENAMES = new Set(['index.md', 'log.md']);
-        
-        let validCount = 0;
-        let invalidCount = 0;
-        const errors: string[] = [];
-        
-        for (const relPath of relativeFiles) {
-          if (!relPath.endsWith('.md') || RESERVED_FILENAMES.has(path.basename(relPath))) continue;
-          const fullPath = path.join(bundlePath, relPath);
-          try {
-            const content = await fsAdapter.readFile(fullPath);
-            const doc = fmParser.parse(content, fullPath, bundlePath);
-            const validation = CareerFrontmatterSchema.safeParse(doc.frontmatter);
-            if (validation.success) {
-              validCount++;
-            } else {
+        const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+          const bundlePath = this.docService.bundleRootPath;
+          const fsAdapter = new FileSystemAdapter();
+          const fmParser = new FrontmatterParser();
+          const relativeFiles = await fsAdapter.listFiles(bundlePath);
+          const RESERVED_FILENAMES = new Set(['index.md', 'log.md']);
+          
+          let validCount = 0;
+          let invalidCount = 0;
+          const errors: string[] = [];
+          
+          for (const relPath of relativeFiles) {
+            if (!relPath.endsWith('.md') || RESERVED_FILENAMES.has(path.basename(relPath))) continue;
+            const fullPath = path.join(bundlePath, relPath);
+            try {
+              const content = await fsAdapter.readFile(fullPath);
+              const doc = fmParser.parse(content, fullPath, bundlePath);
+              const validation = CareerFrontmatterSchema.safeParse(doc.frontmatter);
+              if (validation.success) {
+                validCount++;
+              } else {
+                invalidCount++;
+                errors.push(`[${relPath}] ${validation.error.message}`);
+              }
+            } catch (err: any) {
               invalidCount++;
-              errors.push(`[${relPath}] ${validation.error.message}`);
+              errors.push(`[${relPath}] Parse error: ${err.message}`);
             }
-          } catch (err: any) {
-            invalidCount++;
-            errors.push(`[${relPath}] Parse error: ${err.message}`);
           }
-        }
+          
+          return {
+            ok: invalidCount === 0,
+            bundlePath,
+            checkedAt: new Date().toISOString(),
+            summary: {
+              filesChecked: validCount + invalidCount,
+              validDocuments: validCount,
+              invalidDocuments: invalidCount,
+              warnings: 0
+            },
+            diagnostics: errors.map(msg => ({ severity: 'error', message: msg, file: '', code: '' }))
+          };
+        });
         
         return {
           content: [{
             type: 'text',
-            text: `Validation complete.\nValid documents: ${validCount}\nInvalid documents: ${invalidCount}\n${errors.length > 0 ? 'Errors:\n' + errors.join('\n') : ''}`
+            text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2)
           }]
         };
       } catch (err: any) {
         mcpToolFailuresCounter.add(1);
-        return { isError: true, content: [{ type: 'text', text: `Validation Error: ${err.message}` }] };
+        return { 
+          isError: true, 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolFailure(err.message, 'VALIDATE_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+          }] 
+        };
       }
     });
 
     // Tool migrate_bundle
     this.server.tool('migrate_bundle', { write: z.boolean().optional().default(false) }, async ({ write }) => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'migrate_bundle';
+      const toolVersion = '1.0.0';
       mcpToolCallsCounter.add(1);
       bundleMigrationsCounter.add(1);
+
       try {
-        const fsAdapter = new FileSystemAdapter();
-        const fmParser = new FrontmatterParser();
-        const bundlePath = this.docService.bundleRootPath;
-        const report = await migrateBundle(fsAdapter, fmParser, bundlePath, { write, backup: write });
+        const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+          const fsAdapter = new FileSystemAdapter();
+          const fmParser = new FrontmatterParser();
+          const bundlePath = this.docService.bundleRootPath;
+          const report = await migrateBundle(fsAdapter, fmParser, bundlePath, { write, backup: write });
+          return report;
+        });
+
         return {
-          content: [{ type: 'text', text: `Migration complete. Active write mode: ${write}.\nSuccess: ${report.success}\nMigrated files: ${report.filesMigrated}\nChecked files: ${report.filesChecked}\n${report.error ? 'Error: ' + report.error : ''}` }],
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2) 
+          }],
         };
       } catch (err: any) {
         mcpToolFailuresCounter.add(1);
-        return { isError: true, content: [{ type: 'text', text: err.message }] };
+        return { 
+          isError: true, 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolFailure(err.message, 'MIGRATE_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+          }] 
+        };
       }
     });
 
     // Tool rebuild_indexes
     this.server.tool('rebuild_indexes', {}, async () => {
+      const reqId = crypto.randomUUID();
+      const toolName = 'rebuild_indexes';
+      const toolVersion = '1.0.0';
       mcpToolCallsCounter.add(1);
+
       try {
-        const bundlePath = this.docService.bundleRootPath;
-        const fsAdapter = new FileSystemAdapter();
-        const fmParser = new FrontmatterParser();
-        const indexService = new IndexService(fsAdapter, fmParser, bundlePath);
-        
-        // Root index + collections
-        const subdirs = ['.'];
-        for (const type of Object.values(OKFDocumentType)) {
-            let plural = type.toLowerCase() + 's';
-            if (plural === 'educations') plural = 'education';
-            subdirs.push(plural);
-        }
-        
-        const generated: string[] = [];
-        for (const dir of subdirs) {
-          const dirPath = path.join(bundlePath, dir);
-          if (await fsAdapter.exists(dirPath)) {
-            await indexService.generate(dirPath);
-            generated.push(dir);
+        const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+          const bundlePath = this.docService.bundleRootPath;
+          const fsAdapter = new FileSystemAdapter();
+          const fmParser = new FrontmatterParser();
+          const indexService = new IndexService(fsAdapter, fmParser, bundlePath);
+          
+          const subdirs = ['.'];
+          for (const type of Object.values(OKFDocumentType)) {
+              let plural = type.toLowerCase() + 's';
+              if (plural === 'educations') plural = 'education';
+              subdirs.push(plural);
           }
-        }
+          
+          const generated: string[] = [];
+          for (const dir of subdirs) {
+            const dirPath = path.join(bundlePath, dir);
+            if (await fsAdapter.exists(dirPath)) {
+              await indexService.generate(dirPath);
+              generated.push(dir);
+            }
+          }
+          return { generatedDirs: generated };
+        });
         
-        return { content: [{ type: 'text', text: `Directory index.md listings generated successfully for: ${generated.join(', ')}.` }] };
+        return { 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2) 
+          }] 
+        };
       } catch (err: any) {
         mcpToolFailuresCounter.add(1);
-        return { isError: true, content: [{ type: 'text', text: err.message }] };
+        return { 
+          isError: true, 
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify(createToolFailure(err.message, 'REBUILD_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
+          }] 
+        };
       }
     });
   }

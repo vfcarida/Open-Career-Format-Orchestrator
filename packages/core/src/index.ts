@@ -2,6 +2,7 @@
 export * from './domain/types.js';
 export * from './domain/errors.js';
 export * from './domain/schemas.js';
+export * from './contracts/tool-result.js';
 export type { IFileSystemAdapter, IFrontmatterParser, IOKFRepository, IIndexService, ILogService } from './domain/interfaces.js';
 
 // Infrastructure
@@ -23,4 +24,16 @@ export { OKFDocumentFactory } from './factories/okf-document-factory.js';
 export { migrateBundle } from './migrations/migrate-bundle.js';
 
 // Observability
-export * from './observability/otel.js';
+export { 
+  startTelemetry, 
+  stopTelemetry, 
+  mcpToolCallsCounter, 
+  mcpToolFailuresCounter, 
+  bundleMigrationsCounter, 
+  okfParseFailuresCounter,
+  automationAttemptsCounter,
+  automationApprovalRequiredCounter,
+  automationSubmissionBlockedCounter,
+  automationSubmissionSuccessCounter,
+  withToolTracing
+} from './observability/otel.js';
