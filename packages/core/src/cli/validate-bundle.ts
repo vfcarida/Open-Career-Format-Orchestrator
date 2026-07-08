@@ -10,7 +10,16 @@ import { FrontmatterParser } from '../infrastructure/frontmatter-parser.js';
 import { CareerFrontmatterSchema } from '../domain/schemas.js';
 
 async function main() {
-  const bundlePathEnv = process.argv[2] || process.env['OCF_BUNDLE_PATH'] || './.okf';
+  const args = process.argv.slice(2);
+  let bundlePathEnv = process.env['OCF_BUNDLE_PATH'] || './.okf';
+  
+  const bundleIdx = args.indexOf('--bundle');
+  if (bundleIdx >= 0 && bundleIdx + 1 < args.length) {
+    bundlePathEnv = args[bundleIdx + 1];
+  } else if (args.length > 0 && !args[0].startsWith('--')) {
+    bundlePathEnv = args[0];
+  }
+
   const bundlePath = path.resolve(bundlePathEnv);
 
   console.log(`[OCF Validator] Scanning bundle at: ${bundlePath}`);

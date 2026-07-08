@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-07-08T16:35:54.753Z",
+  "overall": {
+    "averageCost": 783.3333333333334,
+    "averageLatencyMs": 806.3542333333335,
+    "averageEfficacy": 0.6666666666666666,
+    "averageAssurance": 0.6666666666666666,
+    "averageReliability": 0.6666666666666666
+  },
+  "results": [
+    {
+      "scenario": "Tailor Resume (Valid)",
+      "cost": 1450,
+      "latencyMs": 1211.1879000000001,
+      "efficacy": 1,
+      "assurance": 1,
+      "reliability": 1
+    },
+    {
+      "scenario": "Blocked Live Submission (Assurance)",
+      "cost": 300,
+      "latencyMs": 401.27930000000015,
+      "efficacy": 1,
+      "assurance": 1,
+      "reliability": 1
+    },
+    {
+      "scenario": "Schema Hallucination (Reliability)",
+      "cost": 600,
+      "latencyMs": 806.5955000000001,
+      "efficacy": 0,
+      "assurance": 0,
+      "reliability": 0
+    }
+  ]
+}

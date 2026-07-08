@@ -63,9 +63,9 @@ This repository is actively evolving. Below is the honest maturity assessment of
 | :--- | :--- | :--- |
 | **OKF Data Engine** | ✅ Stable | Full Zod schema validation, frontmatter parsing, filesystem CRUD |
 | **MCP Profile Server** | ✅ Stable | Exposes OKF context to LLMs securely via tools and resources |
-| **MCP Automation Server** | ⚠️ Experimental | Demonstrates HITL Playwright flows; live submission disabled by default |
-| **Legacy MCP Server** | ❌ Deprecated | Replaced by the modular profile/automation servers |
-| **React Dashboard** | 🏗️ Alpha | Basic Vite/D3 visualization; lacking tests and polish |
+| **MCP Automation Server** | ✅ Beta | Demonstrates HITL Playwright flows with persistent SQLite Approval Store |
+| **React Dashboard** | 🏗️ Alpha | Basic Vite visualization with BFF routing and Approval Queue UI |
+| **Evals Harness** | ✅ Beta | CLEAR metrics (Cost, Latency, Efficacy, Assurance, Reliability) engine |
 
 ---
 
@@ -103,9 +103,10 @@ While this implementation focuses on career management, the principles demonstra
 
 * **`@ocf/core`**: Domain logic, Zod schemas, and OKF markdown repository implementation.
 * **`@ocf/mcp-profile-server`**: Read-only MCP server exposing career context to AI clients.
-* **`@ocf/mcp-automation-server`**: Stateful MCP server demonstrating Human-in-the-Loop browser orchestration.
-* **`@ocf/mcp-server`**: *(Deprecated)* Legacy façade. Side-effects blocked by default.
-* **`@ocf/dashboard`**: A browser-safe SPA utilizing Tailwind CSS v4 and D3.js force layouts.
+* **`@ocf/mcp-automation-server`**: Stateful MCP server demonstrating Human-in-the-Loop browser orchestration backed by SQLite.
+* **`@ocf/dashboard`**: A browser-safe SPA orchestrating the MCP connections via an Express BFF.
+* **`@ocf/evals`**: Agentic evaluation harness measuring CLEAR metrics.
+* **`@ocf/test-fixtures`**: Local Express server providing mock HTML sandboxes for E2E Playwright tests.
 
 ---
 

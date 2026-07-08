@@ -1,4 +1,7 @@
 import crypto from 'crypto';
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
 
 export interface ApprovalPayload {
   toolName: string;
@@ -15,52 +18,71 @@ export interface PendingApproval {
 }
 
 export class ApprovalStore {
-  private store: Map<string, ApprovalPayload> = new Map();
+  private db: Database.Database;
+
+  constructor() {
+    const defaultDbDir = path.resolve(process.env['OCF_BUNDLE_PATH'] || './sample-data/.okf');
+    if (!fs.existsSync(defaultDbDir)) {
+      fs.mkdirSync(defaultDbDir, { recursive: true });
+    }
+    
+    const dbPath = process.env['OCF_DB_PATH'] || path.join(defaultDbDir, 'approvals.db');
+    this.db = new Database(dbPath);
+    this.initializeDatabase();
+  }
+
+  private initializeDatabase() {
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS pending_approvals (
+        token TEXT PRIMARY KEY,
+        toolName TEXT NOT NULL,
+        payloadHash TEXT NOT NULL,
+        expiresAt INTEGER NOT NULL,
+        metadata TEXT
+      )
+    `);
+  }
 
   generateToken(toolName: string, payload: unknown, metadata?: Record<string, unknown>, ttlMs = 15 * 60 * 1000): string {
     const token = crypto.randomBytes(32).toString('hex');
     const payloadHash = this.hashPayload(payload);
-    
-    this.store.set(token, {
-      toolName,
-      payloadHash,
-      expiresAt: Date.now() + ttlMs,
-      metadata,
-    });
+    const expiresAt = Date.now() + ttlMs;
+    const metaStr = metadata ? JSON.stringify(metadata) : null;
+
+    const stmt = this.db.prepare(
+      `INSERT INTO pending_approvals (token, toolName, payloadHash, expiresAt, metadata) VALUES (?, ?, ?, ?, ?)`
+    );
+    stmt.run(token, toolName, payloadHash, expiresAt, metaStr);
     
     return token;
   }
 
   getPendingApprovals(): PendingApproval[] {
-    const pending: PendingApproval[] = [];
     const now = Date.now();
-    
-    for (const [token, record] of this.store.entries()) {
-      if (now <= record.expiresAt) {
-        pending.push({
-          token,
-          toolName: record.toolName,
-          expiresAt: record.expiresAt,
-          metadata: record.metadata,
-        });
-      } else {
-        // Clean up expired
-        this.store.delete(token);
-      }
-    }
-    
-    return pending;
+    // Clean up expired
+    this.db.prepare(`DELETE FROM pending_approvals WHERE expiresAt < ?`).run(now);
+
+    const stmt = this.db.prepare(`SELECT * FROM pending_approvals`);
+    const rows = stmt.all() as any[];
+
+    return rows.map(row => ({
+      token: row.token,
+      toolName: row.toolName,
+      expiresAt: row.expiresAt,
+      metadata: row.metadata ? JSON.parse(row.metadata) : undefined
+    }));
   }
 
   validateAndConsume(token: string, toolName: string, payload: unknown): boolean {
-    const record = this.store.get(token);
-    if (!record) return false;
+    const now = Date.now();
     
-    // Check expiration
-    if (Date.now() > record.expiresAt) {
-      this.store.delete(token);
-      return false;
-    }
+    // Cleanup first
+    this.db.prepare(`DELETE FROM pending_approvals WHERE expiresAt < ?`).run(now);
+
+    const stmt = this.db.prepare(`SELECT * FROM pending_approvals WHERE token = ?`);
+    const record = stmt.get(token) as any;
+
+    if (!record) return false;
     
     // Check tool match
     if (record.toolName !== toolName) {
@@ -74,7 +96,7 @@ export class ApprovalStore {
     }
     
     // Consume token (One-time use)
-    this.store.delete(token);
+    this.db.prepare(`DELETE FROM pending_approvals WHERE token = ?`).run(token);
     return true;
   }
 
