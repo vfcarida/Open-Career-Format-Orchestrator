@@ -81,4 +81,14 @@ export const profileServerCapabilities: CapabilityManifest[] = [
     sideEffectLevel: 'local-write',
     requiredApproval: true,
   },
+  {
+    id: 'ocf.profile.build_context_pack',
+    name: 'build_context_pack',
+    kind: 'tool',
+    version: '1.0.0',
+    description: 'Selects and compresses documents to fit within a given token budget.',
+    riskLevel: 'low',
+    sideEffectLevel: 'local-read',
+    requiredApproval: false,
+  },
 ];

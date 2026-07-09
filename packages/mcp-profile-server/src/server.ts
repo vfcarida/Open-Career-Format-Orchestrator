@@ -21,7 +21,8 @@ import {
   IndexService,
   createToolSuccess,
   createToolFailure,
-  withToolTracing
+  withToolTracing,
+  ContextPacker
 } from '@ocf/core';
 import { profileServerCapabilities } from './capabilities.js';
 
@@ -177,6 +178,64 @@ export class OCFMcpProfileServer {
         }]
       };
     });
+
+    // Tool build_context_pack
+    this.server.tool(
+      'build_context_pack',
+      {
+        task: z.string().describe('The task or query to build context for'),
+        profile: z.string().optional().default('career'),
+        maxTokens: z.number().optional().default(10000),
+        mode: z.enum(['minimal', 'balanced', 'full', 'audit']).optional().default('balanced'),
+        includeProvenance: z.boolean().optional().default(true),
+      },
+      async ({ task, profile, maxTokens, mode, includeProvenance }) => {
+        const reqId = crypto.randomUUID();
+        const toolName = 'build_context_pack';
+        const toolVersion = '1.0.0';
+        mcpToolCallsCounter.add(1);
+
+        try {
+          const { data, durationMs } = await withToolTracing(toolName, toolVersion, reqId, async () => {
+            const context = await this.docService.getCareerContext();
+            const docs = [
+              ...context.skills,
+              ...context.experiences,
+              ...context.applications,
+              ...context.preferences,
+              ...context.education,
+              ...context.certificates,
+              ...context.projects,
+            ];
+            
+            const packer = new ContextPacker();
+            return packer.pack(docs, {
+              task,
+              profile,
+              maxTokens,
+              mode,
+              includeProvenance,
+            });
+          });
+
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2)
+            }]
+          };
+        } catch (err: any) {
+          mcpToolFailuresCounter.add(1);
+          return {
+            isError: true,
+            content: [{
+              type: 'text',
+              text: JSON.stringify(createToolFailure(err.message, 'BUILD_CONTEXT_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2)
+            }]
+          };
+        }
+      }
+    );
 
     // Tool list_documents
     this.server.tool('list_documents', {}, async () => {

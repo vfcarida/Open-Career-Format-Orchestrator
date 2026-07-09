@@ -21,6 +21,10 @@ export { LogService } from './services/log-service.js';
 // Factories
 export { OKFDocumentFactory } from './factories/okf-document-factory.js';
 
+// Context Budgeting
+export * from './domain/context-pack.js';
+export { ContextPacker } from './services/context-packer.js';
+
 // Migrations
 export { migrateBundle } from './migrations/migrate-bundle.js';
 
