@@ -16,7 +16,7 @@ import {
   migrateBundle,
   FileSystemAdapter,
   FrontmatterParser,
-  CareerFrontmatterSchema,
+  ProfileRegistry,
   OKFDocumentType,
   IndexService,
   createToolSuccess,
@@ -347,7 +347,7 @@ export class OCFMcpProfileServer {
     });
 
     // Tool validate_bundle
-    this.server.tool('validate_bundle', {}, async () => {
+    this.server.tool('validate_bundle', { profile: z.string().optional().default('career') }, async ({ profile }) => {
       const reqId = crypto.randomUUID();
       const toolName = 'validate_bundle';
       const toolVersion = '1.0.0';
@@ -358,6 +358,7 @@ export class OCFMcpProfileServer {
           const bundlePath = this.docService.bundleRootPath;
           const fsAdapter = new FileSystemAdapter();
           const fmParser = new FrontmatterParser();
+          const SchemaValidator = ProfileRegistry.getProfileSchema(profile);
           const relativeFiles = await fsAdapter.listFiles(bundlePath);
           const RESERVED_FILENAMES = new Set(['index.md', 'log.md']);
           
@@ -371,7 +372,7 @@ export class OCFMcpProfileServer {
             try {
               const content = await fsAdapter.readFile(fullPath);
               const doc = fmParser.parse(content, fullPath, bundlePath);
-              const validation = CareerFrontmatterSchema.safeParse(doc.frontmatter);
+              const validation = SchemaValidator.safeParse(doc.frontmatter);
               if (validation.success) {
                 validCount++;
               } else {
@@ -388,6 +389,7 @@ export class OCFMcpProfileServer {
             ok: invalidCount === 0,
             bundlePath,
             checkedAt: new Date().toISOString(),
+            profile,
             summary: {
               filesChecked: validCount + invalidCount,
               validDocuments: validCount,

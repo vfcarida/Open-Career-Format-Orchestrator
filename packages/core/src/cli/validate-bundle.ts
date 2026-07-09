@@ -7,12 +7,13 @@
 import path from 'node:path';
 import { FileSystemAdapter } from '../infrastructure/file-system-adapter.js';
 import { FrontmatterParser } from '../infrastructure/frontmatter-parser.js';
-import { CareerFrontmatterSchema } from '../domain/schemas.js';
+import { ProfileRegistry } from '../domain/schemas.js';
 
 type BundleValidationReport = {
   ok: boolean;
   bundlePath: string;
   checkedAt: string;
+  profile: string;
   summary: {
     filesChecked: number;
     validDocuments: number;
@@ -33,6 +34,7 @@ async function main() {
   const args = process.argv.slice(2);
   let bundlePathEnv = process.env['OCF_BUNDLE_PATH'] || './.okf';
   let format: 'text' | 'json' | 'markdown' = 'text';
+  let profileName = 'career'; // default to legacy behavior
   
   for (let i = 0; i < args.length; i++) {
     const currentArg = args[i];
@@ -40,12 +42,15 @@ async function main() {
       bundlePathEnv = args[i + 1]!;
     } else if (currentArg === '--format' && i + 1 < args.length) {
       format = args[i + 1] as any;
+    } else if (currentArg === '--profile' && i + 1 < args.length) {
+      profileName = args[i + 1]!;
     } else if (currentArg !== undefined && !currentArg.startsWith('--') && i === 0 && !args.includes('--bundle')) {
       bundlePathEnv = currentArg;
     }
   }
 
   const bundlePath = path.resolve(bundlePathEnv);
+  const SchemaValidator = ProfileRegistry.getProfileSchema(profileName);
 
   const fsAdapter = new FileSystemAdapter();
   const fmParser = new FrontmatterParser();
@@ -72,7 +77,7 @@ async function main() {
 
     try {
       const doc = fmParser.parse(content, fullPath, bundlePath);
-      const validation = CareerFrontmatterSchema.safeParse(doc.frontmatter);
+      const validation = SchemaValidator.safeParse(doc.frontmatter);
 
       if (validation.success) {
         validCount++;
@@ -100,6 +105,7 @@ async function main() {
     ok: invalidCount === 0,
     bundlePath,
     checkedAt: new Date().toISOString(),
+    profile: profileName,
     summary: {
       filesChecked: validCount + invalidCount,
       validDocuments: validCount,
@@ -115,6 +121,7 @@ async function main() {
     console.log(`# Bundle Validation Report\n`);
     console.log(`- **Checked At:** ${report.checkedAt}`);
     console.log(`- **Bundle Path:** ${report.bundlePath}`);
+    console.log(`- **Profile:** ${report.profile}`);
     console.log(`- **Status:** ${report.ok ? '✅ Valid' : '❌ Invalid'}`);
     console.log(`\n## Summary\n`);
     console.log(`- Files Checked: ${report.summary.filesChecked}`);
@@ -127,7 +134,7 @@ async function main() {
       }
     }
   } else {
-    console.log(`[OCF Validator] Scanning bundle at: ${bundlePath}`);
+    console.log(`[OCF Validator] Scanning bundle at: ${bundlePath} (Profile: ${profileName})`);
     for (const d of diagnostics) {
       console.error(`  ✗ [Invalid] ${d.file}:`);
       console.error(`    Reason: ${d.message}`);
@@ -136,7 +143,7 @@ async function main() {
     console.log(`  Valid concepts: ${validCount}`);
     console.log(`  Invalid concepts: ${invalidCount}`);
     if (report.ok) {
-      console.log(`[OCF Validator] All checked career records are strictly schema compliant!`);
+      console.log(`[OCF Validator] All checked records are strictly schema compliant!`);
     }
   }
 

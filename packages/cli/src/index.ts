@@ -55,6 +55,7 @@ program
   .description('Strict offline schema validation of an OKF/Context bundle')
   .argument('[directory]', 'Directory to validate', '.')
   .option('-f, --format <format>', 'Output format (json or markdown)', 'markdown')
+  .option('-p, --profile <profile>', 'Profile to validate against', 'career')
   .action((directory, options) => {
     const targetDir = path.resolve(process.cwd(), directory);
     console.log(`[INFO] Validating bundle at: ${targetDir}`);
@@ -67,7 +68,7 @@ program
     try {
       const require = createRequire(import.meta.url);
       const validatorPath = require.resolve('@ocf/core/dist/cli/validate-bundle.js');
-      execSync(`node ${validatorPath} --bundle ${targetDir} --format ${options.format}`, { encoding: 'utf-8', stdio: 'inherit' });
+      execSync(`node ${validatorPath} --bundle ${targetDir} --format ${options.format} --profile ${options.profile}`, { encoding: 'utf-8', stdio: 'inherit' });
     } catch (err: any) {
       process.exit(1);
     }
