@@ -14,8 +14,8 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "test:watch": "pnpm -r run test:watch",
-    "test:unit": "pnpm -r run test:unit",
-    "test:integration": "pnpm -r run test:integration",
+    "test:unit": "pnpm -r run test -- --run",
+    "test:integration": "pnpm -r run test -- --run",
     "test:contract": "vitest run packages/mcp-profile-server packages/mcp-automation-server",
     "test:e2e": "pnpm --filter @ocf/dashboard exec playwright test",
     "lint": "pnpm -r run lint",
@@ -27,7 +27,8 @@
     "evals": "pnpm --filter @ocf/evals run evals",
     "dev:profile-server": "pnpm --filter @ocf/mcp-profile-server dev",
     "dev:automation-server": "pnpm --filter @ocf/mcp-automation-server dev",
-    "dev:dashboard": "pnpm --filter @ocf/dashboard dev"
+    "dev:dashboard": "pnpm --filter @ocf/dashboard dev",
+    "akcp": "node packages/cli/dist/index.js"
   },
   "devDependencies": {
     "typescript": "^5.8.0",

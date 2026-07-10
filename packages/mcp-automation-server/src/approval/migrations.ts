@@ -50,8 +50,8 @@ const migrations: Migration[] = [
 ];
 
 export function runMigrations(db: Database.Database) {
-  const currentVersionObj = db.prepare('PRAGMA user_version').get() as { user_version: number };
-  const currentVersion = currentVersionObj.user_version;
+  const currentVersionObj = db.prepare('PRAGMA user_version').get() as { user_version?: number } | undefined;
+  const currentVersion = currentVersionObj?.user_version ?? 0;
 
   const pendingMigrations = migrations.filter(m => m.version > currentVersion).sort((a, b) => a.version - b.version);
 

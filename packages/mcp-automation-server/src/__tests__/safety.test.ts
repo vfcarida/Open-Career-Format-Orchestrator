@@ -3,13 +3,26 @@ import { OCFMcpAutomationServer } from '../server.js';
 import { OKFDocumentService } from '@ocf/core';
 
 vi.mock('better-sqlite3', () => {
+  const transactionFn = vi.fn().mockImplementation((fn: () => void) => {
+    // Execute the transaction function immediately (no actual DB wrapping in test)
+    const wrappedFn = () => fn();
+    return wrappedFn;
+  });
+
   return {
     default: vi.fn().mockImplementation(() => ({
       exec: vi.fn(),
-      prepare: vi.fn().mockReturnValue({ run: vi.fn(), get: vi.fn(), all: vi.fn() }),
+      prepare: vi.fn().mockImplementation((sql: string) => ({
+        run: vi.fn(),
+        // PRAGMA user_version must return { user_version: 0 } so runMigrations works
+        get: vi.fn().mockReturnValue(sql.includes('PRAGMA user_version') ? { user_version: 0 } : undefined),
+        all: vi.fn().mockReturnValue([]),
+      })),
+      transaction: transactionFn,
     })),
   };
 });
+
 
 describe('Safety Controls', () => {
   let server: OCFMcpAutomationServer;

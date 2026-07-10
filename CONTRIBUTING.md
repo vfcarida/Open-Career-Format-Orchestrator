@@ -1,33 +1,78 @@
-# Contributing to ContextOps
+# Contributing to AKCP
 
-We welcome contributions that improve the safety, efficiency, and clarity of AI Agent context! 
-To keep the repository stable and easy to review, please follow these guidelines.
+Welcome! The **Agent Knowledge Compiler and Control Plane (AKCP)** is an open, specification-driven project. We value contributors who help build a safer, more deterministic knowledge infrastructure for AI agents.
 
-## 1. Small, Iterative PRs Only
-- Large, monolithic PRs that refactor multiple domains will be rejected. 
-- Break your changes down into small, trackable additions. 
-- Focus on one thing per PR (e.g., adding a single capability, or a single eval scenario).
+## Community Workstreams
 
-## 2. Structured Outputs > Free Text
-ContextOps relies on structure. If you are adding new context, do not just dump markdown paragraphs. 
-You must define or use a Zod schema for the OKF Frontmatter.
+The project is organized into the following workstreams. Pick the one that matches your skills and interests:
 
-## 3. Mandatory Testing
-- **Evals are our compass.** If you are changing how the CLI parses OKF or how MCP tools behave, you *must* add or update an eval scenario in `packages/evals/`.
-- Run `pnpm test` and `pnpm build` locally before submitting.
+| Workstream | Description | Good First Task |
+|------------|-------------|-----------------|
+| **compiler** | The core compilation pipeline: OKF parsing, IR construction, emission targets. | Add a new output target (e.g., `llms-txt`) |
+| **control-plane** | MCP Gateway, Policy evaluation, HITL approvals, Audit logging. | Add a new rule type to the Policy Card evaluator |
+| **connectors** | Plugins that pull knowledge from external systems (Notion, Confluence, GitHub). | See [How to Contribute a Connector](docs/community/how-to-contribute-a-connector.md) |
+| **policies** | Policy Pack authoring, governance templates, NIST AI RMF mappings. | Author a new governance policy template |
+| **evals** | Evaluation datasets, grounding benchmarks, adversarial scenarios. | Add a prompt injection eval scenario |
+| **docs** | Technical documentation, spec improvements, tutorials, examples. | Improve a spec section with a concrete example |
+| **examples** | Real-world bundle examples for different domains. | Add a new domain example under `examples/domains/` |
 
-## 4. Run the Dev Environment
-\`\`\`bash
-# Install dependencies
-pnpm install
+---
 
-# Run full suite (build, format, lint, test)
-pnpm run build
-pnpm test
-\`\`\`
+## Before You Start
 
-## 5. "Good First Issues"
-Check our issue tracker for `good first issue` labels. We highly recommend starting by:
-- Creating a new `Domain Adapter`.
-- Submitting a new `Eval Scenario`.
-- Improving a tool description in the Capability Registry.
+1. **Read the spec**: All contributions touching the compiler or control plane should be grounded in the `spec/` documents.
+2. **Run pre-checks**: Ensure the repository is healthy before making changes.
+   ```bash
+   npx pnpm install --frozen-lockfile
+   npx pnpm -r run typecheck
+   npx pnpm -r run test -- --run
+   npx pnpm -r run build
+   ```
+3. **Open an issue first**: For non-trivial changes, open an issue using the appropriate template to discuss your approach before submitting a PR.
+
+---
+
+## Pull Request Guidelines
+
+- **Small, iterative PRs.** A single PR should do one thing. Large monolithic PRs will be rejected.
+- **Tests are mandatory.** All changes to `packages/core` or `packages/cli` require corresponding unit tests. Coverage must not decrease.
+- **Spec changes require an RFC.** Any normative change to `spec/` requires a formal RFC. See [docs/rfcs/README.md](docs/rfcs/README.md).
+- **Conventional Commits.** PR titles and commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/). Examples: `feat: add eval-dataset target`, `fix: correct policy deny logic`, `docs: improve IR spec examples`.
+- **Do not credit AI in commits.** Commit messages must read as standard developer-authored notes.
+
+---
+
+## Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/vfcarida/Agent-ready-Knowledge-Reference-Architecture.git
+cd Agent-ready-Knowledge-Reference-Architecture
+
+# Install all workspace dependencies
+npx pnpm install
+
+# Build all packages
+npx pnpm -r run build
+
+# Run all tests
+npx pnpm -r run test -- --run
+
+# Validate an example OKF bundle
+npx agent-ready validate examples/domains/software-project
+```
+
+---
+
+## Good First Issues
+
+Look for issues labelled `good first issue`. The easiest entry points are:
+- **Add a new domain example** (`examples/` workstream) — see the [examples/domains/software-project](examples/domains/software-project) as a reference.
+- **Add an eval scenario** (`evals` workstream) — add a JSONL fixture in `packages/evals/fixtures/`.
+- **Improve a spec example** (`docs` workstream) — add a concrete JSON example to any spec doc in `spec/`.
+
+---
+
+## Community Standards
+
+All contributors must follow our [Code of Conduct](CODE_OF_CONDUCT.md). We are committed to building an inclusive, respectful community. We strictly adhere to NIST AI RMF and OWASP LLM Top 10 guidelines in all technical decisions.

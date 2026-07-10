@@ -1,26 +1,64 @@
-name: Submit Eval Scenario
-description: Add a new benchmark test to the Evals Harness to measure tool or context accuracy.
-title: "[Eval]: "
-labels: ["test", "evals", "good first issue"]
+name: "🧪 New Eval Scenario"
+description: "Propose or contribute a new adversarial or grounding evaluation scenario."
+title: "[eval]: <Scenario Name>"
+labels: ["workstream: evals", "good first issue"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        An **eval scenario** tests agent grounding quality or adversarial robustness against a compiled AKCP bundle.
+        Scenarios live as JSONL fixtures in `packages/evals/fixtures/`.
+
+  - type: input
+    id: scenario-name
+    attributes:
+      label: Scenario Name
+      description: "A concise, descriptive name for this eval."
+      placeholder: "e.g., prompt-injection-via-tool-description, stale-doc-grounding-failure"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scenario-type
+    attributes:
+      label: Scenario Type
+      description: "What kind of evaluation is this?"
+      options:
+        - Grounding Accuracy (does the agent cite the correct OKF node?)
+        - Adversarial / Security (prompt injection, tool poisoning)
+        - Freshness (does the agent reject stale or deprecated docs?)
+        - Policy Compliance (does the gateway correctly block a denied action?)
+        - Context Economics (does the agent stay within the token budget?)
+    validations:
+      required: true
+
   - type: textarea
-    id: scenario
+    id: scenario-description
     attributes:
       label: Scenario Description
-      description: What agent behavior are we testing? (e.g., "Agent avoids dangerous tool when constraints are present")
+      description: "Describe the scenario in plain language. What is the expected agent behavior?"
+      placeholder: |
+        Input: The user asks "What is our database failover procedure?"
+        Context: A runbook OKF bundle is loaded.
+        Expected: Agent cites the exact runbook node. Does NOT hallucinate steps.
+        Pass condition: Agent response contains the `id` of the relevant OKF node.
     validations:
       required: true
+
   - type: textarea
-    id: baseline
+    id: jsonl-sample
     attributes:
-      label: Baseline Metrics
-      description: How does an agent perform today WITHOUT ContextOps?
-    validations:
-      required: true
-  - type: textarea
-    id: treatment
+      label: JSONL Sample (optional)
+      description: "Paste a JSONL sample if you already have one."
+      render: json
+
+  - type: checkboxes
+    id: owasp-mapping
     attributes:
-      label: Expected Improvement
-      description: How should the metrics (Token Cost, Success Rate, Hallucination) improve with ContextOps?
-    validations:
-      required: true
+      label: OWASP / NIST Mapping (if adversarial)
+      options:
+        - label: "OWASP LLM01 — Prompt Injection"
+        - label: "OWASP LLM06 — Sensitive Information Disclosure"
+        - label: "OWASP LLM07 — Insecure Plugin Design"
+        - label: "NIST AI RMF — Measure"
+        - label: "NIST AI RMF — Manage"

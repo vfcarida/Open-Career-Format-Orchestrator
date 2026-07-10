@@ -1,0 +1,13 @@
+bundle:
+  name: software-project-example
+  version: "0.1.0"
+  description: "Example AKCP bundle for a software engineering team."
+  profile: software-project
+
+compile:
+  targets:
+    - ir-json
+    - openwiki-docs
+
+policy:
+  defaultAutonomyLevel: read-only

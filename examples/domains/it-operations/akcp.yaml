@@ -1,0 +1,17 @@
+bundle:
+  name: it-operations-example
+  version: "0.1.0"
+  description: "Example AKCP bundle for an IT operations team."
+  profile: it-operations
+
+compile:
+  targets:
+    - ir-json
+    - openwiki-docs
+    - eval-dataset
+
+policy:
+  defaultAutonomyLevel: read-only
+  requireApprovalFor:
+    - execute_command
+    - restart_service

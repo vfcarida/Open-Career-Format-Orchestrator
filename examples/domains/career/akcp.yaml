@@ -1,0 +1,13 @@
+bundle:
+  name: career-example
+  version: "0.1.0"
+  description: "Example AKCP bundle for a personal career knowledge base."
+  profile: career
+
+compile:
+  targets:
+    - ir-json
+    - openwiki-docs
+
+policy:
+  defaultAutonomyLevel: read-only
