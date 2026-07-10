@@ -9,13 +9,26 @@ import api from '@opentelemetry/api';
 
 let sdk: NodeSDK | null = null;
 
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
+
 /**
  * Initialize OpenTelemetry tracer and instrumentations.
  */
 export function startTelemetry(): void {
   if (sdk) return;
 
+  const traceExporter = process.env.OTEL_EXPORTER_OTLP_ENDPOINT 
+    ? new OTLPTraceExporter() 
+    : undefined;
+
+  const metricReader = process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+    ? new OTLPMetricExporter()
+    : undefined;
+
   sdk = new NodeSDK({
+    traceExporter,
+    metricReader: metricReader as any, // NodeSDK API cast
     instrumentations: [getNodeAutoInstrumentations()],
   });
 

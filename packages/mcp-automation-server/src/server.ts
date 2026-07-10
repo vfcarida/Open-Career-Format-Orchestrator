@@ -23,10 +23,14 @@ import {
 } from '@ocf/core';
 import { BrowserOrchestrator } from './automation/browser-orchestrator.js';
 import { ApprovalStore } from './approval/approval-store.js';
+import { RedisApprovalStore } from './approval/redis-store.js';
 import { auditLogger } from './audit/audit-log.js';
 import { automationServerCapabilities } from './capabilities.js';
+import type { IApprovalStore } from './approval/types.js';
 
-const approvalStore = new ApprovalStore();
+const approvalStore: IApprovalStore = process.env.REDIS_URL 
+  ? new RedisApprovalStore()
+  : new ApprovalStore();
 
 // Centralized approval store handles pending tokens
 
@@ -144,7 +148,7 @@ export class OCFMcpAutomationServer {
 
               const payload = { jobUrl, context, preparedFields };
               const metadata = { jobUrl, platform: this.detectPlatform(jobUrl) };
-              const token = approvalStore.generateToken('confirm_application_submission', payload, metadata);
+              const token = await approvalStore.generateToken('confirm_application_submission', payload, metadata);
 
               return { token, preparedFields };
             });
@@ -231,7 +235,7 @@ export class OCFMcpAutomationServer {
 
               const expectedPayload = { jobUrl, context, preparedFields };
               
-              const isValid = approvalStore.validateAndConsume(approvalToken, 'confirm_application_submission', expectedPayload, approverIdentity);
+              const isValid = await approvalStore.validateAndConsume(approvalToken, 'confirm_application_submission', expectedPayload, approverIdentity);
 
               if (!isValid) {
                 throw new Error(`Execution Blocked: Invalid, expired, or tampered approval token: ${approvalToken}`);
@@ -381,7 +385,7 @@ export class OCFMcpAutomationServer {
             payload: {}
           }, async () => {
             return await withToolTracing(toolName, toolVersion, reqId, async () => {
-              return approvalStore.getPendingApprovals();
+              return await approvalStore.getPendingApprovals();
             });
           });
 
@@ -430,7 +434,7 @@ export class OCFMcpAutomationServer {
             payload: { approvalToken, approverIdentity }
           }, async () => {
             return await withToolTracing(toolName, toolVersion, reqId, async () => {
-              const success = approvalStore.revokeToken(approvalToken, approverIdentity);
+              const success = await approvalStore.revokeToken(approvalToken, approverIdentity);
               if (!success) {
                 throw new Error('Token not found, already consumed, or expired');
               }
@@ -480,7 +484,7 @@ export class OCFMcpAutomationServer {
             payload: { limit }
           }, async () => {
             return await withToolTracing(toolName, toolVersion, reqId, async () => {
-              return approvalStore.getAuditLogs(limit);
+              return await approvalStore.getAuditLogs(limit);
             });
           });
 

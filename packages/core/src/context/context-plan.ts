@@ -3,6 +3,7 @@ import type { ContextBudget } from './budget.js';
 import type { ContextPackManifest } from './context-pack-manifest.js';
 import { TokenEstimator } from './token-estimator.js';
 import { RelevanceScore } from './relevance-score.js';
+import { chunkMarkdown } from './markdown-chunker.js';
 
 export interface ContextPlanOptions {
   task: string;
@@ -34,7 +35,7 @@ export class ContextPlanner {
       if (options.mode === 'minimal') {
         contentToEstimate = `---\n${fmStr}\n---`;
       } else if (options.mode === 'balanced') {
-        const truncatedBody = doc.body.length > 500 ? doc.body.substring(0, 500) + '\n...[TRUNCATED]' : doc.body;
+        const truncatedBody = chunkMarkdown(doc.body, 1500); // 1500 chars limit for balanced
         contentToEstimate = `---\n${fmStr}\n---\n\n${truncatedBody}`;
       } else {
         contentToEstimate = `---\n${fmStr}\n---\n\n${doc.body}`;

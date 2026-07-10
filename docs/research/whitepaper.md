@@ -47,20 +47,29 @@ AKCP synthesizes and extends these prior works, filling the gap between document
 
 AKCP introduces two operational planes:
 
-```
-┌────────────────────────────────────────────────────┐
-│               BUILD PLANE (Compiler)               │
-│  OKF Source → Parse → Normalize → Validate → IR   │
-│           AK-IR (JSON) + Manifest + Hash           │
-└────────────────────────────────────────────────────┘
-                          │
-                    (dist artifacts)
-                          │
-┌────────────────────────────────────────────────────┐
-│             RUNTIME PLANE (Control Plane)          │
-│  Agent → MCP Gateway → Policy Eval → MCP Server   │
-│          Audit Log ← Scorecard ← HITL Gate         │
-└────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+  subgraph Build Plane ["Build Plane (Compiler)"]
+    A[OKF Source] --> B[Parse & Normalize]
+    B --> C[Validate]
+    C --> D[AK-IR JSON + Manifest + Hash]
+  end
+
+  subgraph Artifacts
+    D -.-> E[Distribution Artifacts]
+  end
+
+  subgraph Runtime Plane ["Runtime Plane (Control Plane)"]
+    F[Agent] --> G[MCP Gateway]
+    G --> H{Policy Eval}
+    H -- Approved --> I[MCP Server]
+    H -- High Risk --> J[HITL Gate]
+    J -- Authorized --> I
+    H -. Log .-> K[Audit Log & Scorecard]
+    J -. Log .-> K
+  end
+
+  E -. Provides Context .-> G
 ```
 
 ### 3.1 Build Plane

@@ -17,6 +17,7 @@
     "@modelcontextprotocol/sdk": "^1.0.1",
     "@ocf/core": "workspace:*",
     "better-sqlite3": "^12.11.1",
+    "ioredis": "^5.11.1",
     "playwright": "^1.49.0",
     "zod": "catalog:"
   },

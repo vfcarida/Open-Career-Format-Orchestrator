@@ -4,23 +4,9 @@ import path from 'path';
 import fs from 'fs';
 import { runMigrations } from './migrations.js';
 
-export interface ApprovalPayload {
-  toolName: string;
-  payloadHash: string;
-  expiresAt: number;
-  metadata?: Record<string, unknown>;
-}
+import type { IApprovalStore, PendingApproval } from './types.js';
 
-export interface PendingApproval {
-  token: string;
-  toolName: string;
-  payloadHash: string;
-  expiresAt: number;
-  metadata?: Record<string, unknown>;
-  requesterIdentity?: string;
-}
-
-export class ApprovalStore {
+export class ApprovalStore implements IApprovalStore {
   private db: Database.Database;
 
   constructor() {
