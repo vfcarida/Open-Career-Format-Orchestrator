@@ -27,4 +27,5 @@ Side effects: local-read only (Safe).
 ```text
 Reads context.
 ```
-*(Fails length, fails side-effect declaration, lacks usage boundaries).*
+
+_(Fails length, fails side-effect declaration, lacks usage boundaries)._

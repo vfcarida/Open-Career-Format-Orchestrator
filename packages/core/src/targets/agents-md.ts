@@ -1,18 +1,21 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { createHash } from 'node:crypto';
-import type { CompileTarget, TargetConfig, TargetOutput } from './types.js';
-import type { AgentKnowledgeIR } from '../ir/types.js';
+import fs from "node:fs/promises";
+import path from "node:path";
+import { createHash } from "node:crypto";
+import type { CompileTarget, TargetConfig, TargetOutput } from "./types.js";
+import type { AgentKnowledgeIR } from "../ir/types.js";
 
 export class AgentsMdTarget implements CompileTarget {
-  public readonly targetType = 'agents-md';
+  public readonly targetType = "agents-md";
 
-  async compile(ir: AgentKnowledgeIR, config: TargetConfig): Promise<TargetOutput> {
+  async compile(
+    ir: AgentKnowledgeIR,
+    config: TargetConfig,
+  ): Promise<TargetOutput> {
     const outPath = path.resolve(process.cwd(), config.out);
     const outDir = path.dirname(outPath);
-    
+
     await fs.mkdir(outDir, { recursive: true });
-    
+
     // Generates a snippet to be appended to AGENTS.md or CLAUDE.md
     const content = `<!-- akcp:start -->
 > **⚠️ MANAGED CONTEXT BLOCK ⚠️**
@@ -28,21 +31,21 @@ Always consult the MCP Profile Server tools (\`list_documents\`, \`read_document
 
 ## 3. Capabilities
 The following MCP capabilities are active:
-${(ir.capabilities || []).map(c => `- ${c}`).join('\n')}
+${(ir.capabilities || []).map((c) => `- ${c}`).join("\n")}
 
 <!-- akcp:end -->
 `;
-    
-    await fs.writeFile(outPath, content, 'utf-8');
-    
-    const hash = createHash('sha256').update(content).digest('hex');
-    const bytesWritten = Buffer.byteLength(content, 'utf8');
+
+    await fs.writeFile(outPath, content, "utf-8");
+
+    const hash = createHash("sha256").update(content).digest("hex");
+    const bytesWritten = Buffer.byteLength(content, "utf8");
 
     return {
       targetType: this.targetType,
       outputPath: outPath,
       hash,
-      bytesWritten
+      bytesWritten,
     };
   }
 }

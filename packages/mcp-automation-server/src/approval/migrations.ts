@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3';
+import type Database from "better-sqlite3";
 
 interface Migration {
   version: number;
@@ -27,7 +27,7 @@ const migrations: Migration[] = [
           metadata TEXT
         );
       `);
-    }
+    },
   },
   {
     version: 2,
@@ -37,23 +37,40 @@ const migrations: Migration[] = [
       try {
         db.exec(`ALTER TABLE audit_logs ADD COLUMN actorIdentity TEXT;`);
       } catch (e: any) {
-        if (!e.message.includes('duplicate column')) throw e;
+        if (!e.message.includes("duplicate column")) throw e;
       }
 
       try {
-        db.exec(`ALTER TABLE pending_approvals ADD COLUMN requesterIdentity TEXT;`);
+        db.exec(
+          `ALTER TABLE pending_approvals ADD COLUMN requesterIdentity TEXT;`,
+        );
       } catch (e: any) {
-        if (!e.message.includes('duplicate column')) throw e;
+        if (!e.message.includes("duplicate column")) throw e;
       }
-    }
-  }
+    },
+  },
+  {
+    version: 3,
+    up: (db) => {
+      try {
+        db.exec(
+          `ALTER TABLE pending_approvals ADD COLUMN status TEXT DEFAULT 'PENDING';`,
+        );
+      } catch (e: any) {
+        if (!e.message.includes("duplicate column")) throw e;
+      }
+    },
+  },
 ];
 
 export function runMigrations(db: Database.Database) {
-  const currentVersionObj = db.prepare('PRAGMA user_version').get() as { user_version?: number } | undefined;
+  const currentVersionObj = db.prepare("PRAGMA user_version").get() as
+    { user_version?: number } | undefined;
   const currentVersion = currentVersionObj?.user_version ?? 0;
 
-  const pendingMigrations = migrations.filter(m => m.version > currentVersion).sort((a, b) => a.version - b.version);
+  const pendingMigrations = migrations
+    .filter((m) => m.version > currentVersion)
+    .sort((a, b) => a.version - b.version);
 
   if (pendingMigrations.length === 0) {
     return; // Up to date

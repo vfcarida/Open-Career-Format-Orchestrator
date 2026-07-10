@@ -1,4 +1,4 @@
-import type { LifecycleMetadata, LifecycleStatus } from './types.js';
+import type { LifecycleMetadata, LifecycleStatus } from "./types.js";
 
 export class Freshness {
   /**
@@ -7,7 +7,10 @@ export class Freshness {
    * Otherwise, if `lastReviewedAt` and `reviewCadenceDays` are provided, it calculates staleness.
    * Defaults to 'active'.
    */
-  public static getEffectiveStatus(metadata: LifecycleMetadata, now: Date = new Date()): LifecycleStatus {
+  public static getEffectiveStatus(
+    metadata: LifecycleMetadata,
+    now: Date = new Date(),
+  ): LifecycleStatus {
     if (metadata.status) {
       return metadata.status;
     }
@@ -15,21 +18,26 @@ export class Freshness {
     if (metadata.lastReviewedAt && metadata.reviewCadenceDays) {
       const reviewedAt = new Date(metadata.lastReviewedAt);
       if (isNaN(reviewedAt.getTime())) {
-        return 'active'; // Invalid date, assume active or let schema validation handle it
+        return "active"; // Invalid date, assume active or let schema validation handle it
       }
 
       const msPerDay = 1000 * 60 * 60 * 24;
-      const daysSinceReview = Math.floor((now.getTime() - reviewedAt.getTime()) / msPerDay);
-      
+      const daysSinceReview = Math.floor(
+        (now.getTime() - reviewedAt.getTime()) / msPerDay,
+      );
+
       if (daysSinceReview > metadata.reviewCadenceDays) {
-        return 'stale';
+        return "stale";
       }
     }
 
-    return 'active';
+    return "active";
   }
 
-  public static isStale(metadata: LifecycleMetadata, now: Date = new Date()): boolean {
-    return this.getEffectiveStatus(metadata, now) === 'stale';
+  public static isStale(
+    metadata: LifecycleMetadata,
+    now: Date = new Date(),
+  ): boolean {
+    return this.getEffectiveStatus(metadata, now) === "stale";
   }
 }

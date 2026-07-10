@@ -1,14 +1,14 @@
 export enum ScorecardDimension {
-  KnowledgeStructure = 'knowledge-structure',
-  OKFCompatibility = 'okf-compatibility',
-  ContextEconomy = 'context-economy',
-  MCPReadiness = 'mcp-readiness',
-  PolicyCoverage = 'policy-coverage',
-  SecurityPosture = 'security-posture',
-  Provenance = 'provenance',
-  Evals = 'evals',
-  Freshness = 'freshness',
-  DX = 'dx'
+  KnowledgeStructure = "knowledge-structure",
+  OKFCompatibility = "okf-compatibility",
+  ContextEconomy = "context-economy",
+  MCPReadiness = "mcp-readiness",
+  PolicyCoverage = "policy-coverage",
+  SecurityPosture = "security-posture",
+  Provenance = "provenance",
+  Evals = "evals",
+  Freshness = "freshness",
+  DX = "dx",
 }
 
 export interface DimensionScore {
@@ -21,7 +21,7 @@ export interface DimensionScore {
 export interface Recommendation {
   dimension: ScorecardDimension;
   action: string;
-  impact: 'high' | 'medium' | 'low';
+  impact: "high" | "medium" | "low";
 }
 
 export interface ScorecardReport {

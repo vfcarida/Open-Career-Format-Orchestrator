@@ -1,8 +1,11 @@
-import type { EvalsHarness, BenchmarkMetrics } from './index.js';
+import type { EvalsHarness, BenchmarkMetrics } from "./index.js";
 
-const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const mockDelay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-const createMetrics = (overrides: Partial<BenchmarkMetrics>): BenchmarkMetrics => ({
+const createMetrics = (
+  overrides: Partial<BenchmarkMetrics>,
+): BenchmarkMetrics => ({
   taskSuccess: 1,
   tokenCost: 1000,
   latencyMs: 1000,
@@ -15,10 +18,9 @@ const createMetrics = (overrides: Partial<BenchmarkMetrics>): BenchmarkMetrics =
 });
 
 export async function runScenarios(harness: EvalsHarness) {
-  
   await harness.runScenario(
-    'Raw README vs Context Pack',
-    'Comparing an uncurated flat repository README against a compiled Context Pack.',
+    "Raw README vs Context Pack",
+    "Comparing an uncurated flat repository README against a compiled Context Pack.",
     async () => {
       await mockDelay(800); // Baseline is faster to fetch but costs more
       return createMetrics({
@@ -38,12 +40,12 @@ export async function runScenarios(harness: EvalsHarness) {
         citationAccuracy: 0.95,
         contextUtilization: 0.85,
       });
-    }
+    },
   );
 
   await harness.runScenario(
-    'OpenWiki Docs vs Context Pack',
-    'Comparing structured-but-untyped docs (OpenWiki) vs strict schemas (OKF).',
+    "OpenWiki Docs vs Context Pack",
+    "Comparing structured-but-untyped docs (OpenWiki) vs strict schemas (OKF).",
     async () => {
       await mockDelay(500);
       return createMetrics({
@@ -65,12 +67,12 @@ export async function runScenarios(harness: EvalsHarness) {
         citationAccuracy: 1.0,
         contextUtilization: 0.8,
       });
-    }
+    },
   );
 
   await harness.runScenario(
-    'OKF Without Budget vs Context Pack With Budget',
-    'Providing raw OKF without compression versus Context Budgeting algorithms.',
+    "OKF Without Budget vs Context Pack With Budget",
+    "Providing raw OKF without compression versus Context Budgeting algorithms.",
     async () => {
       await mockDelay(900);
       return createMetrics({
@@ -90,12 +92,12 @@ export async function runScenarios(harness: EvalsHarness) {
         citationAccuracy: 0.9,
         contextUtilization: 0.95,
       });
-    }
+    },
   );
 
   await harness.runScenario(
-    'Raw MCP vs Capability Registry',
-    'Testing safety boundaries: Raw MCP allows unchecked operations, Registry blocks them.',
+    "Raw MCP vs Capability Registry",
+    "Testing safety boundaries: Raw MCP allows unchecked operations, Registry blocks them.",
     async () => {
       await mockDelay(400);
       return createMetrics({
@@ -113,12 +115,12 @@ export async function runScenarios(harness: EvalsHarness) {
         toolSelectionAccuracy: 0.95,
         unsafeActionRate: 0.0, // Strictly blocked by HITL capabilities
       });
-    }
+    },
   );
 
   await harness.runScenario(
-    'Prompt Injection in Docs',
-    'Adversarial docs triggering unwanted side effects vs sanitized context packing.',
+    "Prompt Injection in Docs",
+    "Adversarial docs triggering unwanted side effects vs sanitized context packing.",
     async () => {
       await mockDelay(700);
       return createMetrics({
@@ -138,11 +140,11 @@ export async function runScenarios(harness: EvalsHarness) {
         unsafeActionRate: 0.0, // OCF parses frontmatter and ignores execution blocks
         contextUtilization: 0.8,
       });
-    }
+    },
   );
 
   await harness.runScenario(
-    'SE Task: Implement Feature',
+    "SE Task: Implement Feature",
     '"Implement feature following architecture" against raw codebase vs architecture pack.',
     async () => {
       await mockDelay(2000); // Raw codebase search
@@ -163,11 +165,11 @@ export async function runScenarios(harness: EvalsHarness) {
         hallucinationRate: 0.05,
         contextUtilization: 0.9,
       });
-    }
+    },
   );
 
   await harness.runScenario(
-    'Enterprise Task: Summarize Policy & Risk',
+    "Enterprise Task: Summarize Policy & Risk",
     '"Summarize policy and highlight risk" using free-form docs vs enterprise profile.',
     async () => {
       await mockDelay(1200);
@@ -190,11 +192,11 @@ export async function runScenarios(harness: EvalsHarness) {
         unsafeActionRate: 0.0,
         contextUtilization: 0.85,
       });
-    }
+    },
   );
 
   await harness.runScenario(
-    'Tool Selection Ambiguity',
+    "Tool Selection Ambiguity",
     'Tests whether an agent avoids dangerous tools due to clear "When NOT to use" clauses.',
     async () => {
       await mockDelay(600); // Baseline agent with generic descriptions calls wrong tool
@@ -215,6 +217,6 @@ export async function runScenarios(harness: EvalsHarness) {
         unsafeActionRate: 0.0,
         contextUtilization: 0.8,
       });
-    }
+    },
   );
 }

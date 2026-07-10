@@ -1,4 +1,4 @@
-import type { ScorecardReport } from '@ocf/core';
+import type { ScorecardReport } from "@ocf/core";
 
 export function formatScorecardMarkdown(report: ScorecardReport): string {
   let md = `# Agent Knowledge Readiness Scorecard\n\n`;
@@ -11,7 +11,7 @@ export function formatScorecardMarkdown(report: ScorecardReport): string {
   md += `|-----------|-------|---------|\n`;
 
   for (const dim of report.dimensions) {
-    const details = dim.details.join(' ');
+    const details = dim.details.join(" ");
     md += `| **${dim.dimension}** | ${dim.score}/${dim.maxScore} | ${details} |\n`;
   }
 
@@ -20,7 +20,8 @@ export function formatScorecardMarkdown(report: ScorecardReport): string {
     md += `Great job! Your bundle is fully optimized for agent readiness.\n`;
   } else {
     for (const rec of report.recommendations) {
-      const emoji = rec.impact === 'high' ? '🚨' : rec.impact === 'medium' ? '⚠️' : '💡';
+      const emoji =
+        rec.impact === "high" ? "🚨" : rec.impact === "medium" ? "⚠️" : "💡";
       md += `- ${emoji} **[${rec.dimension}]**: ${rec.action}\n`;
     }
   }

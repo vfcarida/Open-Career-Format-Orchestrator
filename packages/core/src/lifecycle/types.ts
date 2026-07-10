@@ -1,4 +1,4 @@
-export type LifecycleStatus = 'active' | 'stale' | 'deprecated' | 'archived';
+export type LifecycleStatus = "active" | "stale" | "deprecated" | "archived";
 
 export interface LifecycleMetadata {
   owner?: string;

@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 export interface AuditEvent {
   eventId: string;
@@ -8,19 +8,19 @@ export interface AuditEvent {
   autonomyLevel: string;
   approvalRequired: boolean;
   sideEffectLevel: string;
-  status: 'success' | 'failure' | 'blocked';
+  status: "success" | "failure" | "blocked";
   durationMs?: number;
   details?: Record<string, unknown>;
 }
 
 export class AuditLogger {
-  log(event: Omit<AuditEvent, 'eventId' | 'timestamp'>) {
+  log(event: Omit<AuditEvent, "eventId" | "timestamp">) {
     const fullEvent: AuditEvent = {
       eventId: randomUUID(),
       timestamp: new Date().toISOString(),
       ...event,
     };
-    
+
     // In a real enterprise system, this should write to a secure append-only log.
     // For this reference architecture, we output to stdout with structured JSON.
     console.log(JSON.stringify(fullEvent));

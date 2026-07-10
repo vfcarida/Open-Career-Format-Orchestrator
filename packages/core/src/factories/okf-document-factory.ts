@@ -20,9 +20,9 @@
  * ```
  */
 
-import type { OKFDocument, OKFFrontmatter } from '../domain/types.js';
-import { OKFDocumentType, ApplicationStatus } from '../domain/types.js';
-import type { SkillLevel } from '../domain/types.js';
+import type { OKFDocument, OKFFrontmatter } from "../domain/types.js";
+import { OKFDocumentType, ApplicationStatus } from "../domain/types.js";
+import type { SkillLevel } from "../domain/types.js";
 
 // ─── Option Types ───────────────────────────────────────────────────────────────
 
@@ -126,28 +126,35 @@ export class OKFDocumentFactory {
    * @param options - Optional skill-specific fields
    * @returns A complete OKF document with type `Skill`
    */
-  static createSkill(name: string, options: CreateSkillOptions = {}): OKFDocument {
+  static createSkill(
+    name: string,
+    options: CreateSkillOptions = {},
+  ): OKFDocument {
     const frontmatter: OKFFrontmatter = {
       type: OKFDocumentType.Skill,
       title: name,
       timestamp: new Date().toISOString(),
       ...(options.level !== undefined && { level: options.level }),
-      ...(options.yearsOfExperience !== undefined && { yearsOfExperience: options.yearsOfExperience }),
+      ...(options.yearsOfExperience !== undefined && {
+        yearsOfExperience: options.yearsOfExperience,
+      }),
       ...(options.category !== undefined && { category: options.category }),
       ...(options.tags !== undefined && { tags: options.tags }),
-      ...(options.description !== undefined && { description: options.description }),
+      ...(options.description !== undefined && {
+        description: options.description,
+      }),
     };
 
     const body = [
       `# ${name}`,
-      '',
+      "",
       options.description ?? `Skill profile for ${name}.`,
-    ].join('\n');
+    ].join("\n");
 
     return {
       frontmatter,
       body,
-      filePath: '',
+      filePath: "",
       conceptId: `skills/${OKFDocumentFactory.slugify(name)}`,
     };
   }
@@ -176,19 +183,21 @@ export class OKFDocumentFactory {
       ...(options.current !== undefined && { current: options.current }),
       ...(options.location !== undefined && { location: options.location }),
       ...(options.tags !== undefined && { tags: options.tags }),
-      ...(options.description !== undefined && { description: options.description }),
+      ...(options.description !== undefined && {
+        description: options.description,
+      }),
     };
 
     const body = [
       `# ${role} at ${company}`,
-      '',
+      "",
       options.description ?? `Experience as ${role} at ${company}.`,
-    ].join('\n');
+    ].join("\n");
 
     return {
       frontmatter,
       body,
-      filePath: '',
+      filePath: "",
       conceptId: `experiences/${OKFDocumentFactory.slugify(`${company} ${role}`)}`,
     };
   }
@@ -229,14 +238,14 @@ export class OKFDocumentFactory {
 
     const body = [
       `# ${position} at ${company}`,
-      '',
+      "",
       `Application submitted via [${url}](${url}).`,
-    ].join('\n');
+    ].join("\n");
 
     return {
       frontmatter,
       body,
-      filePath: '',
+      filePath: "",
       conceptId: `applications/${datePrefix}-${OKFDocumentFactory.slugify(company)}`,
     };
   }
@@ -265,19 +274,21 @@ export class OKFDocumentFactory {
       ...(options.endDate !== undefined && { endDate: options.endDate }),
       ...(options.location !== undefined && { location: options.location }),
       ...(options.tags !== undefined && { tags: options.tags }),
-      ...(options.description !== undefined && { description: options.description }),
+      ...(options.description !== undefined && {
+        description: options.description,
+      }),
     };
 
     const body = [
       `# ${degree} — ${institution}`,
-      '',
+      "",
       options.description ?? `${degree} at ${institution}.`,
-    ].join('\n');
+    ].join("\n");
 
     return {
       frontmatter,
       body,
-      filePath: '',
+      filePath: "",
       conceptId: `education/${OKFDocumentFactory.slugify(institution)}`,
     };
   }
@@ -300,25 +311,35 @@ export class OKFDocumentFactory {
       title: name,
       issuer,
       timestamp: new Date().toISOString(),
-      ...(options.dateObtained !== undefined && { dateObtained: options.dateObtained }),
-      ...(options.expirationDate !== undefined && { expirationDate: options.expirationDate }),
-      ...(options.credentialId !== undefined && { credentialId: options.credentialId }),
+      ...(options.dateObtained !== undefined && {
+        dateObtained: options.dateObtained,
+      }),
+      ...(options.expirationDate !== undefined && {
+        expirationDate: options.expirationDate,
+      }),
+      ...(options.credentialId !== undefined && {
+        credentialId: options.credentialId,
+      }),
       ...(options.url !== undefined && { url: options.url }),
       ...(options.tags !== undefined && { tags: options.tags }),
-      ...(options.description !== undefined && { description: options.description }),
+      ...(options.description !== undefined && {
+        description: options.description,
+      }),
     };
 
     const body = [
       `# ${name}`,
-      '',
+      "",
       `Issued by ${issuer}.`,
-      ...(options.credentialId ? [`Credential ID: ${options.credentialId}`] : []),
-    ].join('\n');
+      ...(options.credentialId
+        ? [`Credential ID: ${options.credentialId}`]
+        : []),
+    ].join("\n");
 
     return {
       frontmatter,
       body,
-      filePath: '',
+      filePath: "",
       conceptId: `certificates/${OKFDocumentFactory.slugify(name)}`,
     };
   }
@@ -330,29 +351,36 @@ export class OKFDocumentFactory {
    * @param options - Optional project-specific fields
    * @returns A complete OKF document with type `Project`
    */
-  static createProject(name: string, options: CreateProjectOptions = {}): OKFDocument {
+  static createProject(
+    name: string,
+    options: CreateProjectOptions = {},
+  ): OKFDocument {
     const frontmatter: OKFFrontmatter = {
       type: OKFDocumentType.Project,
       title: name,
       timestamp: new Date().toISOString(),
       ...(options.url !== undefined && { url: options.url }),
-      ...(options.technologies !== undefined && { technologies: options.technologies }),
+      ...(options.technologies !== undefined && {
+        technologies: options.technologies,
+      }),
       ...(options.startDate !== undefined && { startDate: options.startDate }),
       ...(options.endDate !== undefined && { endDate: options.endDate }),
       ...(options.tags !== undefined && { tags: options.tags }),
-      ...(options.description !== undefined && { description: options.description }),
+      ...(options.description !== undefined && {
+        description: options.description,
+      }),
     };
 
     const body = [
       `# ${name}`,
-      '',
+      "",
       options.description ?? `Overview of the ${name} project.`,
-    ].join('\n');
+    ].join("\n");
 
     return {
       frontmatter,
       body,
-      filePath: '',
+      filePath: "",
       conceptId: `projects/${OKFDocumentFactory.slugify(name)}`,
     };
   }
@@ -366,28 +394,34 @@ export class OKFDocumentFactory {
   static createPreference(options: CreatePreferenceOptions = {}): OKFDocument {
     const frontmatter: OKFFrontmatter = {
       type: OKFDocumentType.Preference,
-      title: options.title ?? 'Job Search Preferences',
+      title: options.title ?? "Job Search Preferences",
       timestamp: new Date().toISOString(),
       ...(options.locations !== undefined && { locations: options.locations }),
       ...(options.remote !== undefined && { remote: options.remote }),
-      ...(options.salaryRange !== undefined && { salaryRange: options.salaryRange }),
+      ...(options.salaryRange !== undefined && {
+        salaryRange: options.salaryRange,
+      }),
       ...(options.roles !== undefined && { roles: options.roles }),
-      ...(options.companySize !== undefined && { companySize: options.companySize }),
+      ...(options.companySize !== undefined && {
+        companySize: options.companySize,
+      }),
       ...(options.tags !== undefined && { tags: options.tags }),
-      ...(options.description !== undefined && { description: options.description }),
+      ...(options.description !== undefined && {
+        description: options.description,
+      }),
     };
 
     const body = [
-      `# ${options.title ?? 'Job Search Preferences'}`,
-      '',
-      options.description ?? 'Current job search parameters and preferences.',
-    ].join('\n');
+      `# ${options.title ?? "Job Search Preferences"}`,
+      "",
+      options.description ?? "Current job search parameters and preferences.",
+    ].join("\n");
 
     return {
       frontmatter,
       body,
-      filePath: '',
-      conceptId: 'preferences/job-search',
+      filePath: "",
+      conceptId: "preferences/job-search",
     };
   }
 
@@ -410,9 +444,9 @@ export class OKFDocumentFactory {
     return text
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/[\s]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/[\s]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
   }
 }

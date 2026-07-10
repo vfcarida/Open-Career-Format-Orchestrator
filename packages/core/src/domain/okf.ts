@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Base frontmatter schema per OKF v0.1 spec §4.1.
@@ -6,7 +6,9 @@ import { z } from 'zod';
  */
 export const OKFFrontmatterSchema = z
   .object({
-    type: z.string().min(1, 'The "type" field is required by OKF v0.1 spec §4.1'),
+    type: z
+      .string()
+      .min(1, 'The "type" field is required by OKF v0.1 spec §4.1'),
     title: z.string().optional(),
     description: z.string().optional(),
     resource: z.string().optional(),
@@ -14,11 +16,11 @@ export const OKFFrontmatterSchema = z
     timestamp: z.string().optional(),
     schemaVersion: z.string().optional(),
     bundleVersion: z.string().optional(),
-    priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+    priority: z.enum(["low", "medium", "high", "critical"]).optional(),
     owner: z.string().optional(),
     lastReviewedAt: z.string().optional(),
     reviewCadenceDays: z.number().int().positive().optional(),
-    status: z.enum(['active', 'stale', 'deprecated', 'archived']).optional(),
+    status: z.enum(["active", "stale", "deprecated", "archived"]).optional(),
     successor: z.string().optional(),
   })
   .passthrough();

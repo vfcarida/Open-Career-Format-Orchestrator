@@ -1,51 +1,15 @@
-# OpenWiki Interoperability
+# OpenWiki Integration
 
-## The Strategy: Complementarity
+OpenWiki (by LangChain) focuses on authoring and maintaining wiki-style documentation specifically tailored for agents. AKCP acts as the downstream consumer, importing OpenWiki content and transforming it into a robust, structured OKF representation.
 
-**[OpenWiki](https://github.com/langchain-ai/openwiki)** has successfully popularized the concept of "documentation written for agents, by agents". It provides a straightforward CLI that writes and maintains a raw `openwiki/` folder, instructing `AGENTS.md` to reference it.
+## Mappings and Structures
+- **Format Accepted**: Standard Markdown (`.md`) with optional YAML frontmatter.
+- **Expected Structure**: Any directory tree of markdown files.
+- **Mapping to AK-IR**:
+  - OpenWiki documents are mapped to a generic `Document` OKF type if no type is provided.
+  - The relative path becomes part of the identity/URI.
+  - Existing frontmatter is preserved.
 
-However, raw Markdown files without standardized schemas are difficult to programmatically validate, govern, and expose to external enterprise tools. 
-
-**Agent-Ready Knowledge (ARK) / AKCP** steps in as the structured, governed layer on top of your raw documentation.
-
-### The Pipeline
-1. **Generation (OpenWiki)**: Use OpenWiki to let agents effortlessly generate documentation.
-2. **Structuring (AKCP)**: Use `akcp import openwiki` to ingest that raw Markdown, applying the `software-project` OKF Profile.
-3. **Validation (AKCP)**: Run `akcp validate` in CI to ensure all architectural decisions, runbooks, and service definitions conform to your organization's schemas.
-4. **Serving (AKCP MCP)**: Boot `akcp serve:mcp` to expose this validated context securely to your organization's LLM ecosystem via the Model Context Protocol.
-
-## Using the Importer
-
-The `@ocf/cli` includes a dedicated bridge to convert an OpenWiki folder into an OKF Context Pack.
-
-```bash
-# Convert your OpenWiki folder into an OKF bundle (dry-run first)
-npx akcp import openwiki --input ./openwiki --output .okf --dry-run
-
-# Execute the import
-npx akcp import openwiki --input ./openwiki --output .okf --force
-```
-
-### Mappings
-The importer intelligently maps standard OpenWiki file conventions to the `software-project` profile:
-- `overview.md` -> `ProjectOverview`
-- `architecture.md` -> `ArchitectureDecision`
-- `commands.md` -> `Runbook`
-- `conventions.md` -> `CodingConvention`
-- `testing.md` -> `Workflow`
-- *(Other)* -> `DomainConcept`
-
-## Instructing Agents
-
-Once imported, update your `AGENTS.md` (or `.clauderc`) to point agents to the structured context pack rather than the raw files:
-
-```markdown
-# Agent Instructions
-
-This repository uses AKCP for structured agent knowledge. 
-
-When you need context about architecture, commands, or conventions, DO NOT guess. 
-Instead, rely on the validated OKF bundle located in \`.okf/\`. 
-
-If you are connected via MCP, use the \`read_document\` tool.
-```
+## Limitations and Risks
+- **Data Loss Risk**: Since OpenWiki is loosely structured, AKCP will not attempt a destructive round-trip (sync back to OpenWiki) by default. The import is one-way (OpenWiki -> AKCP/OKF) unless explicitly managed.
+- **Round-Trip Policy**: Round-trip updates to OpenWiki are currently disabled to prevent destroying loosely structured authoring data.

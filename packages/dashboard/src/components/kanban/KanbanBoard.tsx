@@ -3,8 +3,8 @@
  * @description Coordinates pipeline columns and structures columns for the Kanban board view.
  */
 
-import type { ApplicationDoc } from '../../types/career.js';
-import { KanbanColumn } from './KanbanColumn.js';
+import type { ApplicationDoc } from "../../types/career.js";
+import { KanbanColumn } from "./KanbanColumn.js";
 
 interface KanbanBoardProps {
   applications: ApplicationDoc[];
@@ -13,18 +13,19 @@ interface KanbanBoardProps {
 export function KanbanBoard({ applications }: KanbanBoardProps) {
   // Define Pipeline Columns
   const columns = [
-    { title: 'Saved', status: 'Saved' },
-    { title: 'Applied', status: 'Applied' },
-    { title: 'Screening', status: 'Screening' },
-    { title: 'Interviewing', status: 'Interview' },
-    { title: 'Offers', status: 'Offer' },
-    { title: 'Rejected', status: 'Rejected' },
+    { title: "Saved", status: "Saved" },
+    { title: "Applied", status: "Applied" },
+    { title: "Screening", status: "Screening" },
+    { title: "Interviewing", status: "Interview" },
+    { title: "Offers", status: "Offer" },
+    { title: "Rejected", status: "Rejected" },
   ];
 
   // Group applications by status (case insensitive matching)
   const getAppsForColumn = (status: string) => {
     return applications.filter((app) => {
-      const appStatus = (app.frontmatter.status as string | undefined)?.toLowerCase() || '';
+      const appStatus =
+        (app.frontmatter.status as string | undefined)?.toLowerCase() || "";
       return appStatus === status.toLowerCase();
     });
   };

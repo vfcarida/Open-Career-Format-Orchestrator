@@ -8,10 +8,10 @@
  * in-memory mock.
  */
 
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from "node:fs/promises";
+import path from "node:path";
 
-import type { IFileSystemAdapter } from '../domain/interfaces.js';
+import type { IFileSystemAdapter } from "../domain/interfaces.js";
 
 /**
  * Production filesystem adapter using Node.js `fs/promises`.
@@ -19,14 +19,14 @@ import type { IFileSystemAdapter } from '../domain/interfaces.js';
 export class FileSystemAdapter implements IFileSystemAdapter {
   /** @inheritdoc */
   async readFile(filePath: string): Promise<string> {
-    return fs.readFile(filePath, 'utf-8');
+    return fs.readFile(filePath, "utf-8");
   }
 
   /** @inheritdoc */
   async writeFile(filePath: string, content: string): Promise<void> {
     const dir = path.dirname(filePath);
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(filePath, content, 'utf-8');
+    await fs.writeFile(filePath, content, "utf-8");
   }
 
   /** @inheritdoc */
@@ -58,7 +58,7 @@ export class FileSystemAdapter implements IFileSystemAdapter {
    * @returns Array of relative file paths
    */
   async listFiles(dirPath: string, pattern?: string): Promise<string[]> {
-    const extension = pattern ?? '.md';
+    const extension = pattern ?? ".md";
     const results: string[] = [];
 
     await this.walkDirectory(dirPath, dirPath, extension, results);

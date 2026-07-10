@@ -1,7 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { PluginLoader } from './loader.js';
-import type { PluginManifest } from './manifest-schema.js';
+import * as fs from "fs";
+import * as path from "path";
+import { PluginLoader } from "./loader.js";
+import type { PluginManifest } from "./manifest-schema.js";
 
 export interface DiscoveredPlugin {
   dirPath: string;
@@ -30,14 +30,14 @@ export class PluginRegistry {
           const manifest = PluginLoader.loadManifest(pluginDir);
           discovered.push({
             dirPath: pluginDir,
-            manifest
+            manifest,
           });
         } catch (err: any) {
           // Record broken plugins so the CLI can report them instead of silently ignoring
           discovered.push({
             dirPath: pluginDir,
             manifest: null as any,
-            error: err.message
+            error: err.message,
           });
         }
       }

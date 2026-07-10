@@ -4,9 +4,9 @@
 
 Only the latest release of the Agent Knowledge Compiler and Control Plane (AKCP) is actively supported for security updates.
 
-| Version | Supported |
-| ------- | --------- |
-| >= 0.1.0| Yes       |
+| Version  | Supported |
+| -------- | --------- |
+| >= 0.1.0 | Yes       |
 
 ## Reporting a Vulnerability
 

@@ -1,6 +1,6 @@
-import { Package, Zap, Layers, AlertTriangle } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import type { CareerBundleData } from '../../types/career.js';
+import { Package, Zap, Layers, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import type { CareerBundleData } from "../../types/career.js";
 
 interface TargetManifest {
   type: string;
@@ -23,10 +23,10 @@ export function ContextPacks({ data }: { data: CareerBundleData | null }) {
   useEffect(() => {
     const fetchManifest = async () => {
       try {
-        const response = await fetch('/api/manifest');
+        const response = await fetch("/api/manifest");
         if (!response.ok) {
           const errData = await response.json();
-          throw new Error(errData.error || 'Failed to fetch manifest');
+          throw new Error(errData.error || "Failed to fetch manifest");
         }
         const manifestData = await response.json();
         setManifest(manifestData);
@@ -68,50 +68,85 @@ export function ContextPacks({ data }: { data: CareerBundleData | null }) {
       ) : manifest ? (
         <div className="space-y-6">
           <div className="bg-zinc-900/50 p-4 rounded-xl border border-dark-border mb-4">
-             <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider mb-2">Build Metadata</p>
-             <div className="grid grid-cols-3 gap-4">
-                <div><span className="text-zinc-500 text-xs block">Version</span><span className="text-zinc-200 font-mono text-sm">{manifest.version}</span></div>
-                <div><span className="text-zinc-500 text-xs block">Timestamp</span><span className="text-zinc-200 text-sm">{new Date(manifest.timestamp).toLocaleString()}</span></div>
-                <div><span className="text-zinc-500 text-xs block">Source Hash</span><span className="text-zinc-200 font-mono text-xs truncate block" title={manifest.sourceHash}>{manifest.sourceHash}</span></div>
-             </div>
+            <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider mb-2">
+              Build Metadata
+            </p>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <span className="text-zinc-500 text-xs block">Version</span>
+                <span className="text-zinc-200 font-mono text-sm">
+                  {manifest.version}
+                </span>
+              </div>
+              <div>
+                <span className="text-zinc-500 text-xs block">Timestamp</span>
+                <span className="text-zinc-200 text-sm">
+                  {new Date(manifest.timestamp).toLocaleString()}
+                </span>
+              </div>
+              <div>
+                <span className="text-zinc-500 text-xs block">Source Hash</span>
+                <span
+                  className="text-zinc-200 font-mono text-xs truncate block"
+                  title={manifest.sourceHash}
+                >
+                  {manifest.sourceHash}
+                </span>
+              </div>
+            </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {manifest.targets.map(target => (
-              <div key={target.type} className="glass-panel p-6 rounded-2xl flex flex-col h-full border hover:border-neon-indigo/30 transition-colors">
+            {manifest.targets.map((target) => (
+              <div
+                key={target.type}
+                className="glass-panel p-6 rounded-2xl flex flex-col h-full border hover:border-neon-indigo/30 transition-colors"
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-neon-indigo/10 flex items-center justify-center">
                       <Layers className="w-5 h-5 text-neon-indigo" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-zinc-100">{target.type}</h3>
+                      <h3 className="text-lg font-bold text-zinc-100">
+                        {target.type}
+                      </h3>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-3 mb-6 flex-1">
                   <div className="bg-zinc-900/50 p-3 rounded-xl border border-dark-border">
-                    <span className="block text-[10px] text-zinc-500 uppercase font-semibold mb-1">Generated Files</span>
-                    <span className="text-lg font-bold text-zinc-200">{target.generatedFiles.length}</span>
+                    <span className="block text-[10px] text-zinc-500 uppercase font-semibold mb-1">
+                      Generated Files
+                    </span>
+                    <span className="text-lg font-bold text-zinc-200">
+                      {target.generatedFiles.length}
+                    </span>
                   </div>
                   <div className="bg-zinc-900/50 p-3 rounded-xl border border-dark-border">
                     <span className="block text-[10px] text-zinc-500 uppercase font-semibold mb-1 flex items-center gap-1">
                       <Zap className="w-3 h-3 text-amber-400" />
                       Size
                     </span>
-                    <span className="text-lg font-bold text-zinc-200">{(target.totalBytes / 1024).toFixed(2)} KB</span>
+                    <span className="text-lg font-bold text-zinc-200">
+                      {(target.totalBytes / 1024).toFixed(2)} KB
+                    </span>
                   </div>
                 </div>
 
                 <div className="text-xs text-zinc-500 space-y-1">
-                   <p className="font-semibold mb-2">Files:</p>
-                   {target.generatedFiles.slice(0, 3).map((file, i) => (
-                      <div key={i} className="truncate" title={file}>{file}</div>
-                   ))}
-                   {target.generatedFiles.length > 3 && (
-                      <div className="italic text-zinc-600">+{target.generatedFiles.length - 3} more</div>
-                   )}
+                  <p className="font-semibold mb-2">Files:</p>
+                  {target.generatedFiles.slice(0, 3).map((file, i) => (
+                    <div key={i} className="truncate" title={file}>
+                      {file}
+                    </div>
+                  ))}
+                  {target.generatedFiles.length > 3 && (
+                    <div className="italic text-zinc-600">
+                      +{target.generatedFiles.length - 3} more
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

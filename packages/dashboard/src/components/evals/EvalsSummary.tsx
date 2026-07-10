@@ -1,5 +1,11 @@
-import { useState, useEffect } from 'react';
-import { LineChart, CheckCircle, AlertTriangle, Cpu, Flame } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  LineChart,
+  CheckCircle,
+  AlertTriangle,
+  Cpu,
+  Flame,
+} from "lucide-react";
 
 export function EvalsSummary() {
   const [report, setReport] = useState<any>(null);
@@ -9,9 +15,9 @@ export function EvalsSummary() {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await fetch('/api/evals/report');
+        const res = await fetch("/api/evals/report");
         if (!res.ok) {
-          throw new Error('Evals report not found or server error');
+          throw new Error("Evals report not found or server error");
         }
         const data = await res.json();
         setReport(data);
@@ -40,7 +46,9 @@ export function EvalsSummary() {
         <div>
           <h3 className="font-semibold text-red-300">Failed to load Evals</h3>
           <p className="text-sm mt-1">{error}</p>
-          <p className="text-xs text-red-400/80 mt-2">Hint: Run `pnpm run test` in packages/evals to generate a report.</p>
+          <p className="text-xs text-red-400/80 mt-2">
+            Hint: Run `pnpm run test` in packages/evals to generate a report.
+          </p>
         </div>
       </div>
     );
@@ -107,7 +115,12 @@ export function EvalsSummary() {
             Hallucination Rate
           </h3>
           <div className="text-4xl font-bold text-white mt-2">
-            {report.summary.failed > 0 ? ((report.summary.failed / report.summary.total) * 100).toFixed(1) : '0'}%
+            {report.summary.failed > 0
+              ? ((report.summary.failed / report.summary.total) * 100).toFixed(
+                  1,
+                )
+              : "0"}
+            %
           </div>
           <p className="text-xs text-zinc-400 mt-2">
             Targeting 0% via strict descriptions
@@ -116,30 +129,41 @@ export function EvalsSummary() {
       </div>
 
       <div className="mt-8">
-        <h3 className="text-lg font-semibold text-zinc-200 mb-4">Test Results</h3>
+        <h3 className="text-lg font-semibold text-zinc-200 mb-4">
+          Test Results
+        </h3>
         <div className="space-y-3">
-          {Object.entries(report.results).map(([testName, result]: [string, any]) => (
-            <div key={testName} className="glass-panel p-4 rounded-xl flex items-center justify-between border border-dark-border">
-              <div className="flex items-center gap-3">
-                {result.passed ? (
-                  <CheckCircle className="w-5 h-5 text-emerald-400" />
-                ) : (
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
-                )}
-                <span className="font-medium text-zinc-200">{testName}</span>
+          {Object.entries(report.results).map(
+            ([testName, result]: [string, any]) => (
+              <div
+                key={testName}
+                className="glass-panel p-4 rounded-xl flex items-center justify-between border border-dark-border"
+              >
+                <div className="flex items-center gap-3">
+                  {result.passed ? (
+                    <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                  )}
+                  <span className="font-medium text-zinc-200">{testName}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-xs font-mono bg-black/40 text-zinc-400 px-2 py-1 rounded">
+                    {result.durationMs}ms
+                  </span>
+                  <span
+                    className={`text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded ${
+                      result.passed
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : "bg-red-500/10 text-red-400"
+                    }`}
+                  >
+                    {result.passed ? "Passed" : "Failed"}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-mono bg-black/40 text-zinc-400 px-2 py-1 rounded">
-                  {result.durationMs}ms
-                </span>
-                <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded ${
-                  result.passed ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-                }`}>
-                  {result.passed ? 'Passed' : 'Failed'}
-                </span>
-              </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </div>
     </div>

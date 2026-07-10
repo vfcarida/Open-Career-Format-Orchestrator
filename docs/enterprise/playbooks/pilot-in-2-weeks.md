@@ -1,14 +1,17 @@
 # Playbook: AKCP Pilot in 2 Weeks
 
 ## Objective
+
 Launch a focused, high-value Agent Knowledge Compiler and Control Plane (AKCP) pilot within 14 days to prove ROI, test the developer experience, and establish a beachhead for enterprise scaling.
 
 ## Prerequisites
+
 - Node.js >= 18 and `pnpm` installed.
 - Access to an existing, isolated knowledge domain (e.g., a specific team's runbooks or developer onboarding docs).
 - A designated platform engineer and a subject matter expert (SME).
 
 ## Stakeholders
+
 - **Knowledge Owner (SME):** Validates the accuracy of the context pack.
 - **Platform Team:** Sets up the AKCP CLI and CI/CD pipelines.
 - **Security:** Reviews the initial Policy Card.
@@ -16,6 +19,7 @@ Launch a focused, high-value Agent Knowledge Compiler and Control Plane (AKCP) p
 ## Executable Steps
 
 ### Week 1: Knowledge Capture & Compilation
+
 1. **Initialize the Workspace:**
    ```bash
    akcp init ./pilot-workspace --profile software-project
@@ -32,6 +36,7 @@ Launch a focused, high-value Agent Knowledge Compiler and Control Plane (AKCP) p
    Ensure you achieve a scorecard rating of at least 80/100.
 
 ### Week 2: Integration & Governance
+
 5. **Establish Basic Policy:**
    Create a basic `.policy.yaml` explicitly defining `defaultAutonomyLevel: read-only`.
 6. **Expose to Agents via MCP:**
@@ -43,15 +48,18 @@ Launch a focused, high-value Agent Knowledge Compiler and Control Plane (AKCP) p
    Ask your agent a domain-specific question and observe it using the MCP server to fetch the exact, governed context.
 
 ## Risks & Limitations
+
 - **Anti-pattern:** Attempting to migrate the entire company wiki at once. Focus on one high-value domain.
 - **Anti-pattern:** Starting with autonomous write operations. Stick to `read-only` knowledge retrieval for the pilot.
 
 ## Metrics (Before/After)
+
 - **Before:** Agent hallucinates domain-specific architecture details.
 - **After:** Agent correctly cites the local OKF bundle with 100% determinism.
 - **Metric:** Time spent by agents searching for context (aim for >50% reduction).
 
 ## Definition of Done
+
 - A single domain context pack is compiling successfully.
 - Scorecard is >80.
 - An agent successfully queries the pack via MCP.

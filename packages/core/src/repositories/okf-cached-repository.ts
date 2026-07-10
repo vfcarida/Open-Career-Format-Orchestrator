@@ -1,6 +1,6 @@
-import type { IOKFRepository } from '../domain/interfaces.js';
-import type { OKFDocument, OKFFrontmatter } from '../domain/types.js';
-import type { AgentKnowledgeIR } from '../ir/types.js';
+import type { IOKFRepository } from "../domain/interfaces.js";
+import type { OKFDocument, OKFFrontmatter } from "../domain/types.js";
+import type { AgentKnowledgeIR } from "../ir/types.js";
 
 /**
  * Decorator for IOKFRepository that uses an in-memory Agent Knowledge IR
@@ -23,7 +23,7 @@ export class OKFCachedRepository implements IOKFRepository {
         conceptId: concept.conceptId,
         frontmatter: concept.frontmatter as OKFFrontmatter,
         body: concept.body,
-        filePath: concept.source.filePath
+        filePath: concept.source.filePath,
       });
     }
   }

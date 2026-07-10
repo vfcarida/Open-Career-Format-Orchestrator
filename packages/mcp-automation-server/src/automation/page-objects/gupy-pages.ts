@@ -3,7 +3,7 @@
  * @description Page Object Models for Gupy Job Application automation.
  */
 
-import type { Locator, Page } from 'playwright';
+import type { Locator, Page } from "playwright";
 
 /**
  * POM representing the Gupy login page or candidate dashboard entry.
@@ -17,7 +17,9 @@ export class GupyLoginPage {
   constructor(page: Page) {
     this.page = page;
     this.emailInput = page.locator('input[type="email"], input[name="email"]');
-    this.passwordInput = page.locator('input[type="password"], input[name="password"]');
+    this.passwordInput = page.locator(
+      'input[type="password"], input[name="password"]',
+    );
     this.submitButton = page.locator('button[type="submit"]');
   }
 
@@ -32,7 +34,7 @@ export class GupyLoginPage {
     await this.emailInput.fill(email);
     await this.passwordInput.fill(pass);
     await this.submitButton.click();
-    await this.page.waitForNavigation({ waitUntil: 'networkidle' });
+    await this.page.waitForNavigation({ waitUntil: "networkidle" });
   }
 }
 
@@ -48,23 +50,33 @@ export class GupyJobPage {
   constructor(page: Page) {
     this.page = page;
     // Gupy job pages typically have an "Apply for vacancy" (Candidatar-se à vaga) button
-    this.applyButton = page.locator('[data-testid="apply-vacancy-button"], button:has-text("Candidatar-se"), button:has-text("Apply")');
+    this.applyButton = page.locator(
+      '[data-testid="apply-vacancy-button"], button:has-text("Candidatar-se"), button:has-text("Apply")',
+    );
     this.jobTitleHeader = page.locator('h1, [data-testid="job-title"]');
-    this.companyNameHeader = page.locator('[data-testid="company-name"], .company-name');
+    this.companyNameHeader = page.locator(
+      '[data-testid="company-name"], .company-name',
+    );
   }
 
   async getJobTitle(): Promise<string> {
     if (await this.jobTitleHeader.isVisible()) {
-      return (await this.jobTitleHeader.first().textContent())?.trim() ?? 'Unknown Position';
+      return (
+        (await this.jobTitleHeader.first().textContent())?.trim() ??
+        "Unknown Position"
+      );
     }
-    return 'Unknown Position';
+    return "Unknown Position";
   }
 
   async getCompanyName(): Promise<string> {
     if (await this.companyNameHeader.isVisible()) {
-      return (await this.companyNameHeader.first().textContent())?.trim() ?? 'Unknown Company';
+      return (
+        (await this.companyNameHeader.first().textContent())?.trim() ??
+        "Unknown Company"
+      );
     }
-    return 'Unknown Company';
+    return "Unknown Company";
   }
 
   async clickApply(): Promise<void> {
@@ -83,8 +95,12 @@ export class GupyApplicationWizard {
 
   constructor(page: Page) {
     this.page = page;
-    this.continueButton = page.locator('button:has-text("Continuar"), button:has-text("Next"), button:has-text("Continue")');
-    this.submitButton = page.locator('button:has-text("Enviar candidatura"), button:has-text("Submit application")');
+    this.continueButton = page.locator(
+      'button:has-text("Continuar"), button:has-text("Next"), button:has-text("Continue")',
+    );
+    this.submitButton = page.locator(
+      'button:has-text("Enviar candidatura"), button:has-text("Submit application")',
+    );
   }
 
   async proceedThroughForm(): Promise<boolean> {

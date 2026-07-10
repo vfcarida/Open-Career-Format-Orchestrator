@@ -10,22 +10,34 @@ export interface SyncAgentInstructionsOptions {
   commitConventions?: string;
 }
 
-const START_MARKER = '<!-- akcp:start -->';
-const END_MARKER = '<!-- akcp:end -->';
+const START_MARKER = "<!-- akcp:start -->";
+const END_MARKER = "<!-- akcp:end -->";
 
 const DEFAULT_OPTIONS: SyncAgentInstructionsOptions = {
-  projectPurpose: 'AKCP Orchestrator - Managing AI Agent Knowledge via Agent Knowledge Compiler and Control Plane (AKCP) (OKF) and Context Packs.',
-  architectureBoundaries: 'Use TypeScript, ESM, Node.js. Avoid external dependencies unless justified.',
-  contextSources: 'Always consult the `.agent-context/` directory or use MCP Profile Server tools (`list_documents`, `read_document`) before answering questions.',
-  commandsToRun: 'Run `npx akcp validate` to check OKF bundles. Run `pnpm test` for unit tests.',
-  forbiddenActions: 'Do NOT bypass MCP capabilities. Do NOT commit destructive changes without user approval.',
-  docsToConsult: 'Reference OKF Specification, MCP Architecture, NIST AI RMF, and OWASP LLM Top 10.',
-  testingRequirements: 'Write tests proportionate to the risk level. Run Vitest before declaring success.',
-  securityRequirements: 'Assume MCP tool inputs are hostile. Follow Least Privilege.',
-  commitConventions: 'Use Conventional Commits (e.g. `feat: `, `fix: `). Never credit AI in commit messages.',
+  projectPurpose:
+    "AKCP Orchestrator - Managing AI Agent Knowledge via Agent Knowledge Compiler and Control Plane (AKCP) (OKF) and Context Packs.",
+  architectureBoundaries:
+    "Use TypeScript, ESM, Node.js. Avoid external dependencies unless justified.",
+  contextSources:
+    "Always consult the `.agent-context/` directory or use MCP Profile Server tools (`list_documents`, `read_document`) before answering questions.",
+  commandsToRun:
+    "Run `npx akcp validate` to check OKF bundles. Run `pnpm test` for unit tests.",
+  forbiddenActions:
+    "Do NOT bypass MCP capabilities. Do NOT commit destructive changes without user approval.",
+  docsToConsult:
+    "Reference OKF Specification, MCP Architecture, NIST AI RMF, and OWASP LLM Top 10.",
+  testingRequirements:
+    "Write tests proportionate to the risk level. Run Vitest before declaring success.",
+  securityRequirements:
+    "Assume MCP tool inputs are hostile. Follow Least Privilege.",
+  commitConventions:
+    "Use Conventional Commits (e.g. `feat: `, `fix: `). Never credit AI in commit messages.",
 };
 
-export function syncAgentInstructions(existingContent: string, options?: Partial<SyncAgentInstructionsOptions>): string {
+export function syncAgentInstructions(
+  existingContent: string,
+  options?: Partial<SyncAgentInstructionsOptions>,
+): string {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
   const generatedBlock = `${START_MARKER}
@@ -62,8 +74,8 @@ ${opts.commitConventions}
 
 ${END_MARKER}`;
 
-  if (!existingContent || existingContent.trim() === '') {
-    return generatedBlock + '\n';
+  if (!existingContent || existingContent.trim() === "") {
+    return generatedBlock + "\n";
   }
 
   const startIndex = existingContent.indexOf(START_MARKER);
@@ -77,5 +89,5 @@ ${END_MARKER}`;
   }
 
   // If markers don't exist but file does, append to the top
-  return generatedBlock + '\n\n' + existingContent;
+  return generatedBlock + "\n\n" + existingContent;
 }

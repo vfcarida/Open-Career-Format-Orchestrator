@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react';
-import { Network, AlertTriangle, Link as LinkIcon, FileQuestion, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Network,
+  AlertTriangle,
+  Link as LinkIcon,
+  FileQuestion,
+  ArrowRight,
+} from "lucide-react";
 
 interface GraphData {
   summary: {
     totalNodes: number;
     totalEdges: number;
-    brokenLinks: Array<{ sourceConceptId: string; targetConceptId: string; relationType: string }>;
+    brokenLinks: Array<{
+      sourceConceptId: string;
+      targetConceptId: string;
+      relationType: string;
+    }>;
     orphanedConcepts: string[];
     highlyConnectedConcepts: string[];
   };
@@ -20,8 +30,11 @@ export function GraphReport() {
   useEffect(() => {
     const fetchGraph = async () => {
       try {
-        const res = await fetch('/api/manifest/graph');
-        if (!res.ok) throw new Error('Graph not found. Run "akcp graph build" to generate it.');
+        const res = await fetch("/api/manifest/graph");
+        if (!res.ok)
+          throw new Error(
+            'Graph not found. Run "akcp graph build" to generate it.',
+          );
         const json = await res.json();
         setData(json);
       } catch (err: any) {
@@ -33,7 +46,8 @@ export function GraphReport() {
     fetchGraph();
   }, []);
 
-  if (loading) return <div className="text-zinc-500">Loading Semantic Graph...</div>;
+  if (loading)
+    return <div className="text-zinc-500">Loading Semantic Graph...</div>;
   if (error) return <div className="text-red-400">Error: {error}</div>;
   if (!data) return null;
 
@@ -52,22 +66,50 @@ export function GraphReport() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-         <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
-           <div className="p-3 bg-neon-indigo/10 rounded-lg"><Network className="w-5 h-5 text-neon-indigo" /></div>
-           <div><p className="text-xs text-zinc-500">Nodes</p><p className="text-xl font-bold text-white">{data.summary.totalNodes}</p></div>
-         </div>
-         <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
-           <div className="p-3 bg-neon-blue/10 rounded-lg"><LinkIcon className="w-5 h-5 text-neon-blue" /></div>
-           <div><p className="text-xs text-zinc-500">Edges</p><p className="text-xl font-bold text-white">{data.summary.totalEdges}</p></div>
-         </div>
-         <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
-           <div className="p-3 bg-orange-500/10 rounded-lg"><AlertTriangle className="w-5 h-5 text-orange-400" /></div>
-           <div><p className="text-xs text-zinc-500">Broken Links</p><p className="text-xl font-bold text-orange-400">{data.summary.brokenLinks.length}</p></div>
-         </div>
-         <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
-           <div className="p-3 bg-zinc-500/10 rounded-lg"><FileQuestion className="w-5 h-5 text-zinc-400" /></div>
-           <div><p className="text-xs text-zinc-500">Orphans</p><p className="text-xl font-bold text-zinc-300">{data.summary.orphanedConcepts.length}</p></div>
-         </div>
+        <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
+          <div className="p-3 bg-neon-indigo/10 rounded-lg">
+            <Network className="w-5 h-5 text-neon-indigo" />
+          </div>
+          <div>
+            <p className="text-xs text-zinc-500">Nodes</p>
+            <p className="text-xl font-bold text-white">
+              {data.summary.totalNodes}
+            </p>
+          </div>
+        </div>
+        <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
+          <div className="p-3 bg-neon-blue/10 rounded-lg">
+            <LinkIcon className="w-5 h-5 text-neon-blue" />
+          </div>
+          <div>
+            <p className="text-xs text-zinc-500">Edges</p>
+            <p className="text-xl font-bold text-white">
+              {data.summary.totalEdges}
+            </p>
+          </div>
+        </div>
+        <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
+          <div className="p-3 bg-orange-500/10 rounded-lg">
+            <AlertTriangle className="w-5 h-5 text-orange-400" />
+          </div>
+          <div>
+            <p className="text-xs text-zinc-500">Broken Links</p>
+            <p className="text-xl font-bold text-orange-400">
+              {data.summary.brokenLinks.length}
+            </p>
+          </div>
+        </div>
+        <div className="glass-panel p-4 rounded-xl flex items-center gap-4">
+          <div className="p-3 bg-zinc-500/10 rounded-lg">
+            <FileQuestion className="w-5 h-5 text-zinc-400" />
+          </div>
+          <div>
+            <p className="text-xs text-zinc-500">Orphans</p>
+            <p className="text-xl font-bold text-zinc-300">
+              {data.summary.orphanedConcepts.length}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -81,10 +123,15 @@ export function GraphReport() {
           ) : (
             <ul className="space-y-2">
               {data.summary.brokenLinks.map((bl, i) => (
-                <li key={i} className="text-sm bg-orange-500/5 border border-orange-500/10 p-2 rounded-lg flex items-center gap-2">
+                <li
+                  key={i}
+                  className="text-sm bg-orange-500/5 border border-orange-500/10 p-2 rounded-lg flex items-center gap-2"
+                >
                   <span className="text-zinc-300">{bl.sourceConceptId}</span>
                   <ArrowRight className="w-3 h-3 text-zinc-600" />
-                  <span className="text-orange-400 font-mono text-xs">{bl.targetConceptId}</span>
+                  <span className="text-orange-400 font-mono text-xs">
+                    {bl.targetConceptId}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -92,17 +139,21 @@ export function GraphReport() {
         </div>
 
         <div className="glass-panel p-6 rounded-xl space-y-4">
-          <h3 className="text-lg font-bold text-zinc-100">Highly Connected Concepts</h3>
+          <h3 className="text-lg font-bold text-zinc-100">
+            Highly Connected Concepts
+          </h3>
           <ul className="space-y-2">
-             {data.summary.highlyConnectedConcepts.map(hc => (
-                <li key={hc} className="text-sm text-neon-blue bg-neon-blue/5 border border-neon-blue/10 p-2 rounded-lg">
-                  {hc}
-                </li>
-             ))}
+            {data.summary.highlyConnectedConcepts.map((hc) => (
+              <li
+                key={hc}
+                className="text-sm text-neon-blue bg-neon-blue/5 border border-neon-blue/10 p-2 rounded-lg"
+              >
+                {hc}
+              </li>
+            ))}
           </ul>
         </div>
       </div>
-
     </div>
   );
 }

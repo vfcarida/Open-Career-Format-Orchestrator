@@ -1,20 +1,20 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const CapabilityManifestSchema = z.object({
   id: z.string().min(1, "Capability ID is required"),
   name: z.string().min(1, "Capability name is required"),
-  kind: z.enum(['tool', 'resource', 'prompt', 'context-pack']),
+  kind: z.enum(["tool", "resource", "prompt", "context-pack"]),
   version: z.string().min(1, "Version is required"),
   description: z.string().min(1, "Description is required"),
   owner: z.string().optional(),
-  riskLevel: z.enum(['low', 'medium', 'high', 'critical']),
+  riskLevel: z.enum(["low", "medium", "high", "critical"]),
   sideEffectLevel: z.enum([
-    'none',
-    'local-read',
-    'local-write',
-    'external-read',
-    'external-write',
-    'external-submit',
+    "none",
+    "local-read",
+    "local-write",
+    "external-read",
+    "external-write",
+    "external-submit",
   ]),
   requiredApproval: z.boolean(),
   inputSchema: z.unknown().optional(),
@@ -32,7 +32,7 @@ export const CapabilityManifestSchema = z.object({
       z.object({
         input: z.unknown(),
         output: z.unknown(),
-      })
+      }),
     )
     .optional(),
 });

@@ -1,4 +1,4 @@
-import type { AgentKnowledgeIR } from '../ir/types.js';
+import type { AgentKnowledgeIR } from "../ir/types.js";
 
 export interface TargetConfig {
   type: string;

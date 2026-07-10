@@ -7,11 +7,12 @@ tags:
   - frontend
   - backend
   - javascript
-timestamp: '2026-07-01T00:00:00Z'
+timestamp: "2026-07-01T00:00:00Z"
 level: Advanced
 yearsOfExperience: 5
 category: Programming Language
 schemaVersion: ocf.profile/v1
 bundleVersion: 1.0.0
 ---
+
 Proficient in TypeScript for building type-safe, maintainable applications across the full stack. Extensive experience with strict compiler configurations, advanced generics, mapped types, and conditional types. Regularly use TypeScript with React and Next.js on the frontend, and Node.js with NestJS on the backend. Comfortable designing complex type hierarchies for domain-driven codebases and contributing to shared type libraries consumed by multiple teams.

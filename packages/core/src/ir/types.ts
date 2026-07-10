@@ -1,5 +1,12 @@
-import { z } from 'zod';
-import { AgentKnowledgeIRSchema, IRConceptSchema, IRLinkSchema, IRPoliciesSchema, IRScienceBudgetSchema, IRSourceSchema } from './schema.js';
+import { z } from "zod";
+import {
+  AgentKnowledgeIRSchema,
+  IRConceptSchema,
+  IRLinkSchema,
+  IRPoliciesSchema,
+  IRScienceBudgetSchema,
+  IRSourceSchema,
+} from "./schema.js";
 
 export type IRScienceBudget = z.infer<typeof IRScienceBudgetSchema>;
 export type IRSource = z.infer<typeof IRSourceSchema>;

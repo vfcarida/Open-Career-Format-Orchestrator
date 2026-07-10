@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 export interface User {
   identity: string;
   name: string;
-  role: 'admin' | 'viewer';
+  role: "admin" | "viewer";
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (identity: string, name: string, role?: 'admin' | 'viewer') => void;
+  login: (identity: string, name: string, role?: "admin" | "viewer") => void;
   logout: () => void;
 }
 
@@ -19,21 +19,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check local storage for mock session
-    const storedUser = localStorage.getItem('mockUser');
+    const storedUser = localStorage.getItem("mockUser");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  const login = (identity: string, name: string, role: 'admin' | 'viewer' = 'admin') => {
+  const login = (
+    identity: string,
+    name: string,
+    role: "admin" | "viewer" = "admin",
+  ) => {
     const newUser = { identity, name, role };
     setUser(newUser);
-    localStorage.setItem('mockUser', JSON.stringify(newUser));
+    localStorage.setItem("mockUser", JSON.stringify(newUser));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('mockUser');
+    localStorage.removeItem("mockUser");
   };
 
   return (
@@ -46,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

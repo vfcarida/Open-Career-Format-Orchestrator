@@ -4,21 +4,21 @@ This example demonstrates an AKCP bundle for an IT operations team managing runb
 
 ## What's Included
 
-| File | OKF Type | Description |
-|------|----------|-------------|
-| `sample-data/` | Various | Runbooks, incident procedures, deployment guides in OKF format |
+| File           | OKF Type | Description                                                    |
+| -------------- | -------- | -------------------------------------------------------------- |
+| `sample-data/` | Various  | Runbooks, incident procedures, deployment guides in OKF format |
 
 ## Running This Example
 
 ```bash
 # Validate the bundle schema
-npx akcp validate ./examples/domains/it-operations/sample-data
+pnpm akcp validate ./examples/domains/it-operations/sample-data
 
 # Compile to all targets (including eval-dataset for CI testing)
-akcp compile --bundle ./examples/domains/it-operations
+pnpm akcp compile --bundle ./examples/domains/it-operations
 
-# Check the readiness score
-akcp scorecard run --bundle ./examples/domains/it-operations
+# Check policy compliance
+pnpm akcp policy validate ./examples/domains/it-operations/.policy.yaml
 ```
 
 ## Expected Results

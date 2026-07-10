@@ -10,7 +10,7 @@ compile:
       # Exclude drafts or specific patterns
       exclude:
         - "**/drafts/**"
-  
+
   # Compilation target for the intermediate representation (IR)
   target:
     format: "ir/json"

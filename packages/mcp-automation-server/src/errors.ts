@@ -13,9 +13,13 @@ export class OCFMCPError extends Error {
   public readonly code: string;
   public readonly details?: Record<string, unknown>;
 
-  constructor(message: string, code: string, details?: Record<string, unknown>) {
+  constructor(
+    message: string,
+    code: string,
+    details?: Record<string, unknown>,
+  ) {
     super(message);
-    this.name = 'OCFMCPError';
+    this.name = "OCFMCPError";
     this.code = code;
     this.details = details;
     Object.setPrototypeOf(this, new.target.prototype);
@@ -35,13 +39,17 @@ export class OCFMCPError extends Error {
  * Thrown when an MCP tool execution fails.
  */
 export class MCPToolExecutionError extends OCFMCPError {
-  constructor(toolName: string, message: string, details?: Record<string, unknown>) {
+  constructor(
+    toolName: string,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     super(
       `MCP Tool [${toolName}] failed: ${message}`,
-      'MCP_TOOL_EXECUTION_ERROR',
+      "MCP_TOOL_EXECUTION_ERROR",
       { toolName, ...details },
     );
-    this.name = 'MCPToolExecutionError';
+    this.name = "MCPToolExecutionError";
   }
 }
 
@@ -52,11 +60,11 @@ export class PlatformNotSupportedError extends OCFMCPError {
   constructor(url: string) {
     super(
       `The job application URL "${url}" is on a platform that is not supported yet. ` +
-      'Currently supported platforms: LinkedIn, Gupy, Indeed.',
-      'PLATFORM_NOT_SUPPORTED',
+        "Currently supported platforms: LinkedIn, Gupy, Indeed.",
+      "PLATFORM_NOT_SUPPORTED",
       { url },
     );
-    this.name = 'PlatformNotSupportedError';
+    this.name = "PlatformNotSupportedError";
   }
 }
 
@@ -64,12 +72,17 @@ export class PlatformNotSupportedError extends OCFMCPError {
  * Thrown during browser automation when page actions or page object elements fail.
  */
 export class AutomationError extends OCFMCPError {
-  constructor(platform: string, step: string, message: string, details?: Record<string, unknown>) {
+  constructor(
+    platform: string,
+    step: string,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     super(
       `Browser automation failed on [${platform}] during step [${step}]: ${message}`,
-      'AUTOMATION_ERROR',
+      "AUTOMATION_ERROR",
       { platform, step, ...details },
     );
-    this.name = 'AutomationError';
+    this.name = "AutomationError";
   }
 }

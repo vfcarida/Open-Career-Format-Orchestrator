@@ -1,0 +1,9 @@
+{
+  "file://C:\\Users\\vinicius\\Documents\\GeminiCode\\Open-Career-Format-Orchestrator\\packages\\conformance\\fixtures\\okf-warning-broken-link\\skills\\broken.md": {
+    "sourceHash": "f8a6450106ee6a46c6e4f5fd802db21a47cd778a110262679f83fdbb3a4caf21",
+    "normalizedHash": "",
+    "artifactHash": "../dummy",
+    "lastCompiledAt": "2026-07-10T20:11:03.597Z",
+    "dependencies": []
+  }
+}

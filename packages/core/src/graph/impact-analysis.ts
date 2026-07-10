@@ -1,4 +1,4 @@
-import type { GraphEdge, ImpactMap } from './types.js';
+import type { GraphEdge, ImpactMap } from "./types.js";
 
 /**
  * Computes the reverse dependency graph.
@@ -9,9 +9,9 @@ export function computeImpactMap(edges: GraphEdge[]): ImpactMap {
   const directImpacts: Record<string, Set<string>> = {};
 
   // Build direct reverse edges (if A -> B, then B -> A in reverse)
-  edges.forEach(edge => {
+  edges.forEach((edge) => {
     if (edge.isBroken) return;
-    
+
     if (!directImpacts[edge.targetConceptId]) {
       directImpacts[edge.targetConceptId] = new Set<string>();
     }
@@ -25,9 +25,9 @@ export function computeImpactMap(edges: GraphEdge[]): ImpactMap {
     const visited = new Set<string>();
     const initial = directImpacts[conceptId];
     if (!initial) continue;
-    
+
     const queue = Array.from(initial);
-    
+
     while (queue.length > 0) {
       const current = queue.shift()!;
       if (!visited.has(current)) {
@@ -38,7 +38,7 @@ export function computeImpactMap(edges: GraphEdge[]): ImpactMap {
         }
       }
     }
-    
+
     impactMap[conceptId] = Array.from(visited);
   }
 

@@ -1,10 +1,14 @@
-import { createHash } from 'node:crypto';
-import path from 'node:path';
-import type { IFileSystemAdapter } from '../domain/interfaces.js';
-import type { ConnectorConfig, KnowledgeSourceConnector, RawKnowledgeItem } from './types.js';
+import { createHash } from "node:crypto";
+import path from "node:path";
+import type { IFileSystemAdapter } from "../domain/interfaces.js";
+import type {
+  ConnectorConfig,
+  KnowledgeSourceConnector,
+  RawKnowledgeItem,
+} from "./types.js";
 
 export class MarkdownDirectoryConnector implements KnowledgeSourceConnector {
-  public readonly connectorType = 'markdown-directory';
+  public readonly connectorType = "markdown-directory";
 
   constructor(private readonly fsAdapter: IFileSystemAdapter) {}
 
@@ -23,23 +27,26 @@ export class MarkdownDirectoryConnector implements KnowledgeSourceConnector {
     const files = await this.fsAdapter.listFiles(sourceDir);
 
     for (const relativePath of files) {
-      if (config.exclude && config.exclude.some(ex => relativePath.includes(ex))) {
+      if (
+        config.exclude &&
+        config.exclude.some((ex) => relativePath.includes(ex))
+      ) {
         continue;
       }
 
       const filePath = path.join(sourceDir, relativePath);
       const content = await this.fsAdapter.readFile(filePath);
-      
-      const hash = createHash('sha256').update(content).digest('hex');
+
+      const hash = createHash("sha256").update(content).digest("hex");
 
       items.push({
         sourceUri: `file://${filePath}`,
         contentHash: hash,
         metadata: {
           relativePath,
-          originalFormat: 'markdown'
+          originalFormat: "markdown",
         },
-        rawContent: content
+        rawContent: content,
       });
     }
 

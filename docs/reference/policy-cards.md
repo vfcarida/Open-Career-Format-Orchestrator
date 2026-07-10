@@ -44,7 +44,7 @@ spec:
 - **allowedContextPacks**: Restrict the contexts that can be mounted.
 - **allowedTools** / **forbiddenTools**: Allow-list and block-list of MCP tools.
 - **maxContextBudget**: (Optional) Enforce a maximum context window limit to control costs.
-- **sideEffectRules**: 
+- **sideEffectRules**:
   - Define rules for `read`, `write`, and `submit` operations. Valid values: `allow`, `deny`, `audit`, `approval`.
 - **approvalRequirements**: Tools that strictly require a cryptographic HITL approval token to execute.
 - **piiHandling**: Dictates how PII should be handled: `deny`, `redact`, or `allow-with-audit`.
@@ -57,4 +57,5 @@ spec:
 - **Explain a Policy**: `npx akcp policy explain policies/strict-enterprise.policy.yaml`
 
 ## MCP Enforcement
+
 When the `mcp-automation-server` initializes with a policy, every single tool call is passed through the evaluation engine. If a tool violates the allowed tools, autonomy boundary, or side-effect rules, it will instantly throw an error mapped to `[LLM06: Excessive Agency]`.

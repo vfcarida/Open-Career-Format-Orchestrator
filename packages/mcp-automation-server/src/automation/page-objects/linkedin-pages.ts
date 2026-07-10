@@ -3,7 +3,7 @@
  * @description Page Object Models for LinkedIn Job Application automation.
  */
 
-import type { Locator, Page } from 'playwright';
+import type { Locator, Page } from "playwright";
 
 /**
  * POM representing the LinkedIn Login Page.
@@ -16,8 +16,8 @@ export class LinkedInLoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.usernameInput = page.locator('#username');
-    this.passwordInput = page.locator('#password');
+    this.usernameInput = page.locator("#username");
+    this.passwordInput = page.locator("#password");
     this.submitButton = page.locator('button[type="submit"]');
   }
 
@@ -37,7 +37,7 @@ export class LinkedInLoginPage {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(pass);
     await this.submitButton.click();
-    await this.page.waitForNavigation({ waitUntil: 'networkidle' });
+    await this.page.waitForNavigation({ waitUntil: "networkidle" });
   }
 }
 
@@ -51,24 +51,36 @@ export class LinkedInJobPage {
   public readonly companyNameLink: Locator;
 
   constructor(page: Page) {
-    this.easyApplyButton = page.locator('button.jobs-apply-button:has-text("Easy Apply")');
-    this.applyButton = page.locator('button.jobs-apply-button:has-text("Apply")');
-    this.jobTitleHeader = page.locator('.job-details-jobs-unified-top-card__job-title');
-    this.companyNameLink = page.locator('.job-details-jobs-unified-top-card__company-name a');
+    this.easyApplyButton = page.locator(
+      'button.jobs-apply-button:has-text("Easy Apply")',
+    );
+    this.applyButton = page.locator(
+      'button.jobs-apply-button:has-text("Apply")',
+    );
+    this.jobTitleHeader = page.locator(
+      ".job-details-jobs-unified-top-card__job-title",
+    );
+    this.companyNameLink = page.locator(
+      ".job-details-jobs-unified-top-card__company-name a",
+    );
   }
 
   async getJobTitle(): Promise<string> {
     if (await this.jobTitleHeader.isVisible()) {
-      return (await this.jobTitleHeader.textContent())?.trim() ?? 'Unknown Position';
+      return (
+        (await this.jobTitleHeader.textContent())?.trim() ?? "Unknown Position"
+      );
     }
-    return 'Unknown Position';
+    return "Unknown Position";
   }
 
   async getCompanyName(): Promise<string> {
     if (await this.companyNameLink.isVisible()) {
-      return (await this.companyNameLink.textContent())?.trim() ?? 'Unknown Company';
+      return (
+        (await this.companyNameLink.textContent())?.trim() ?? "Unknown Company"
+      );
     }
-    return 'Unknown Company';
+    return "Unknown Company";
   }
 }
 
@@ -85,11 +97,13 @@ export class LinkedInEasyApplyDialog {
 
   constructor(page: Page) {
     this.page = page;
-    this.nextButton = page.getByRole('button', { name: /Next/i });
-    this.reviewButton = page.getByRole('button', { name: /Review/i });
-    this.submitButton = page.getByRole('button', { name: /Submit application/i });
-    this.closeButton = page.getByRole('button', { name: /Dismiss/i });
-    this.progressIndicator = page.locator('.jobs-easy-apply-modal__progress');
+    this.nextButton = page.getByRole("button", { name: /Next/i });
+    this.reviewButton = page.getByRole("button", { name: /Review/i });
+    this.submitButton = page.getByRole("button", {
+      name: /Submit application/i,
+    });
+    this.closeButton = page.getByRole("button", { name: /Dismiss/i });
+    this.progressIndicator = page.locator(".jobs-easy-apply-modal__progress");
   }
 
   /**

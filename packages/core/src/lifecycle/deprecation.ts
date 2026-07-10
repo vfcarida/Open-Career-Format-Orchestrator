@@ -1,5 +1,4 @@
-
-import type { OKFDocument } from '../domain/types.js';
+import type { OKFDocument } from "../domain/types.js";
 
 export class Deprecation {
   /**
@@ -11,14 +10,16 @@ export class Deprecation {
    */
   public static resolveUltimateSuccessor(
     startDoc: OKFDocument,
-    allDocsMap: Map<string, OKFDocument>
+    allDocsMap: Map<string, OKFDocument>,
   ): string | null {
     let currentId = startDoc.conceptId;
     const visited = new Set<string>();
 
     while (true) {
       if (visited.has(currentId)) {
-        console.warn(`[Lifecycle] Cycle detected resolving successor for ${startDoc.conceptId} at ${currentId}`);
+        console.warn(
+          `[Lifecycle] Cycle detected resolving successor for ${startDoc.conceptId} at ${currentId}`,
+        );
         return null;
       }
       visited.add(currentId);
@@ -29,7 +30,7 @@ export class Deprecation {
       }
 
       const status = doc.frontmatter.status;
-      if (status !== 'deprecated' && status !== 'archived') {
+      if (status !== "deprecated" && status !== "archived") {
         // We found a non-deprecated document in the chain (could be the startDoc itself)
         return currentId === startDoc.conceptId ? null : currentId;
       }

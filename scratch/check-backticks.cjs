@@ -1,6 +1,6 @@
-const fs = require('fs');
-const content = fs.readFileSync('packages/cli/src/index.ts', 'utf-8');
-const lines = content.split('\n');
+const fs = require("fs");
+const content = fs.readFileSync("packages/cli/src/index.ts", "utf-8");
+const lines = content.split("\n");
 
 let backtickCount = 0;
 for (let i = 0; i < lines.length; i++) {

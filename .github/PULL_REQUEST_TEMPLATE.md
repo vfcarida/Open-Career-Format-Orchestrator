@@ -2,8 +2,8 @@
 
 Please include a summary of the changes and the related issue or specification they resolve.
 
-*   Fixes # (issue)
-*   Implements architectural plan in `docs/` or `ADR-`
+- Fixes # (issue)
+- Implements architectural plan in `docs/` or `ADR-`
 
 ## Spec-Driven Development (SDD) Compliance
 

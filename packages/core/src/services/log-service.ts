@@ -8,27 +8,27 @@
  * at the top.
  */
 
-import type { IFileSystemAdapter, ILogService } from '../domain/interfaces.js';
-import type { LogEntry } from '../domain/types.js';
+import type { IFileSystemAdapter, ILogService } from "../domain/interfaces.js";
+import type { LogEntry } from "../domain/types.js";
 
 /**
  * YAML frontmatter header for the log file.
  */
 const LOG_FRONTMATTER = [
-  '---',
-  'type: Log',
-  'title: Change Log',
-  'description: Chronological record of bundle changes',
-  '---',
-].join('\n');
+  "---",
+  "type: Log",
+  "title: Change Log",
+  "description: Chronological record of bundle changes",
+  "---",
+].join("\n");
 
 /**
  * Markdown table header for log entries.
  */
 const TABLE_HEADER = [
-  '| Timestamp | Action | Concept | Details |',
-  '|-----------|--------|---------|---------|',
-].join('\n');
+  "| Timestamp | Action | Concept | Details |",
+  "|-----------|--------|---------|---------|",
+].join("\n");
 
 /**
  * Manages the `log.md` file within an OKF bundle.
@@ -78,13 +78,13 @@ export class LogService implements ILogService {
     // Rebuild the complete file
     const content = [
       LOG_FRONTMATTER,
-      '',
-      '# Change Log',
-      '',
+      "",
+      "# Change Log",
+      "",
       TABLE_HEADER,
       ...allRows,
-      '', // Trailing newline
-    ].join('\n');
+      "", // Trailing newline
+    ].join("\n");
 
     await this.fsAdapter.writeFile(this.logFilePath, content);
   }
@@ -128,7 +128,7 @@ export class LogService implements ILogService {
    * the Markdown content.
    */
   private extractTableRows(content: string): string[] {
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     const rows: string[] = [];
     let inTable = false;
     let headerRowsPassed = 0;
@@ -136,7 +136,7 @@ export class LogService implements ILogService {
     for (const line of lines) {
       const trimmed = line.trim();
 
-      if (trimmed.startsWith('| Timestamp')) {
+      if (trimmed.startsWith("| Timestamp")) {
         inTable = true;
         headerRowsPassed = 0;
         continue;
@@ -147,9 +147,9 @@ export class LogService implements ILogService {
         continue;
       }
 
-      if (inTable && trimmed.startsWith('|') && headerRowsPassed > 0) {
+      if (inTable && trimmed.startsWith("|") && headerRowsPassed > 0) {
         rows.push(trimmed);
-      } else if (inTable && !trimmed.startsWith('|')) {
+      } else if (inTable && !trimmed.startsWith("|")) {
         // End of table
         break;
       }
@@ -162,9 +162,9 @@ export class LogService implements ILogService {
    * Format a {@link LogEntry} as a Markdown table row.
    */
   private formatRow(entry: LogEntry): string {
-    const details = entry.details?.replace(/\|/g, '\\|') ?? '';
-    const action = entry.action.replace(/\|/g, '\\|');
-    const conceptId = entry.conceptId.replace(/\|/g, '\\|');
+    const details = entry.details?.replace(/\|/g, "\\|") ?? "";
+    const action = entry.action.replace(/\|/g, "\\|");
+    const conceptId = entry.conceptId.replace(/\|/g, "\\|");
     return `| ${entry.timestamp} | ${action} | ${conceptId} | ${details} |`;
   }
 
@@ -185,9 +185,9 @@ export class LogService implements ILogService {
       if (cells.length >= 3) {
         entries.push({
           timestamp: cells[0]!,
-          action: cells[1]!.replace(/\\\|/g, '|'),
-          conceptId: cells[2]!.replace(/\\\|/g, '|'),
-          details: cells[3]?.replace(/\\\|/g, '|') || undefined,
+          action: cells[1]!.replace(/\\\|/g, "|"),
+          conceptId: cells[2]!.replace(/\\\|/g, "|"),
+          details: cells[3]?.replace(/\\\|/g, "|") || undefined,
         });
       }
     }

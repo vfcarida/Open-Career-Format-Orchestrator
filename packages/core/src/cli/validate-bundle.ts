@@ -4,10 +4,10 @@
  * @description Command line utility to validate OKF bundle schemas.
  */
 
-import path from 'node:path';
-import { FileSystemAdapter } from '../infrastructure/file-system-adapter.js';
-import { FrontmatterParser } from '../infrastructure/frontmatter-parser.js';
-import { ProfileRegistry } from '../domain/schemas.js';
+import path from "node:path";
+import { FileSystemAdapter } from "../infrastructure/file-system-adapter.js";
+import { FrontmatterParser } from "../infrastructure/frontmatter-parser.js";
+import { ProfileRegistry } from "../domain/schemas.js";
 
 type BundleValidationReport = {
   ok: boolean;
@@ -32,19 +32,24 @@ type BundleValidationReport = {
 
 async function main() {
   const args = process.argv.slice(2);
-  let bundlePathEnv = process.env['OCF_BUNDLE_PATH'] || './.okf';
-  let format: 'text' | 'json' | 'markdown' = 'text';
-  let profileName = 'career'; // default to legacy behavior
-  
+  let bundlePathEnv = process.env["OCF_BUNDLE_PATH"] || "./.okf";
+  let format: "text" | "json" | "markdown" = "text";
+  let profileName = "career"; // default to legacy behavior
+
   for (let i = 0; i < args.length; i++) {
     const currentArg = args[i];
-    if (currentArg === '--bundle' && i + 1 < args.length) {
+    if (currentArg === "--bundle" && i + 1 < args.length) {
       bundlePathEnv = args[i + 1]!;
-    } else if (currentArg === '--format' && i + 1 < args.length) {
+    } else if (currentArg === "--format" && i + 1 < args.length) {
       format = args[i + 1] as any;
-    } else if (currentArg === '--profile' && i + 1 < args.length) {
+    } else if (currentArg === "--profile" && i + 1 < args.length) {
       profileName = args[i + 1]!;
-    } else if (currentArg !== undefined && !currentArg.startsWith('--') && i === 0 && !args.includes('--bundle')) {
+    } else if (
+      currentArg !== undefined &&
+      !currentArg.startsWith("--") &&
+      i === 0 &&
+      !args.includes("--bundle")
+    ) {
       bundlePathEnv = currentArg;
     }
   }
@@ -61,14 +66,17 @@ async function main() {
   }
 
   const relativeFiles = await fsAdapter.listFiles(bundlePath);
-  const RESERVED_FILENAMES = new Set(['index.md', 'log.md']);
-  
+  const RESERVED_FILENAMES = new Set(["index.md", "log.md"]);
+
   let validCount = 0;
   let invalidCount = 0;
-  const diagnostics: BundleValidationReport['diagnostics'] = [];
+  const diagnostics: BundleValidationReport["diagnostics"] = [];
 
   for (const relPath of relativeFiles) {
-    if (!relPath.endsWith('.md') || RESERVED_FILENAMES.has(path.basename(relPath))) {
+    if (
+      !relPath.endsWith(".md") ||
+      RESERVED_FILENAMES.has(path.basename(relPath))
+    ) {
       continue;
     }
 
@@ -84,18 +92,18 @@ async function main() {
       } else {
         invalidCount++;
         diagnostics.push({
-          severity: 'error',
+          severity: "error",
           file: relPath,
-          code: 'SCHEMA_INVALID',
+          code: "SCHEMA_INVALID",
           message: validation.error.message,
         });
       }
     } catch (err: any) {
       invalidCount++;
       diagnostics.push({
-        severity: 'error',
+        severity: "error",
         file: relPath,
-        code: 'PARSE_ERROR',
+        code: "PARSE_ERROR",
         message: err.message,
       });
     }
@@ -115,14 +123,14 @@ async function main() {
     diagnostics,
   };
 
-  if (format === 'json') {
+  if (format === "json") {
     console.log(JSON.stringify(report, null, 2));
-  } else if (format === 'markdown') {
+  } else if (format === "markdown") {
     console.log(`# Bundle Validation Report\n`);
     console.log(`- **Checked At:** ${report.checkedAt}`);
     console.log(`- **Bundle Path:** ${report.bundlePath}`);
     console.log(`- **Profile:** ${report.profile}`);
-    console.log(`- **Status:** ${report.ok ? '✅ Valid' : '❌ Invalid'}`);
+    console.log(`- **Status:** ${report.ok ? "✅ Valid" : "❌ Invalid"}`);
     console.log(`\n## Summary\n`);
     console.log(`- Files Checked: ${report.summary.filesChecked}`);
     console.log(`- Valid Documents: ${report.summary.validDocuments}`);
@@ -130,11 +138,15 @@ async function main() {
     if (diagnostics.length > 0) {
       console.log(`\n## Diagnostics\n`);
       for (const d of diagnostics) {
-        console.log(`- **[${d.severity.toUpperCase()}]** \`${d.file}\`: ${d.message}`);
+        console.log(
+          `- **[${d.severity.toUpperCase()}]** \`${d.file}\`: ${d.message}`,
+        );
       }
     }
   } else {
-    console.log(`[OCF Validator] Scanning bundle at: ${bundlePath} (Profile: ${profileName})`);
+    console.log(
+      `[OCF Validator] Scanning bundle at: ${bundlePath} (Profile: ${profileName})`,
+    );
     for (const d of diagnostics) {
       console.error(`  ✗ [Invalid] ${d.file}:`);
       console.error(`    Reason: ${d.message}`);
@@ -143,7 +155,9 @@ async function main() {
     console.log(`  Valid concepts: ${validCount}`);
     console.log(`  Invalid concepts: ${invalidCount}`);
     if (report.ok) {
-      console.log(`[OCF Validator] All checked records are strictly schema compliant!`);
+      console.log(
+        `[OCF Validator] All checked records are strictly schema compliant!`,
+      );
     }
   }
 
@@ -155,6 +169,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('[OCF Validator] Unhandled exception:', err);
+  console.error("[OCF Validator] Unhandled exception:", err);
   process.exit(1);
 });

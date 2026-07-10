@@ -3,10 +3,10 @@
  * @description Master layout wrapper coordinating Sidebar, Header, and Page Content.
  */
 
-import React from 'react';
-import { Sidebar } from './Sidebar.js';
-import { Header } from './Header.js';
-import type { CareerBundleData } from '../../types/career.js';
+import React from "react";
+import { Sidebar } from "./Sidebar.js";
+import { Header } from "./Header.js";
+import type { CareerBundleData } from "../../types/career.js";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -32,7 +32,11 @@ export function MainLayout({
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-dark-bg font-sans text-zinc-100 selection:bg-neon-indigo/30 selection:text-indigo-200">
       {/* Sidebar navigation and statistics */}
-      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} data={data} />
+      <Sidebar
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        data={data}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -50,9 +54,7 @@ export function MainLayout({
         />
 
         {/* Dynamic Page Router container */}
-        <main className="flex-1 overflow-y-auto p-10">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-10">{children}</main>
       </div>
     </div>
   );

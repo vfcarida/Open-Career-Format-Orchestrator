@@ -3,15 +3,18 @@
  * @description Job application automation strategy for the Indeed platform.
  */
 
-import type { Page } from 'playwright';
-import type { CareerContext } from '@ocf/core';
-import type { IApplicationStrategy, ApplicationResult } from '../interfaces.js';
-import { IndeedJobPage, IndeedApplicationWizard } from '../page-objects/indeed-pages.js';
+import type { Page } from "playwright";
+import type { CareerContext } from "@ocf/core";
+import type { IApplicationStrategy, ApplicationResult } from "../interfaces.js";
+import {
+  IndeedJobPage,
+  IndeedApplicationWizard,
+} from "../page-objects/indeed-pages.js";
 
 export class IndeedStrategy implements IApplicationStrategy {
   /** @inheritdoc */
   supports(url: string): boolean {
-    return url.includes('indeed.com') || url.includes('.indeed.com');
+    return url.includes("indeed.com") || url.includes(".indeed.com");
   }
 
   /** @inheritdoc */
@@ -21,11 +24,11 @@ export class IndeedStrategy implements IApplicationStrategy {
     url: string,
     dryRun?: boolean,
   ): Promise<ApplicationResult> {
-    const platform = 'Indeed';
+    const platform = "Indeed";
     const errors: string[] = [];
 
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await page.goto(url, { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(2000);
 
       const jobPage = new IndeedJobPage(page);
@@ -39,7 +42,9 @@ export class IndeedStrategy implements IApplicationStrategy {
       const isReadyToSubmit = await wizard.proceedThroughForm();
 
       if (!isReadyToSubmit) {
-        throw new Error('Failed to proceed through Indeed application form steps automatically.');
+        throw new Error(
+          "Failed to proceed through Indeed application form steps automatically.",
+        );
       }
 
       if (dryRun) {
@@ -49,7 +54,9 @@ export class IndeedStrategy implements IApplicationStrategy {
           jobTitle,
           company,
           submittedAt: new Date().toISOString(),
-          errors: ['Dry run completed successfully. Indeed form filled but not submitted.'],
+          errors: [
+            "Dry run completed successfully. Indeed form filled but not submitted.",
+          ],
         };
       }
 
@@ -70,8 +77,8 @@ export class IndeedStrategy implements IApplicationStrategy {
       return {
         success: false,
         platform,
-        jobTitle: 'Unknown Position',
-        company: 'Unknown Company',
+        jobTitle: "Unknown Position",
+        company: "Unknown Company",
         submittedAt: new Date().toISOString(),
         errors,
       };

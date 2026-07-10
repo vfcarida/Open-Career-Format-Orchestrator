@@ -1,11 +1,11 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
 
 /**
  * Generates a SHA-256 hash for a given string.
  */
 export function hashString(data: string): string {
-  return crypto.createHash('sha256').update(data).digest('hex');
+  return crypto.createHash("sha256").update(data).digest("hex");
 }
 
 /**
@@ -13,7 +13,7 @@ export function hashString(data: string): string {
  */
 export async function hashFile(filePath: string): Promise<string> {
   const content = await fs.readFile(filePath);
-  return crypto.createHash('sha256').update(content).digest('hex');
+  return crypto.createHash("sha256").update(content).digest("hex");
 }
 
 /**
@@ -27,19 +27,24 @@ export function hashConfig(config: any): string {
 }
 
 function redactSecrets(obj: any): any {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== "object") {
     return obj;
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(redactSecrets);
   }
-  
+
   const result: any = {};
   for (const key of Object.keys(obj)) {
     const lowerKey = key.toLowerCase();
-    if (lowerKey.includes('secret') || lowerKey.includes('key') || lowerKey.includes('token') || lowerKey.includes('password')) {
-      result[key] = '[REDACTED]';
+    if (
+      lowerKey.includes("secret") ||
+      lowerKey.includes("key") ||
+      lowerKey.includes("token") ||
+      lowerKey.includes("password")
+    ) {
+      result[key] = "[REDACTED]";
     } else {
       result[key] = redactSecrets(obj[key]);
     }
@@ -48,13 +53,15 @@ function redactSecrets(obj: any): any {
 }
 
 function stableStringify(obj: any): string {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== "object") {
     return JSON.stringify(obj);
   }
   if (Array.isArray(obj)) {
-    return '[' + obj.map(stableStringify).join(',') + ']';
+    return "[" + obj.map(stableStringify).join(",") + "]";
   }
   const sortedKeys = Object.keys(obj).sort();
-  const pairs = sortedKeys.map(k => JSON.stringify(k) + ':' + stableStringify(obj[k]));
-  return '{' + pairs.join(',') + '}';
+  const pairs = sortedKeys.map(
+    (k) => JSON.stringify(k) + ":" + stableStringify(obj[k]),
+  );
+  return "{" + pairs.join(",") + "}";
 }

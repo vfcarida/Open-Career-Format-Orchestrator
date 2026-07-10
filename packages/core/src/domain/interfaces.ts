@@ -8,7 +8,7 @@
  * - Swappable implementations (e.g., in-memory adapter for testing)
  */
 
-import type { LogEntry, OKFDocument, OKFFrontmatter } from './types.js';
+import type { LogEntry, OKFDocument, OKFFrontmatter } from "./types.js";
 
 // ─── Infrastructure Interfaces ──────────────────────────────────────────────────
 

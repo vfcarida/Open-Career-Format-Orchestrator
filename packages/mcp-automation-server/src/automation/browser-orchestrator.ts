@@ -3,13 +3,13 @@
  * @description Launches browser sessions and routes applications to platform strategies.
  */
 
-import { chromium } from 'playwright';
-import type { CareerContext } from '@ocf/core';
-import type { IApplicationStrategy, ApplicationResult } from './interfaces.js';
-import { PlatformNotSupportedError } from '../errors.js';
-import { LinkedInStrategy } from './strategies/linkedin-strategy.js';
-import { GupyStrategy } from './strategies/gupy-strategy.js';
-import { IndeedStrategy } from './strategies/indeed-strategy.js';
+import { chromium } from "playwright";
+import type { CareerContext } from "@ocf/core";
+import type { IApplicationStrategy, ApplicationResult } from "./interfaces.js";
+import { PlatformNotSupportedError } from "../errors.js";
+import { LinkedInStrategy } from "./strategies/linkedin-strategy.js";
+import { GupyStrategy } from "./strategies/gupy-strategy.js";
+import { IndeedStrategy } from "./strategies/indeed-strategy.js";
 
 export class BrowserOrchestrator {
   private readonly strategies: IApplicationStrategy[] = [];
@@ -54,12 +54,18 @@ export class BrowserOrchestrator {
 
     try {
       const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        userAgent:
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
       });
       const page = await context.newPage();
 
       // 3. Execute application strategy
-      const result = await strategy.apply(page, careerContext, url, options.dryRun);
+      const result = await strategy.apply(
+        page,
+        careerContext,
+        url,
+        options.dryRun,
+      );
       return result;
     } finally {
       // 4. Close browser tab & context

@@ -1,7 +1,7 @@
 # Artifact Manifest Specification
 
 > **Status:** DRAFT — v0.1.0-draft  
-> **Spec Section:** MANIFEST-1  
+> **Spec Section:** MANIFEST-1
 
 ## 1. Introduction
 
@@ -36,25 +36,25 @@ The Artifact Manifest is a machine-readable file (`akcp-manifest.json`) generate
 
 ### 2.1 Root Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `manifestVersion` | string | REQUIRED | Schema version of the manifest itself. |
-| `specVersion` | string | REQUIRED | The AK-IR spec version used during compilation. |
-| `bundleId` | string (UUID v4) | REQUIRED | Matches the `bundleId` in the AK-IR. |
-| `bundleName` | string | REQUIRED | Human-readable name from `akcp.yaml`. |
-| `compiledAt` | string (ISO-8601) | REQUIRED | Timestamp of the compilation run. |
-| `sourceHash` | string (SHA-256 hex) | REQUIRED | Deterministic hash of all source files. |
-| `artifacts` | array | REQUIRED | List of produced output files. |
-| `stats` | object | RECOMMENDED | Compilation statistics. |
+| Field             | Type                 | Required    | Description                                     |
+| ----------------- | -------------------- | ----------- | ----------------------------------------------- |
+| `manifestVersion` | string               | REQUIRED    | Schema version of the manifest itself.          |
+| `specVersion`     | string               | REQUIRED    | The AK-IR spec version used during compilation. |
+| `bundleId`        | string (UUID v4)     | REQUIRED    | Matches the `bundleId` in the AK-IR.            |
+| `bundleName`      | string               | REQUIRED    | Human-readable name from `akcp.yaml`.           |
+| `compiledAt`      | string (ISO-8601)    | REQUIRED    | Timestamp of the compilation run.               |
+| `sourceHash`      | string (SHA-256 hex) | REQUIRED    | Deterministic hash of all source files.         |
+| `artifacts`       | array                | REQUIRED    | List of produced output files.                  |
+| `stats`           | object               | RECOMMENDED | Compilation statistics.                         |
 
 ### 2.2 ArtifactEntry Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `target` | string | REQUIRED | The target ID (e.g., `ir-json`). |
-| `path` | string | REQUIRED | Path relative to the output directory. |
-| `hash` | string (SHA-256 hex) | REQUIRED | Hash of the produced artifact file. |
-| `sizeBytes` | integer | RECOMMENDED | File size in bytes. |
+| Field       | Type                 | Required    | Description                            |
+| ----------- | -------------------- | ----------- | -------------------------------------- |
+| `target`    | string               | REQUIRED    | The target ID (e.g., `ir-json`).       |
+| `path`      | string               | REQUIRED    | Path relative to the output directory. |
+| `hash`      | string (SHA-256 hex) | REQUIRED    | Hash of the produced artifact file.    |
+| `sizeBytes` | integer              | RECOMMENDED | File size in bytes.                    |
 
 ## 3. Usage
 

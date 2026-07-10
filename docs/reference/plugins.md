@@ -5,6 +5,7 @@ The Agent Knowledge Compiler and Control Plane (AKCP) supports a declarative bui
 ## Plugin Types
 
 AKCP supports the following plugin types:
+
 - `source-connector`: Pulls knowledge from external systems (e.g., Notion, Jira, Drive).
 - `normalizer`: Cleans or transforms knowledge into standard markdown.
 - `compile-target`: Pushes the Agent Knowledge IR to a specific platform (e.g., OpenWiki, MCP Profile).

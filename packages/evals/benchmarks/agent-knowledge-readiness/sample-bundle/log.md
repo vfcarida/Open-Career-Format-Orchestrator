@@ -1,4 +1,5 @@
 ---
 type: log
 ---
+
 # Log

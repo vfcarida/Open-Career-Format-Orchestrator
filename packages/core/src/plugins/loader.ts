@@ -1,55 +1,66 @@
-import { PluginManifestSchema } from './manifest-schema.js';
-import type { PluginManifest, PluginPermission } from './manifest-schema.js';
-import * as fs from 'fs';
-import * as path from 'path';
+import { PluginManifestSchema } from "./manifest-schema.js";
+import type { PluginManifest, PluginPermission } from "./manifest-schema.js";
+import * as fs from "fs";
+import * as path from "path";
 
 export class PluginSecurityError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'PluginSecurityError';
+    this.name = "PluginSecurityError";
   }
 }
 
 export class PluginValidationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'PluginValidationError';
+    this.name = "PluginValidationError";
   }
 }
 
 export class PluginLoader {
   static loadManifest(pluginDir: string): PluginManifest {
-    const manifestPath = path.join(pluginDir, 'akcp-plugin.json');
+    const manifestPath = path.join(pluginDir, "akcp-plugin.json");
     if (!fs.existsSync(manifestPath)) {
       throw new PluginValidationError(`Manifest not found at ${manifestPath}`);
     }
 
     try {
-      const raw = fs.readFileSync(manifestPath, 'utf-8');
+      const raw = fs.readFileSync(manifestPath, "utf-8");
       const data = JSON.parse(raw);
       return PluginManifestSchema.parse(data);
     } catch (err: any) {
-      if (err.name === 'ZodError') {
-        throw new PluginValidationError(`Invalid manifest schema: ${err.message}`);
+      if (err.name === "ZodError") {
+        throw new PluginValidationError(
+          `Invalid manifest schema: ${err.message}`,
+        );
       }
-      throw new PluginValidationError(`Failed to parse manifest: ${err.message}`);
+      throw new PluginValidationError(
+        `Failed to parse manifest: ${err.message}`,
+      );
     }
   }
 
-  static async loadPlugin<T = any>(pluginDir: string, requiredPermissions: PluginPermission[] = []): Promise<{ manifest: PluginManifest, exports: T }> {
+  static async loadPlugin<T = any>(
+    pluginDir: string,
+    requiredPermissions: PluginPermission[] = [],
+  ): Promise<{ manifest: PluginManifest; exports: T }> {
     const manifest = this.loadManifest(pluginDir);
 
     // Security Check: Verify declared permissions against required permissions
     for (const required of requiredPermissions) {
       if (!manifest.permissions.includes(required)) {
-        throw new PluginSecurityError(`Plugin '${manifest.name}' requires undeclared permission: ${required}`);
+        throw new PluginSecurityError(
+          `Plugin '${manifest.name}' requires undeclared permission: ${required}`,
+        );
       }
     }
 
     // Attempt to load entrypoint
     const entrypointPath = path.join(pluginDir, manifest.entrypoint);
     if (!fs.existsSync(entrypointPath)) {
-      throw new PluginValidationError(`Entrypoint not found at ${entrypointPath}`);
+      throw new PluginValidationError(
+        `Entrypoint not found at ${entrypointPath}`,
+      );
     }
 
     try {
@@ -58,9 +69,11 @@ export class PluginLoader {
       const pluginExports = await import(pathToFileURL(entrypointPath).href);
       return { manifest, exports: pluginExports };
     } catch (err: any) {
-      throw new PluginValidationError(`Failed to load plugin entrypoint: ${err.message}`);
+      throw new PluginValidationError(
+        `Failed to load plugin entrypoint: ${err.message}`,
+      );
     }
   }
 }
 
-import { pathToFileURL } from 'url';
+import { pathToFileURL } from "url";

@@ -19,8 +19,8 @@ export class ExampleMarkdownConnector {
     // For this example, we mock the result.
     console.log(`[Plugin] Fetching markdown from ${this.config.directory}...`);
     return [
-      { id: 'doc1', content: '# Hello World\nThis is a mock document.' },
-      { id: 'doc2', content: '# Second Doc\nAnother mock document.' }
+      { id: "doc1", content: "# Hello World\nThis is a mock document." },
+      { id: "doc2", content: "# Second Doc\nAnother mock document." },
     ];
   }
 }

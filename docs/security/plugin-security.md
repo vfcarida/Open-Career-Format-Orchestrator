@@ -17,4 +17,5 @@ AKCP requires all plugins to explicitly declare the permissions they need in `ak
 3. **Build-Time Only**: AKCP plugins are currently limited to build-time execution. Runtime plugins (like MCP servers) operate independently and must be secured via standard containerization or process sandboxing.
 
 ## Supply Chain Risks
-Currently, AKCP only supports a local plugin registry (`./plugins`). We deliberately do not support remote plugin execution or automatic npm installs to prevent accidental execution of malicious code. 
+
+Currently, AKCP only supports a local plugin registry (`./plugins`). We deliberately do not support remote plugin execution or automatic npm installs to prevent accidental execution of malicious code.

@@ -2,9 +2,9 @@ export type ContextPackRequest = {
   task: string;
   profile: string;
   maxTokens: number;
-  mode: 'minimal' | 'balanced' | 'full' | 'audit';
+  mode: "minimal" | "balanced" | "full" | "audit";
   includeProvenance: boolean;
-  riskLevel?: 'low' | 'medium' | 'high';
+  riskLevel?: "low" | "medium" | "high";
 };
 
 export type ContextPackResult = {

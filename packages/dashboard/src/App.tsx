@@ -3,61 +3,68 @@
  * @description Master entrypoint and router dashboard component.
  */
 
-import { useState } from 'react';
-import { MainLayout } from './components/layout/MainLayout.js';
-import { ApprovalQueue } from './components/approvals/ApprovalQueue.js';
-import { SystemHealth } from './components/system/SystemHealth.js';
-import { EvalsSummary } from './components/evals/EvalsSummary.js';
-import { useOKFData } from './hooks/use-okf-data.js';
-import { FolderOpen, ArrowRight, ShieldCheck, Cpu } from 'lucide-react';
+import { useState } from "react";
+import { MainLayout } from "./components/layout/MainLayout.js";
+import { ApprovalQueue } from "./components/approvals/ApprovalQueue.js";
+import { SystemHealth } from "./components/system/SystemHealth.js";
+import { EvalsSummary } from "./components/evals/EvalsSummary.js";
+import { useOKFData } from "./hooks/use-okf-data.js";
+import { FolderOpen, ArrowRight, ShieldCheck, Cpu } from "lucide-react";
 
-import { AuditLog } from './components/audit/AuditLog.js';
-import { Documents } from './components/documents/Documents.js';
-import { ContextPacks } from './components/packs/ContextPacks.js';
-import { GraphReport } from './components/packs/GraphReport.js';
+import { AuditLog } from "./components/audit/AuditLog.js";
+import { Documents } from "./components/documents/Documents.js";
+import { ContextPacks } from "./components/packs/ContextPacks.js";
+import { GraphReport } from "./components/packs/GraphReport.js";
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<string>('health');
-  const { data, loading, error, loadFromFiles, loadFromDirectory } = useOKFData();
+  const [currentTab, setCurrentTab] = useState<string>("health");
+  const { data, loading, error, loadFromFiles, loadFromDirectory } =
+    useOKFData();
 
   // Handle Directory Picker selection
   const handleDirectoryPicker = async () => {
     try {
-      if ('showDirectoryPicker' in window) {
+      if ("showDirectoryPicker" in window) {
         const handle = await (window as any).showDirectoryPicker();
         await loadFromDirectory(handle);
       } else {
-        alert('Directory Picker is only supported in modern Chromium browsers. Try drag-dropping or select directory via input.');
+        alert(
+          "Directory Picker is only supported in modern Chromium browsers. Try drag-dropping or select directory via input.",
+        );
       }
     } catch (err) {
-      console.error('[App] Directory picker cancelled or failed:', err);
+      console.error("[App] Directory picker cancelled or failed:", err);
     }
   };
 
   const renderActiveTab = () => {
     if (!data) return null;
     switch (currentTab) {
-      case 'overview':
+      case "overview":
         return <div className="text-zinc-400">Overview Placeholder</div>;
-      case 'health':
+      case "health":
         return <SystemHealth />;
-      case 'documents':
+      case "documents":
         return <Documents data={data} />;
-      case 'packs':
+      case "packs":
         return <ContextPacks data={data} />;
-      case 'graph':
+      case "graph":
         return <GraphReport />;
-      case 'mcp':
-        return <div className="text-zinc-400">MCP Capabilities Placeholder</div>;
-      case 'approvals':
+      case "mcp":
+        return (
+          <div className="text-zinc-400">MCP Capabilities Placeholder</div>
+        );
+      case "approvals":
         return <ApprovalQueue />;
-      case 'audit':
+      case "audit":
         return <AuditLog />;
-      case 'evals':
+      case "evals":
         return <EvalsSummary />;
-      case 'governance':
-        return <div className="text-zinc-400">Governance Policies Placeholder</div>;
-      case 'settings':
+      case "governance":
+        return (
+          <div className="text-zinc-400">Governance Policies Placeholder</div>
+        );
+      case "settings":
         return <div className="text-zinc-400">Settings Placeholder</div>;
       default:
         return <div className="text-zinc-400">Placeholder</div>;
@@ -91,7 +98,8 @@ export default function App() {
             Welcome to Agent Knowledge Compiler and Control Plane
           </h2>
           <p className="text-zinc-400 text-sm max-w-lg mb-10 leading-relaxed">
-            A privacy-first career manager. All your experience, skills, and vacancy applications live locally on your machine in Markdown files.
+            A privacy-first career manager. All your experience, skills, and
+            vacancy applications live locally on your machine in Markdown files.
           </p>
 
           {/* Cards for features */}
@@ -102,7 +110,9 @@ export default function App() {
                 Privacy-by-Design
               </h4>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Zero remote database hosting. No personal identifiable information (PII) gets sent to external servers. You own your career data.
+                Zero remote database hosting. No personal identifiable
+                information (PII) gets sent to external servers. You own your
+                career data.
               </p>
             </div>
 
@@ -112,7 +122,8 @@ export default function App() {
                 Local Directory Parsing
               </h4>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Seamlessly index your local <code>.okf</code> markdown catalog on the fly directly inside your browser container.
+                Seamlessly index your local <code>.okf</code> markdown catalog
+                on the fly directly inside your browser container.
               </p>
             </div>
           </div>

@@ -30,14 +30,14 @@ export type ToolResult<T> = ToolSuccess<T> | ToolFailure;
 
 export function createToolSuccess<T>(
   data: T,
-  meta: Omit<ToolSuccess<T>['meta'], 'schemaVersion'>
+  meta: Omit<ToolSuccess<T>["meta"], "schemaVersion">,
 ): ToolSuccess<T> {
   return {
     ok: true,
     data,
     meta: {
       ...meta,
-      schemaVersion: '1.0.0',
+      schemaVersion: "1.0.0",
     },
   };
 }
@@ -45,9 +45,9 @@ export function createToolSuccess<T>(
 export function createToolFailure(
   message: string,
   code: string,
-  meta: ToolFailure['meta'],
+  meta: ToolFailure["meta"],
   details?: Record<string, unknown>,
-  retryable = false
+  retryable = false,
 ): ToolFailure {
   return {
     ok: false,

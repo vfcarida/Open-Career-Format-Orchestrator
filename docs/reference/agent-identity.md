@@ -1,10 +1,11 @@
 # Agent Identity
 
-In the Agent Knowledge Compiler and Control Plane, **Agent Identity** is a critical concept that binds an autonomous client to a specific security posture. 
+In the Agent Knowledge Compiler and Control Plane, **Agent Identity** is a critical concept that binds an autonomous client to a specific security posture.
 
 ## Structure
 
 An `AgentIdentity` consists of:
+
 - **`agentId`**: A unique string identifying the agent (e.g., `resume-tailor-bot-v1`).
 - **`roles`**: An array of logical roles assigned to the agent (e.g., `['researcher', 'writer']`).
 - **`policyCardName`**: The name of the `PolicyCard` (e.g., `strict-enterprise`) that dictates the runtime governance constraints for this specific agent.

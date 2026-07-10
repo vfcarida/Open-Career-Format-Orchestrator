@@ -13,53 +13,88 @@ To create a custom tool, you must follow the `MCPGateway` pattern to ensure it r
 Define your tool using the `@modelcontextprotocol/sdk` and `zod` for input validation.
 
 ```typescript
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
-import { MCPGateway, withToolTracing, createToolSuccess, createToolFailure } from '@ocf/core';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import {
+  MCPGateway,
+  withToolTracing,
+  createToolSuccess,
+  createToolFailure,
+} from "@ocf/core";
 
 export function registerCustomTool(server: McpServer, gateway: MCPGateway) {
   server.tool(
-    'my_custom_tool',
-    'Description of what my custom tool does',
+    "my_custom_tool",
+    "Description of what my custom tool does",
     {
-      targetId: z.string().describe('The ID to target'),
-      _agentId: z.string().optional().describe('Agent Identity'),
+      targetId: z.string().describe("The ID to target"),
+      _agentId: z.string().optional().describe("Agent Identity"),
     },
     async ({ targetId, _agentId }) => {
       const reqId = crypto.randomUUID();
-      const toolName = 'my_custom_tool';
-      const toolVersion = '1.0.0';
+      const toolName = "my_custom_tool";
+      const toolVersion = "1.0.0";
 
       try {
-        const { data, durationMs } = await gateway.execute({
-          requestId: reqId,
-          toolName,
-          sideEffect: 'write', // 'read', 'write', 'submit'
-          agentId: _agentId,
-          payload: { targetId }
-        }, async () => {
-          return await withToolTracing(toolName, toolVersion, reqId, async () => {
-            // Your custom logic here
-            return { result: 'success', id: targetId };
-          });
-        });
+        const { data, durationMs } = await gateway.execute(
+          {
+            requestId: reqId,
+            toolName,
+            sideEffect: "write", // 'read', 'write', 'submit'
+            agentId: _agentId,
+            payload: { targetId },
+          },
+          async () => {
+            return await withToolTracing(
+              toolName,
+              toolVersion,
+              reqId,
+              async () => {
+                // Your custom logic here
+                return { result: "success", id: targetId };
+              },
+            );
+          },
+        );
 
         return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(createToolSuccess(data, { requestId: reqId, toolName, toolVersion, durationMs }), null, 2)
-          }],
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                createToolSuccess(data, {
+                  requestId: reqId,
+                  toolName,
+                  toolVersion,
+                  durationMs,
+                }),
+                null,
+                2,
+              ),
+            },
+          ],
         };
       } catch (err: any) {
-        return { 
-          isError: true, 
-          content: [{ 
-            type: 'text', 
-            text: JSON.stringify(createToolFailure(err.message, 'TOOL_ERROR', { requestId: reqId, toolName, toolVersion, durationMs: 0 }), null, 2) 
-          }] 
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                createToolFailure(err.message, "TOOL_ERROR", {
+                  requestId: reqId,
+                  toolName,
+                  toolVersion,
+                  durationMs: 0,
+                }),
+                null,
+                2,
+              ),
+            },
+          ],
         };
       }
-    }
+    },
   );
 }
 ```
@@ -89,16 +124,16 @@ To add a new target, create a new script in `packages/core/src/cli/` or register
 ### 2.1 Implementing an Emitter
 
 ```typescript
-import { OKFDocument } from '../domain/types.js';
+import { OKFDocument } from "../domain/types.js";
 
 export function emitCustomTarget(docs: OKFDocument[], outputPath: string) {
   // Transform the OKF docs into your target format
-  const transformed = docs.map(doc => ({
+  const transformed = docs.map((doc) => ({
     id: doc.conceptId,
     type: doc.type,
-    metadata: doc.frontmatter
+    metadata: doc.frontmatter,
   }));
-  
+
   // Write to output path
   fs.writeFileSync(outputPath, JSON.stringify(transformed, null, 2));
 }
@@ -111,7 +146,7 @@ Call your emitter at the end of the `buildKnowledgeIR` flow:
 ```typescript
 // in core/src/ir/build-ir.ts
 if (options.emitCustom) {
-  emitCustomTarget(documents, path.join(options.outputDir, 'custom.json'));
+  emitCustomTarget(documents, path.join(options.outputDir, "custom.json"));
 }
 ```
 

@@ -1,7 +1,7 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import type { TargetOutput } from './types.js';
-import type { AgentKnowledgeIR } from '../ir/types.js';
+import fs from "node:fs/promises";
+import path from "node:path";
+import type { TargetOutput } from "./types.js";
+import type { AgentKnowledgeIR } from "../ir/types.js";
 
 export interface ManifestData {
   version: string;
@@ -19,21 +19,24 @@ export class ManifestBuilder {
     this.outputs.push(output);
   }
 
-  async writeManifest(ir: AgentKnowledgeIR, manifestPath: string): Promise<void> {
+  async writeManifest(
+    ir: AgentKnowledgeIR,
+    manifestPath: string,
+  ): Promise<void> {
     const fullPath = path.resolve(process.cwd(), manifestPath);
     const outDir = path.dirname(fullPath);
-    
+
     await fs.mkdir(outDir, { recursive: true });
-    
+
     const manifest: ManifestData = {
-      version: '1.0.0',
+      version: "1.0.0",
       buildId: ir.buildId,
       bundleId: ir.bundleId,
       timestamp: ir.timestamp,
       targets: this.outputs,
-      sourceHashes: ir.sourceHashes
+      sourceHashes: ir.sourceHashes,
     };
-    
-    await fs.writeFile(fullPath, JSON.stringify(manifest, null, 2), 'utf-8');
+
+    await fs.writeFile(fullPath, JSON.stringify(manifest, null, 2), "utf-8");
   }
 }

@@ -8,19 +8,19 @@
  * and a log entry so the bundle remains self-documenting.
  */
 
-import path from 'node:path';
+import path from "node:path";
 
 import type {
   IIndexService,
   ILogService,
   IOKFRepository,
-} from '../domain/interfaces.js';
+} from "../domain/interfaces.js";
 import type {
   CareerContext,
   OKFDocument,
   OKFFrontmatter,
-} from '../domain/types.js';
-import { OKFDocumentType } from '../domain/types.js';
+} from "../domain/types.js";
+import { OKFDocumentType } from "../domain/types.js";
 
 /**
  * Orchestrates document CRUD, index regeneration, and change logging.
@@ -88,11 +88,16 @@ export class OKFDocumentService {
     if (this.isOKFDocument(frontmatterOrDoc)) {
       document = { ...frontmatterOrDoc };
       if (!document.filePath) {
-        document.filePath = path.join(this.bundleRoot, `${document.conceptId}.md`);
+        document.filePath = path.join(
+          this.bundleRoot,
+          `${document.conceptId}.md`,
+        );
       }
     } else {
       if (body === undefined || conceptId === undefined) {
-        throw new Error('body and conceptId are required when passing frontmatter separately');
+        throw new Error(
+          "body and conceptId are required when passing frontmatter separately",
+        );
       }
       const filePath = path.join(this.bundleRoot, `${conceptId}.md`);
       document = {
@@ -112,7 +117,7 @@ export class OKFDocumentService {
     // Log the creation
     await this.logService.append({
       timestamp: new Date().toISOString(),
-      action: 'created',
+      action: "created",
       conceptId: document.conceptId,
       details: `Created document: ${document.frontmatter.title ?? document.conceptId}`,
     });
@@ -141,7 +146,7 @@ export class OKFDocumentService {
     let frontmatterUpdates: Partial<OKFFrontmatter>;
     let newBody: string | undefined;
 
-    if (typeof conceptIdOrDoc === 'string') {
+    if (typeof conceptIdOrDoc === "string") {
       conceptId = conceptIdOrDoc;
       frontmatterUpdates = updates ?? {};
       newBody = bodyUpdate;
@@ -155,23 +160,24 @@ export class OKFDocumentService {
 
     if (!existing) {
       // Import dynamically to avoid circular issues (the error is lightweight)
-      const { OKFFileNotFoundError } = await import('../domain/errors.js');
+      const { OKFFileNotFoundError } = await import("../domain/errors.js");
       const filePath = path.join(this.bundleRoot, `${conceptId}.md`);
       throw new OKFFileNotFoundError(filePath);
     }
 
     // Merge frontmatter updates
-    const mergedFrontmatter: OKFFrontmatter = typeof conceptIdOrDoc === 'string'
-      ? {
-          ...existing.frontmatter,
-          ...frontmatterUpdates,
-          timestamp: new Date().toISOString(),
-        }
-      : {
-          ...frontmatterUpdates,
-          type: existing.frontmatter.type,
-          timestamp: new Date().toISOString(),
-        };
+    const mergedFrontmatter: OKFFrontmatter =
+      typeof conceptIdOrDoc === "string"
+        ? {
+            ...existing.frontmatter,
+            ...frontmatterUpdates,
+            timestamp: new Date().toISOString(),
+          }
+        : {
+            ...frontmatterUpdates,
+            type: existing.frontmatter.type,
+            timestamp: new Date().toISOString(),
+          };
 
     const updatedDocument: OKFDocument = {
       frontmatter: mergedFrontmatter,
@@ -183,15 +189,16 @@ export class OKFDocumentService {
     await this.repository.save(updatedDocument);
 
     // Log the update
-    const updatedFields = typeof conceptIdOrDoc === 'string'
-      ? Object.keys(frontmatterUpdates)
-      : Object.keys(updates ?? {});
+    const updatedFields =
+      typeof conceptIdOrDoc === "string"
+        ? Object.keys(frontmatterUpdates)
+        : Object.keys(updates ?? {});
 
     await this.logService.append({
       timestamp: new Date().toISOString(),
-      action: 'updated',
+      action: "updated",
       conceptId,
-      details: `Updated fields: ${updatedFields.join(', ')}`,
+      details: `Updated fields: ${updatedFields.join(", ")}`,
     });
 
     return updatedDocument;
@@ -218,7 +225,7 @@ export class OKFDocumentService {
     // Log the deletion
     await this.logService.append({
       timestamp: new Date().toISOString(),
-      action: 'deleted',
+      action: "deleted",
       conceptId,
       details: `Deleted document: ${conceptId}`,
     });
@@ -280,10 +287,10 @@ export class OKFDocumentService {
   private isOKFDocument(obj: any): obj is OKFDocument {
     return (
       obj &&
-      typeof obj === 'object' &&
-      'frontmatter' in obj &&
-      'body' in obj &&
-      'conceptId' in obj
+      typeof obj === "object" &&
+      "frontmatter" in obj &&
+      "body" in obj &&
+      "conceptId" in obj
     );
   }
 }

@@ -6,15 +6,15 @@ Welcome! The **Agent Knowledge Compiler and Control Plane (AKCP)** is an open, s
 
 The project is organized into the following workstreams. Pick the one that matches your skills and interests:
 
-| Workstream | Description | Good First Task |
-|------------|-------------|-----------------|
-| **compiler** | The core compilation pipeline: OKF parsing, IR construction, emission targets. | Add a new output target (e.g., `llms-txt`) |
-| **control-plane** | MCP Gateway, Policy evaluation, HITL approvals, Audit logging. | Add a new rule type to the Policy Card evaluator |
-| **connectors** | Plugins that pull knowledge from external systems (Notion, Confluence, GitHub). | See [How to Contribute a Connector](docs/community/how-to-contribute-a-connector.md) |
-| **policies** | Policy Pack authoring, governance templates, NIST AI RMF mappings. | Author a new governance policy template |
-| **evals** | Evaluation datasets, grounding benchmarks, adversarial scenarios. | Add a prompt injection eval scenario |
-| **docs** | Technical documentation, spec improvements, tutorials, examples. | Improve a spec section with a concrete example |
-| **examples** | Real-world bundle examples for different domains. | Add a new domain example under `examples/domains/` |
+| Workstream        | Description                                                                     | Good First Task                                                                      |
+| ----------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **compiler**      | The core compilation pipeline: OKF parsing, IR construction, emission targets.  | Add a new output target (e.g., `llms-txt`)                                           |
+| **control-plane** | MCP Gateway, Policy evaluation, HITL approvals, Audit logging.                  | Add a new rule type to the Policy Card evaluator                                     |
+| **connectors**    | Plugins that pull knowledge from external systems (Notion, Confluence, GitHub). | See [How to Contribute a Connector](docs/community/how-to-contribute-a-connector.md) |
+| **policies**      | Policy Pack authoring, governance templates, NIST AI RMF mappings.              | Author a new governance policy template                                              |
+| **evals**         | Evaluation datasets, grounding benchmarks, adversarial scenarios.               | Add a prompt injection eval scenario                                                 |
+| **docs**          | Technical documentation, spec improvements, tutorials, examples.                | Improve a spec section with a concrete example                                       |
+| **examples**      | Real-world bundle examples for different domains.                               | Add a new domain example under `examples/domains/`                                   |
 
 ---
 
@@ -67,6 +67,7 @@ npx akcp validate examples/domains/software-project
 ## Good First Issues
 
 Look for issues labelled `good first issue`. The easiest entry points are:
+
 - **Add a new domain example** (`examples/` workstream) — see the [examples/domains/software-project](examples/domains/software-project) as a reference.
 - **Add an eval scenario** (`evals` workstream) — add a JSONL fixture in `packages/evals/fixtures/`.
 - **Improve a spec example** (`docs` workstream) — add a concrete JSON example to any spec doc in `spec/`.

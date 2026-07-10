@@ -1,12 +1,15 @@
 # Agent-Ready Knowledge Benchmark
 
 ## Objective
+
 To empirically demonstrate the value of structuring knowledge into strictly governed Context Packs over exposing raw, unstructured documents to LLMs. This benchmark provides quantitative metrics to justify the adoption of AKCP in enterprise environments.
 
 ## Methodology
+
 The benchmark operates deterministically by running a suite of evaluations across 7 core enterprise and engineering tasks. Each scenario simulates an LLM's response trajectory, measuring baseline performance (raw repositories, OpenWiki docs, basic MCP tools) against the AKCP treatment (OKF context packs, budget compression, and the Capability Registry).
 
 ### Evaluated Metrics
+
 - **Task Success Rate**: The probability of the agent successfully completing the end-to-end user goal.
 - **Token Cost**: The total volume of tokens ingested by the model (directly correlated to USD cost).
 - **Latency (ms)**: Time taken to serve the context and process the prompt.
@@ -17,6 +20,7 @@ The benchmark operates deterministically by running a suite of evaluations acros
 - **Context Utilization**: The percentage of injected context that was actually required to solve the task (signal-to-noise ratio).
 
 ## Scenarios
+
 1. **Raw README vs Context Pack**: Tests if high-level routing is more efficient via `minimal` OKF schemas than dumping massive flat files.
 2. **OpenWiki Docs vs Context Pack**: Tests structured-but-untyped docs vs explicitly typed `OKF` profiles.
 3. **OKF Without Budget vs Context Pack With Budget**: Tests the Context Budget compression algorithms against context flooding.
@@ -26,7 +30,9 @@ The benchmark operates deterministically by running a suite of evaluations acros
 7. **Enterprise Task - Summarize Policy & Risk**: Policy lookup hallucination mitigation.
 
 ## Running the Benchmark
+
 The benchmark can be executed locally in dry-run mode without requiring active LLM API keys:
+
 ```bash
 pnpm evals
 ```
@@ -34,4 +40,5 @@ pnpm evals
 This generates `benchmark-report.md` and `benchmark-report.json` in the `reports/` directory.
 
 ## Initial Findings
+
 Preliminary results indicate that migrating to Context Packs reduces token overhead by an average of **70%** (via deterministic compression), while plummeting the Unsafe Action Rate to **0%** due to explicit Capability Registry gating.

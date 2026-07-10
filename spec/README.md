@@ -9,6 +9,7 @@ This directory contains the implementation-independent specifications for the Ag
 ## Non-Goals
 
 This specification does **not** prescribe:
+
 - A specific programming language for implementations.
 - A particular storage backend for the Intermediate Representation (IR).
 - Any specific LLM or embedding model.
@@ -17,18 +18,19 @@ This specification does **not** prescribe:
 ## Relationship to Existing Standards
 
 AKCP is a **complement**, not a replacement:
+
 - **OKF (Open Knowledge Format):** AKCP adopts OKF as its primary source document format. OKF authors; AKCP compiles.
 - **MCP (Model Context Protocol):** AKCP exposes compiled artifacts via MCP servers. MCP transmits; AKCP governs what is transmitted.
 
 ## Specification Documents
 
-| Document | Description | Status |
-|----------|-------------|--------|
-| [agent-knowledge-ir.md](agent-knowledge-ir.md) | The Agent Knowledge Intermediate Representation schema | DRAFT |
-| [akcp-build-spec.md](akcp-build-spec.md) | Normative compiler behavior and pipeline stages | DRAFT |
-| [policy-cards.md](policy-cards.md) | Machine-readable runtime governance schema | DRAFT |
-| [artifact-manifest.md](artifact-manifest.md) | Compiled artifact output manifest schema | DRAFT |
-| [conformance.md](conformance.md) | Conformance levels and test requirements | DRAFT |
+| Document                                       | Description                                            | Status |
+| ---------------------------------------------- | ------------------------------------------------------ | ------ |
+| [agent-knowledge-ir.md](agent-knowledge-ir.md) | The Agent Knowledge Intermediate Representation schema | DRAFT  |
+| [akcp-build-spec.md](akcp-build-spec.md)       | Normative compiler behavior and pipeline stages        | DRAFT  |
+| [policy-cards.md](policy-cards.md)             | Machine-readable runtime governance schema             | DRAFT  |
+| [artifact-manifest.md](artifact-manifest.md)   | Compiled artifact output manifest schema               | DRAFT  |
+| [conformance.md](conformance.md)               | Conformance levels and test requirements               | DRAFT  |
 
 ## Versioning
 

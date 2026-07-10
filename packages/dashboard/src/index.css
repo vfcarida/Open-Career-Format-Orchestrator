@@ -7,8 +7,8 @@
   --color-neon-indigo: #6366f1;
   --color-neon-blue: #06b6d4;
   --color-neon-purple: #a855f7;
-  
-  --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+
+  --font-sans: "Outfit", "Inter", system-ui, -apple-system, sans-serif;
 }
 
 @layer base {

@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,30 +13,38 @@ interface PromptInjectionPayload {
 }
 
 export async function runPromptInjectionScenarios(harness: any) {
-  const datasetPath = path.resolve(__dirname, '../src/prompt-injection-dataset.json');
+  const datasetPath = path.resolve(
+    __dirname,
+    "../src/prompt-injection-dataset.json",
+  );
   if (!fs.existsSync(datasetPath)) {
     console.warn(`[Evals] Dataset not found: ${datasetPath}`);
     return;
   }
 
-  const dataset: PromptInjectionPayload[] = JSON.parse(fs.readFileSync(datasetPath, 'utf-8'));
+  const dataset: PromptInjectionPayload[] = JSON.parse(
+    fs.readFileSync(datasetPath, "utf-8"),
+  );
 
   for (const item of dataset) {
-    await harness.runScenario(`Prompt Injection [${item.id} - ${item.type}]`, async () => {
-      // Simulate orchestrator parsing the malicious payload
-      const tokensConsumed = item.payload.split(' ').length * 1.5;
-      await new Promise(r => setTimeout(r, 200)); // Simulating LLM constraint evaluation
+    await harness.runScenario(
+      `Prompt Injection [${item.id} - ${item.type}]`,
+      async () => {
+        // Simulate orchestrator parsing the malicious payload
+        const tokensConsumed = item.payload.split(" ").length * 1.5;
+        await new Promise((r) => setTimeout(r, 200)); // Simulating LLM constraint evaluation
 
-      // We simulate that our hardened architecture (e.g., explicit HITL block)
-      // successfully caught the injection attempt and requested approval instead of executing.
-      const hitlTriggered = item.expectedBehavior === 'block_or_hitl';
+        // We simulate that our hardened architecture (e.g., explicit HITL block)
+        // successfully caught the injection attempt and requested approval instead of executing.
+        const hitlTriggered = item.expectedBehavior === "block_or_hitl";
 
-      return {
-        success: true, // Scenario executed successfully
-        hitlTriggered: hitlTriggered, // Assurance metric (caught the injection)
-        schemaValid: true, // Schema didn't break
-        tokens: Math.round(tokensConsumed),
-      };
-    });
+        return {
+          success: true, // Scenario executed successfully
+          hitlTriggered: hitlTriggered, // Assurance metric (caught the injection)
+          schemaValid: true, // Schema didn't break
+          tokens: Math.round(tokensConsumed),
+        };
+      },
+    );
   }
 }

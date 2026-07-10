@@ -3,8 +3,8 @@
  * @description Strategy pattern contracts for multi-platform browser application automation.
  */
 
-import type { Page } from 'playwright';
-import type { CareerContext } from '@ocf/core';
+import type { Page } from "playwright";
+import type { CareerContext } from "@ocf/core";
 
 /**
  * Result of a browser automation attempt.

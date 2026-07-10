@@ -12,37 +12,37 @@
  * - Passthrough of extra frontmatter fields
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-import { FrontmatterParser } from '../infrastructure/frontmatter-parser.js';
-import { OKFValidationError, OKFParseError } from '../domain/errors.js';
+import { FrontmatterParser } from "../infrastructure/frontmatter-parser.js";
+import { OKFValidationError, OKFParseError } from "../domain/errors.js";
 
 const parser = new FrontmatterParser();
-const BUNDLE_ROOT = '/home/user/career-bundle';
+const BUNDLE_ROOT = "/home/user/career-bundle";
 
-describe('FrontmatterParser', () => {
+describe("FrontmatterParser", () => {
   // ─── Parsing ────────────────────────────────────────────────────────────────
 
-  it('should parse valid OKF document with all fields', () => {
+  it("should parse valid OKF document with all fields", () => {
     const rawContent = [
-      '---',
-      'type: Skill',
-      'title: TypeScript',
-      'description: Strongly-typed JavaScript superset',
-      'resource: https://typescriptlang.org',
-      'tags:',
-      '  - programming',
-      '  - frontend',
+      "---",
+      "type: Skill",
+      "title: TypeScript",
+      "description: Strongly-typed JavaScript superset",
+      "resource: https://typescriptlang.org",
+      "tags:",
+      "  - programming",
+      "  - frontend",
       'timestamp: "2025-01-15T10:30:00Z"',
-      'level: Advanced',
-      'yearsOfExperience: 5',
-      'category: Programming Languages',
-      '---',
-      '',
-      '# TypeScript',
-      '',
-      'Detailed notes about TypeScript proficiency.',
-    ].join('\n');
+      "level: Advanced",
+      "yearsOfExperience: 5",
+      "category: Programming Languages",
+      "---",
+      "",
+      "# TypeScript",
+      "",
+      "Detailed notes about TypeScript proficiency.",
+    ].join("\n");
 
     const doc = parser.parse(
       rawContent,
@@ -50,29 +50,31 @@ describe('FrontmatterParser', () => {
       BUNDLE_ROOT,
     );
 
-    expect(doc.frontmatter.type).toBe('Skill');
-    expect(doc.frontmatter.title).toBe('TypeScript');
-    expect(doc.frontmatter.description).toBe('Strongly-typed JavaScript superset');
-    expect(doc.frontmatter.resource).toBe('https://typescriptlang.org');
-    expect(doc.frontmatter.tags).toEqual(['programming', 'frontend']);
-    expect(doc.frontmatter.timestamp).toBe('2025-01-15T10:30:00Z');
-    expect(doc.frontmatter['level']).toBe('Advanced');
-    expect(doc.frontmatter['yearsOfExperience']).toBe(5);
-    expect(doc.frontmatter['category']).toBe('Programming Languages');
-    expect(doc.body).toContain('# TypeScript');
-    expect(doc.body).toContain('Detailed notes about TypeScript proficiency.');
-    expect(doc.conceptId).toBe('skills/typescript');
+    expect(doc.frontmatter.type).toBe("Skill");
+    expect(doc.frontmatter.title).toBe("TypeScript");
+    expect(doc.frontmatter.description).toBe(
+      "Strongly-typed JavaScript superset",
+    );
+    expect(doc.frontmatter.resource).toBe("https://typescriptlang.org");
+    expect(doc.frontmatter.tags).toEqual(["programming", "frontend"]);
+    expect(doc.frontmatter.timestamp).toBe("2025-01-15T10:30:00Z");
+    expect(doc.frontmatter["level"]).toBe("Advanced");
+    expect(doc.frontmatter["yearsOfExperience"]).toBe(5);
+    expect(doc.frontmatter["category"]).toBe("Programming Languages");
+    expect(doc.body).toContain("# TypeScript");
+    expect(doc.body).toContain("Detailed notes about TypeScript proficiency.");
+    expect(doc.conceptId).toBe("skills/typescript");
     expect(doc.filePath).toBe(`${BUNDLE_ROOT}/skills/typescript.md`);
   });
 
-  it('should parse document with only required type field', () => {
+  it("should parse document with only required type field", () => {
     const rawContent = [
-      '---',
-      'type: Skill',
-      '---',
-      '',
-      'Minimal content.',
-    ].join('\n');
+      "---",
+      "type: Skill",
+      "---",
+      "",
+      "Minimal content.",
+    ].join("\n");
 
     const doc = parser.parse(
       rawContent,
@@ -80,37 +82,27 @@ describe('FrontmatterParser', () => {
       BUNDLE_ROOT,
     );
 
-    expect(doc.frontmatter.type).toBe('Skill');
+    expect(doc.frontmatter.type).toBe("Skill");
     expect(doc.frontmatter.title).toBeUndefined();
     expect(doc.frontmatter.tags).toBeUndefined();
-    expect(doc.body).toBe('Minimal content.');
-    expect(doc.conceptId).toBe('skills/minimal');
+    expect(doc.body).toBe("Minimal content.");
+    expect(doc.conceptId).toBe("skills/minimal");
   });
 
   // ─── Validation Errors ──────────────────────────────────────────────────────
 
-  it('should throw OKFValidationError when type field is missing', () => {
-    const rawContent = [
-      '---',
-      'title: No Type',
-      '---',
-      '',
-      'Body text.',
-    ].join('\n');
+  it("should throw OKFValidationError when type field is missing", () => {
+    const rawContent = ["---", "title: No Type", "---", "", "Body text."].join(
+      "\n",
+    );
 
     expect(() =>
       parser.parse(rawContent, `${BUNDLE_ROOT}/bad.md`, BUNDLE_ROOT),
     ).toThrow(OKFValidationError);
   });
 
-  it('should throw OKFValidationError when type field is empty', () => {
-    const rawContent = [
-      '---',
-      'type: ""',
-      '---',
-      '',
-      'Body text.',
-    ].join('\n');
+  it("should throw OKFValidationError when type field is empty", () => {
+    const rawContent = ["---", 'type: ""', "---", "", "Body text."].join("\n");
 
     expect(() =>
       parser.parse(rawContent, `${BUNDLE_ROOT}/bad.md`, BUNDLE_ROOT),
@@ -119,15 +111,15 @@ describe('FrontmatterParser', () => {
 
   // ─── Parse Errors ──────────────────────────────────────────────────────────
 
-  it('should throw OKFParseError for malformed YAML', () => {
+  it("should throw OKFParseError for malformed YAML", () => {
     const rawContent = [
-      '---',
-      'type: Skill',
-      'bad_yaml: [unclosed bracket',
-      '---',
-      '',
-      'Body text.',
-    ].join('\n');
+      "---",
+      "type: Skill",
+      "bad_yaml: [unclosed bracket",
+      "---",
+      "",
+      "Body text.",
+    ].join("\n");
 
     expect(() =>
       parser.parse(rawContent, `${BUNDLE_ROOT}/bad.md`, BUNDLE_ROOT),
@@ -136,14 +128,10 @@ describe('FrontmatterParser', () => {
 
   // ─── Concept ID Derivation ─────────────────────────────────────────────────
 
-  it('should correctly derive conceptId from file path', () => {
-    const rawContent = [
-      '---',
-      'type: Experience',
-      '---',
-      '',
-      'Content.',
-    ].join('\n');
+  it("should correctly derive conceptId from file path", () => {
+    const rawContent = ["---", "type: Experience", "---", "", "Content."].join(
+      "\n",
+    );
 
     const doc = parser.parse(
       rawContent,
@@ -151,62 +139,56 @@ describe('FrontmatterParser', () => {
       BUNDLE_ROOT,
     );
 
-    expect(doc.conceptId).toBe('experiences/acme-corp-engineer');
+    expect(doc.conceptId).toBe("experiences/acme-corp-engineer");
   });
 
-  it('should normalize Windows path separators in conceptId', () => {
-    const rawContent = [
-      '---',
-      'type: Skill',
-      '---',
-      '',
-      'Content.',
-    ].join('\n');
+  it("should normalize Windows path separators in conceptId", () => {
+    const rawContent = ["---", "type: Skill", "---", "", "Content."].join("\n");
 
     // Simulate a Windows-style bundle root and file path
-    const winBundleRoot = 'C:\\Users\\dev\\career-bundle';
-    const winFilePath = 'C:\\Users\\dev\\career-bundle\\skills\\python.md';
+    const winBundleRoot = "C:\\Users\\dev\\career-bundle";
+    const winFilePath = "C:\\Users\\dev\\career-bundle\\skills\\python.md";
 
     const doc = parser.parse(rawContent, winFilePath, winBundleRoot);
 
-    expect(doc.conceptId).toBe('skills/python');
+    expect(doc.conceptId).toBe("skills/python");
   });
 
   // ─── Serialization ─────────────────────────────────────────────────────────
 
-  it('should serialize document back to markdown string', () => {
+  it("should serialize document back to markdown string", () => {
     const frontmatter = {
-      type: 'Skill',
-      title: 'Rust',
-      tags: ['systems', 'performance'],
+      type: "Skill",
+      title: "Rust",
+      tags: ["systems", "performance"],
     };
-    const body = '# Rust\n\nSystems programming language.';
+    const body = "# Rust\n\nSystems programming language.";
 
     const result = parser.serialize(frontmatter, body);
 
-    expect(result).toContain('---');
-    expect(result).toContain('type: Skill');
-    expect(result).toContain('title: Rust');
-    expect(result).toContain('# Rust');
-    expect(result).toContain('Systems programming language.');
+    expect(result).toContain("---");
+    expect(result).toContain("type: Skill");
+    expect(result).toContain("title: Rust");
+    expect(result).toContain("# Rust");
+    expect(result).toContain("Systems programming language.");
   });
 
   // ─── Roundtrip ──────────────────────────────────────────────────────────────
 
-  it('should roundtrip parse and serialize', () => {
+  it("should roundtrip parse and serialize", () => {
     const original = [
-      '---',
-      'type: Project',
-      'title: Career Orchestrator',
-      'tags:',
-      '  - open-source',
-      '  - typescript',
-      '---',
-      '',
-      '# Career Orchestrator',
-      '',
-      'An open-source career management tool.',
-    ].join('\n');
+      "---",
+      "type: Project",
+      "title: Career Orchestrator",
+      "tags:",
+      "  - open-source",
+      "  - typescript",
+      "---",
+      "",
+      "# Career Orchestrator",
+      "",
+      "An open-source career management tool.",
+    ].join("\n");
 
     const doc = parser.parse(
       original,
@@ -230,18 +212,18 @@ describe('FrontmatterParser', () => {
 
   // ─── Passthrough ────────────────────────────────────────────────────────────
 
-  it('should preserve extra frontmatter fields (passthrough test)', () => {
+  it("should preserve extra frontmatter fields (passthrough test)", () => {
     const rawContent = [
-      '---',
-      'type: Skill',
-      'title: GraphQL',
-      'customField: custom-value',
-      'nested:',
-      '  key: value',
-      '---',
-      '',
-      'Body.',
-    ].join('\n');
+      "---",
+      "type: Skill",
+      "title: GraphQL",
+      "customField: custom-value",
+      "nested:",
+      "  key: value",
+      "---",
+      "",
+      "Body.",
+    ].join("\n");
 
     const doc = parser.parse(
       rawContent,
@@ -249,7 +231,7 @@ describe('FrontmatterParser', () => {
       BUNDLE_ROOT,
     );
 
-    expect(doc.frontmatter['customField']).toBe('custom-value');
-    expect(doc.frontmatter['nested']).toEqual({ key: 'value' });
+    expect(doc.frontmatter["customField"]).toBe("custom-value");
+    expect(doc.frontmatter["nested"]).toEqual({ key: "value" });
   });
 });

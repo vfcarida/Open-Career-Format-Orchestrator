@@ -3,8 +3,8 @@
  * @description Renders details of a single job application with status badges and links.
  */
 
-import { Calendar, MapPin, ExternalLink, DollarSign } from 'lucide-react';
-import type { ApplicationDoc } from '../../types/career.js';
+import { Calendar, MapPin, ExternalLink, DollarSign } from "lucide-react";
+import type { ApplicationDoc } from "../../types/career.js";
 
 interface KanbanCardProps {
   application: ApplicationDoc;
@@ -21,21 +21,27 @@ export function KanbanCard({ application }: KanbanCardProps) {
 
   // Format date helper
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return "N/A";
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      return d.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
     } catch {
       return dateStr;
     }
   };
 
   const getPlatformStyle = (plat?: string) => {
-    const p = plat?.toLowerCase() || '';
-    if (p.includes('linkedin')) return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-    if (p.includes('gupy')) return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
-    if (p.includes('indeed')) return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
-    return 'bg-zinc-800 text-zinc-400 border-zinc-700/50';
+    const p = plat?.toLowerCase() || "";
+    if (p.includes("linkedin"))
+      return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    if (p.includes("gupy"))
+      return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+    if (p.includes("indeed"))
+      return "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+    return "bg-zinc-800 text-zinc-400 border-zinc-700/50";
   };
 
   return (
@@ -47,10 +53,10 @@ export function KanbanCard({ application }: KanbanCardProps) {
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
           <h4 className="font-semibold text-zinc-100 group-hover:text-neon-indigo transition-colors line-clamp-1 leading-snug">
-            {position || 'Unknown Role'}
+            {position || "Unknown Role"}
           </h4>
           <p className="text-xs text-zinc-400 font-medium mt-0.5">
-            {company || 'Unknown Company'}
+            {company || "Unknown Company"}
           </p>
         </div>
 
@@ -93,11 +99,13 @@ export function KanbanCard({ application }: KanbanCardProps) {
       {/* Card Footer badges */}
       {platform && (
         <div className="flex justify-between items-center mt-5 pt-3 border-t border-zinc-900/50">
-          <span className={`text-[9px] px-2 py-0.5 rounded border uppercase font-semibold tracking-wider ${getPlatformStyle(platform)}`}>
+          <span
+            className={`text-[9px] px-2 py-0.5 rounded border uppercase font-semibold tracking-wider ${getPlatformStyle(platform)}`}
+          >
             {platform}
           </span>
           <span className="text-[9px] text-zinc-600 font-semibold tracking-wider uppercase">
-            {application.fileName.replace(/\.md$/, '')}
+            {application.fileName.replace(/\.md$/, "")}
           </span>
         </div>
       )}

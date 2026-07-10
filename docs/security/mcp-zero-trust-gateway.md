@@ -8,12 +8,12 @@ Standard MCP implicitly trusts the client to execute any tool it has discovered.
 
 ## Threat Model & Mitigations
 
-| Threat | Description | Gateway Mitigation |
-|--------|-------------|--------------------|
-| **Confused Deputy** | An agent is tricked into calling a high-risk tool on behalf of an attacker. | The Gateway enforces explicit **Agent Identities**. High-risk tools are tied to strict PolicyCards that require out-of-band human approval (`approvalRequirements`). |
-| **Token Passthrough** | An attacker forwards a valid approval token to a different tool. | The Gateway cryptographically binds approval tokens to the specific `toolName` and `payloadHash`. |
-| **Lateral Movement** | A compromised low-privilege agent attempts to access restricted resources. | The Gateway maps each `agentId` to a specific `PolicyCard` (e.g., `sandbox-only`), dropping out-of-bounds requests immediately. |
-| **Data Exfiltration** | An agent reads sensitive PII and attempts to leak it via external tools. | The Gateway supports strict `piiHandling` (`redact` or `deny`), stripping sensitive information like SSNs or emails from tool outputs before returning them to the agent. |
+| Threat                | Description                                                                 | Gateway Mitigation                                                                                                                                                        |
+| --------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Confused Deputy**   | An agent is tricked into calling a high-risk tool on behalf of an attacker. | The Gateway enforces explicit **Agent Identities**. High-risk tools are tied to strict PolicyCards that require out-of-band human approval (`approvalRequirements`).      |
+| **Token Passthrough** | An attacker forwards a valid approval token to a different tool.            | The Gateway cryptographically binds approval tokens to the specific `toolName` and `payloadHash`.                                                                         |
+| **Lateral Movement**  | A compromised low-privilege agent attempts to access restricted resources.  | The Gateway maps each `agentId` to a specific `PolicyCard` (e.g., `sandbox-only`), dropping out-of-bounds requests immediately.                                           |
+| **Data Exfiltration** | An agent reads sensitive PII and attempts to leak it via external tools.    | The Gateway supports strict `piiHandling` (`redact` or `deny`), stripping sensitive information like SSNs or emails from tool outputs before returning them to the agent. |
 
 ## Architecture
 
@@ -29,7 +29,7 @@ sequenceDiagram
     Gateway->>Gateway: 1. Validate Agent Identity
     Gateway->>Gateway: 2. Load Assigned PolicyCard
     Gateway->>Gateway: 3. Evaluate Policy (Allow/Deny)
-    
+
     alt Policy Denied
         Gateway-->>MCP Server: Throw MCPGatewayError
         MCP Server-->>Agent: Return Error (Blocked)

@@ -1,13 +1,13 @@
 export type ConformanceLevel =
-  | 'none'
-  | 'OKF-compatible'
-  | 'OCF-profile-compatible'
-  | 'AKCP-compiler-compatible'
-  | 'AKCP-control-plane-compatible';
+  | "none"
+  | "OKF-compatible"
+  | "OCF-profile-compatible"
+  | "AKCP-compiler-compatible"
+  | "AKCP-control-plane-compatible";
 
 export interface ConformanceDetail {
   file?: string;
-  type: 'error' | 'warning';
+  type: "error" | "warning";
   message: string;
   ruleId?: string;
 }

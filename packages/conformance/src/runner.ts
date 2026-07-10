@@ -1,52 +1,61 @@
-import { 
-  FileSystemAdapter, 
-  FrontmatterParser, 
-  OKFFileRepository, 
+import {
+  FileSystemAdapter,
+  FrontmatterParser,
+  OKFFileRepository,
   buildKnowledgeIR,
-  loadAkcpConfig
-} from '@ocf/core';
-import type { ConformanceReport, ConformanceDetail } from './types.js';
-import path from 'path';
+  loadAkcpConfig,
+} from "@ocf/core";
+import type { ConformanceReport, ConformanceDetail } from "./types.js";
+import path from "path";
 
 export class ConformanceRunner {
   private bundlePath: string;
   private profile: string;
 
-  constructor(bundlePath: string, profile: string = 'career') {
+  constructor(bundlePath: string, profile: string = "career") {
     this.bundlePath = bundlePath;
     this.profile = profile;
   }
 
   public async run(): Promise<ConformanceReport> {
     const report: ConformanceReport = {
-      conformanceLevel: 'none',
+      conformanceLevel: "none",
       profileDetected: this.profile,
       passed: 0,
       failed: 0,
       warnings: 0,
-      details: []
+      details: [],
     };
 
     const fsAdapter = new FileSystemAdapter();
     const parser = new FrontmatterParser();
-    
+
     // Level 1: OKF-compatible (Base Spec)
     let okfCompatible = true;
     try {
-      const files = await fsAdapter.listFiles(this.bundlePath, '.md');
+      const files = await fsAdapter.listFiles(this.bundlePath, ".md");
       for (const file of files) {
-        if (file === 'index.md' || file === 'log.md') continue;
-        const content = await fsAdapter.readFile(path.join(this.bundlePath, file));
+        if (file === "index.md" || file === "log.md") continue;
+        const content = await fsAdapter.readFile(
+          path.join(this.bundlePath, file),
+        );
         try {
-          const parsed = parser.parse(content, path.join(this.bundlePath, file), this.bundlePath);
-          if (!parsed.frontmatter || typeof parsed.frontmatter.type !== 'string') {
+          const parsed = parser.parse(
+            content,
+            path.join(this.bundlePath, file),
+            this.bundlePath,
+          );
+          if (
+            !parsed.frontmatter ||
+            typeof parsed.frontmatter.type !== "string"
+          ) {
             report.failed++;
             okfCompatible = false;
             report.details.push({
               file,
-              type: 'error',
+              type: "error",
               message: 'Missing or invalid "type" field in OKF frontmatter',
-              ruleId: 'OKF-V0.1-4.1'
+              ruleId: "OKF-V0.1-4.1",
             });
           } else {
             report.passed++;
@@ -56,9 +65,9 @@ export class ConformanceRunner {
           okfCompatible = false;
           report.details.push({
             file,
-            type: 'error',
+            type: "error",
             message: `OKF Parse Error: ${e.message}`,
-            ruleId: 'OKF-V0.1-3.2'
+            ruleId: "OKF-V0.1-3.2",
           });
         }
       }
@@ -67,10 +76,10 @@ export class ConformanceRunner {
     }
 
     if (!okfCompatible) {
-      report.conformanceLevel = 'none';
+      report.conformanceLevel = "none";
       return report;
     }
-    report.conformanceLevel = 'OKF-compatible';
+    report.conformanceLevel = "OKF-compatible";
 
     // Level 2: OCF-profile-compatible
     let ocfCompatible = true;
@@ -79,41 +88,47 @@ export class ConformanceRunner {
       const docs = await repo.findAll();
       // If repo.findAll() succeeds, it means all docs passed the Zod schemas for the profile
       // because OKFFileRepository uses OKFDocumentFactory and valid Zod parsing internally (or at least FrontmatterParser does profile validation if configured).
-      // Actually, FrontmatterParser currently only validates against OKFFrontmatterSchema. 
+      // Actually, FrontmatterParser currently only validates against OKFFrontmatterSchema.
       // To strictly validate profile, we can use the domain/profiles/career schemas, but for now we rely on the parser not throwing OKFValidationError.
       report.passed += docs.length;
     } catch (e: any) {
       ocfCompatible = false;
       report.failed++;
       report.details.push({
-        type: 'error',
+        type: "error",
         message: `Profile Validation Error: ${e.message}`,
-        ruleId: 'OCF-PROFILE-STRICT'
+        ruleId: "OCF-PROFILE-STRICT",
       });
     }
 
     if (!ocfCompatible) {
       return report;
     }
-    report.conformanceLevel = 'OCF-profile-compatible';
+    report.conformanceLevel = "OCF-profile-compatible";
 
     // Level 3: AKCP-compiler-compatible
     let compilerCompatible = true;
     try {
       // Build IR to test semantic graph and index integrity
-      const ir = await buildKnowledgeIR(this.bundlePath, { sources: [{ type: 'okf-directory', path: this.bundlePath }] });
+      const ir = await buildKnowledgeIR(this.bundlePath, {
+        sources: [{ type: "okf-directory", path: this.bundlePath }],
+      });
       report.passed++;
-      
+
       // Check for broken links (warnings)
       for (const link of ir.links || []) {
-        const targetExists = ir.concepts.some(c => c.conceptId === link.targetConceptId);
+        const targetExists = ir.concepts.some(
+          (c) => c.conceptId === link.targetConceptId,
+        );
         if (!targetExists) {
           report.warnings++;
           report.details.push({
-            file: ir.concepts.find(c => c.conceptId === link.sourceConceptId)?.source.filePath || link.sourceConceptId,
-            type: 'warning',
+            file:
+              ir.concepts.find((c) => c.conceptId === link.sourceConceptId)
+                ?.source.filePath || link.sourceConceptId,
+            type: "warning",
             message: `Broken dependency link: ${link.targetConceptId}`,
-            ruleId: 'AKCP-GRAPH-INTEGRITY'
+            ruleId: "AKCP-GRAPH-INTEGRITY",
           });
         }
       }
@@ -121,22 +136,22 @@ export class ConformanceRunner {
       compilerCompatible = false;
       report.failed++;
       report.details.push({
-        type: 'error',
+        type: "error",
         message: `Compiler IR Error: ${e.message}`,
-        ruleId: 'AKCP-COMPILER-IR'
+        ruleId: "AKCP-COMPILER-IR",
       });
     }
 
     if (!compilerCompatible) {
       return report;
     }
-    report.conformanceLevel = 'AKCP-compiler-compatible';
+    report.conformanceLevel = "AKCP-compiler-compatible";
 
     // Level 4: AKCP-control-plane-compatible
     let controlPlaneCompatible = true;
     try {
       // If it has an akcp.yaml and valid policies
-      const configPath = path.join(this.bundlePath, 'akcp.yaml');
+      const configPath = path.join(this.bundlePath, "akcp.yaml");
       if (await fsAdapter.exists(configPath)) {
         loadAkcpConfig(configPath); // Throws if invalid
         report.passed++;
@@ -145,23 +160,23 @@ export class ConformanceRunner {
         // Actually, to be control-plane compatible it MUST have an akcp.yaml
         controlPlaneCompatible = false;
         report.details.push({
-          type: 'warning',
+          type: "warning",
           message: `No akcp.yaml found. Cannot verify control plane policies.`,
-          ruleId: 'AKCP-CP-CONFIG'
+          ruleId: "AKCP-CP-CONFIG",
         });
       }
     } catch (e: any) {
       controlPlaneCompatible = false;
       report.failed++;
       report.details.push({
-        type: 'error',
+        type: "error",
         message: `Control Plane Config Error: ${e.message}`,
-        ruleId: 'AKCP-CP-CONFIG'
+        ruleId: "AKCP-CP-CONFIG",
       });
     }
 
     if (controlPlaneCompatible) {
-      report.conformanceLevel = 'AKCP-control-plane-compatible';
+      report.conformanceLevel = "AKCP-control-plane-compatible";
     }
 
     return report;

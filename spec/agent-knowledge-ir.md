@@ -1,7 +1,7 @@
 # Agent Knowledge IR Specification
 
 > **Status:** DRAFT — v0.1.0-draft  
-> **Spec Section:** IR-1  
+> **Spec Section:** IR-1
 
 ## 1. Introduction
 
@@ -23,21 +23,21 @@ An AK-IR instance is a JSON object conforming to the following schema:
   "bundleId": "<uuid>",
   "compiledAt": "<ISO-8601 timestamp>",
   "sourceHash": "<sha256-hex>",
-  "nodes": [ "<NodeObject>", "..." ],
-  "edges": [ "<EdgeObject>", "..." ],
+  "nodes": ["<NodeObject>", "..."],
+  "edges": ["<EdgeObject>", "..."],
   "provenance": "<ProvenanceObject>"
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `specVersion` | string | REQUIRED | The AK-IR spec version that produced this IR. |
-| `bundleId` | string (UUID v4) | REQUIRED | A unique identifier for this compiled bundle. |
-| `compiledAt` | string (ISO-8601) | REQUIRED | The timestamp of compilation. |
-| `sourceHash` | string (SHA-256 hex) | REQUIRED | The deterministic hash of all source OKF documents. |
-| `nodes` | array | REQUIRED | The set of knowledge nodes. |
-| `edges` | array | REQUIRED | Directed relationships between nodes. |
-| `provenance` | object | REQUIRED | Provenance metadata for audit purposes. |
+| Field         | Type                 | Required | Description                                         |
+| ------------- | -------------------- | -------- | --------------------------------------------------- |
+| `specVersion` | string               | REQUIRED | The AK-IR spec version that produced this IR.       |
+| `bundleId`    | string (UUID v4)     | REQUIRED | A unique identifier for this compiled bundle.       |
+| `compiledAt`  | string (ISO-8601)    | REQUIRED | The timestamp of compilation.                       |
+| `sourceHash`  | string (SHA-256 hex) | REQUIRED | The deterministic hash of all source OKF documents. |
+| `nodes`       | array                | REQUIRED | The set of knowledge nodes.                         |
+| `edges`       | array                | REQUIRED | Directed relationships between nodes.               |
+| `provenance`  | object               | REQUIRED | Provenance metadata for audit purposes.             |
 
 ### 3.2 NodeObject
 
@@ -52,14 +52,14 @@ An AK-IR instance is a JSON object conforming to the following schema:
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | REQUIRED | A globally unique, stable identifier for this node. |
-| `type` | NodeType | REQUIRED | The semantic type of the node (see §3.4). |
-| `title` | string | REQUIRED | The human-readable title of the node. |
-| `content` | string | REQUIRED | The processed Markdown content. |
-| `metadata` | object | REQUIRED | Arbitrary key-value metadata from OKF frontmatter. |
-| `tokenEstimate` | integer | RECOMMENDED | A pre-computed token count estimate for budget planning. |
+| Field           | Type     | Required    | Description                                              |
+| --------------- | -------- | ----------- | -------------------------------------------------------- |
+| `id`            | string   | REQUIRED    | A globally unique, stable identifier for this node.      |
+| `type`          | NodeType | REQUIRED    | The semantic type of the node (see §3.4).                |
+| `title`         | string   | REQUIRED    | The human-readable title of the node.                    |
+| `content`       | string   | REQUIRED    | The processed Markdown content.                          |
+| `metadata`      | object   | REQUIRED    | Arbitrary key-value metadata from OKF frontmatter.       |
+| `tokenEstimate` | integer  | RECOMMENDED | A pre-computed token count estimate for budget planning. |
 
 ### 3.3 EdgeObject
 

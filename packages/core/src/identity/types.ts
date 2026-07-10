@@ -6,5 +6,5 @@ export interface AgentIdentity {
 
 export interface ClientIdentity {
   clientId: string;
-  connectionType: 'local-stdio' | 'remote-sse' | 'internal';
+  connectionType: "local-stdio" | "remote-sse" | "internal";
 }

@@ -13,18 +13,22 @@
  * to avoid treating infrastructure files as career-concept documents.
  */
 
-import path from 'node:path';
+import path from "node:path";
 
-import { OKFFileNotFoundError, OKFValidationError } from '../domain/errors.js';
-import type { IFileSystemAdapter, IFrontmatterParser, IOKFRepository } from '../domain/interfaces.js';
-import type { OKFDocument } from '../domain/types.js';
-import { OKFFrontmatterSchema } from '../domain/types.js';
+import { OKFFileNotFoundError, OKFValidationError } from "../domain/errors.js";
+import type {
+  IFileSystemAdapter,
+  IFrontmatterParser,
+  IOKFRepository,
+} from "../domain/interfaces.js";
+import type { OKFDocument } from "../domain/types.js";
+import { OKFFrontmatterSchema } from "../domain/types.js";
 
 /**
  * Reserved filenames that are excluded from document listing and lookup.
  * These files serve structural / metadata purposes per OKF spec §3.1.
  */
-const RESERVED_FILENAMES: ReadonlySet<string> = new Set(['index.md', 'log.md']);
+const RESERVED_FILENAMES: ReadonlySet<string> = new Set(["index.md", "log.md"]);
 
 /**
  * File-system–backed implementation of {@link IOKFRepository}.
@@ -126,7 +130,9 @@ export class OKFFileRepository implements IOKFRepository {
       } catch (error: unknown) {
         // Log and continue — one bad file should not break the whole bundle
         const message = error instanceof Error ? error.message : String(error);
-        console.error(`[OKFFileRepository] Skipping "${relativePath}": ${message}`);
+        console.error(
+          `[OKFFileRepository] Skipping "${relativePath}": ${message}`,
+        );
       }
     }
 
@@ -151,16 +157,13 @@ export class OKFFileRepository implements IOKFRepository {
 
     if (!validation.success) {
       const issues = validation.error.issues
-        .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
-        .join('; ');
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join("; ");
 
-      throw new OKFValidationError(
-        `Frontmatter validation failed: ${issues}`,
-        {
-          conceptId: document.conceptId,
-          issues: validation.error.issues,
-        },
-      );
+      throw new OKFValidationError(`Frontmatter validation failed: ${issues}`, {
+        conceptId: document.conceptId,
+        issues: validation.error.issues,
+      });
     }
 
     // Resolve the target file path
@@ -169,10 +172,7 @@ export class OKFFileRepository implements IOKFRepository {
       : path.join(this.bundleRoot, `${document.conceptId}.md`);
 
     // Serialize and write
-    const content = this.parser.serialize(
-      document.frontmatter,
-      document.body,
-    );
+    const content = this.parser.serialize(document.frontmatter, document.body);
 
     await this.fsAdapter.writeFile(filePath, content);
   }

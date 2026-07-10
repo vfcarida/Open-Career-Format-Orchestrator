@@ -1,28 +1,49 @@
 # Quickstart
 
-Welcome to the Agent Knowledge Compiler and Control Plane. This quickstart will help you get running in under 5 minutes.
+Welcome to the Agent Knowledge Compiler and Control Plane (AKCP). This quickstart will help you compile and serve your first context pack in under 5 minutes.
 
 ## Prerequisites
-- Node.js >= 22
-- pnpm >= 10
+
+- Node.js >= 20.0
 - corepack enabled (`corepack enable`)
 
-## Installation
+## 1. Local workspace flow (Recommended)
+
+Since AKCP is not yet published to npm, you must run it directly from source via a local clone.
+
 ```bash
-git clone https://github.com/vfcarida/AKCP-Knowledge-Reference-Architecture.git
-cd AKCP-Knowledge-Reference-Architecture
+# Clone the repository
+git clone https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git akcp
+cd akcp
+
+# Setup the environment
 pnpm install --frozen-lockfile
-cp .env.example .env
+pnpm build
+
+# Validate your environment
+pnpm akcp doctor
 ```
 
-## Running the Architecture
+## 2. Compile and Serve
+
+AKCP ships with sample data to help you get started.
+
 ```bash
-# Verify the sample bundle
-pnpm validate:bundle --bundle sample-data/.okf
+# Validate the sample OKF bundle
+pnpm akcp validate sample-data/.okf
 
-# Run the Profile Server for local MCP interactions
-pnpm dev:profile-server
+# Compile the bundle into an Agent Knowledge IR
+pnpm akcp compile --bundle sample-data/.okf
 
-# Run the Automation Server (sandbox mode by default)
-pnpm dev:automation-server
+# Serve the compiled context to agents via MCP
+pnpm akcp serve:mcp sample-data/.okf
 ```
+
+## Published Package (Planned)
+
+_AKCP is not published to npm yet. Use the local workspace flow above._
+
+## Next Steps
+
+- Read the full [CLI Usage Guide](cli/usage.md).
+- Explore the [Example Domains](../examples/domains/).

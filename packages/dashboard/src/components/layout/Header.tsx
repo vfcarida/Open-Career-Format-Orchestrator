@@ -3,10 +3,10 @@
  * @description Header containing the folder selector and active candidate status.
  */
 
-import { useRef } from 'react';
-import { FolderOpen, AlertTriangle } from 'lucide-react';
-import type { CareerBundleData } from '../../types/career.js';
-import { useAuth } from '../../contexts/AuthContext.js';
+import { useRef } from "react";
+import { FolderOpen, AlertTriangle } from "lucide-react";
+import type { CareerBundleData } from "../../types/career.js";
+import { useAuth } from "../../contexts/AuthContext.js";
 
 interface HeaderProps {
   data: CareerBundleData | null;
@@ -29,7 +29,7 @@ export function Header({
   // Handle Directory Picker selection (Chrome/Edge/Opera supported)
   const handleDirectoryPicker = async () => {
     try {
-      if ('showDirectoryPicker' in window) {
+      if ("showDirectoryPicker" in window) {
         const handle = await (window as any).showDirectoryPicker();
         await loadFromDirectory(handle);
       } else {
@@ -37,12 +37,14 @@ export function Header({
         fileInputRef.current?.click();
       }
     } catch (err) {
-      console.error('[Header] Directory picker cancelled or failed:', err);
+      console.error("[Header] Directory picker cancelled or failed:", err);
     }
   };
 
   // Handle fallback file input change
-  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       // Convert FileList to array
@@ -51,10 +53,11 @@ export function Header({
   };
 
   const getPreferencesSummary = () => {
-    if (!data?.preferences || data.preferences.length === 0) return 'No profile loaded';
+    if (!data?.preferences || data.preferences.length === 0)
+      return "No profile loaded";
     const pref = data.preferences[0];
-    const roles = pref?.roles?.join(', ') || 'Developer';
-    const remoteStr = pref?.remote ? 'Remote' : 'On-Site';
+    const roles = pref?.roles?.join(", ") || "Developer";
+    const remoteStr = pref?.remote ? "Remote" : "On-Site";
     return `${roles} (${remoteStr})`;
   };
 
@@ -115,10 +118,12 @@ export function Header({
           {user ? (
             <div className="flex items-center gap-2">
               <div className="text-right">
-                <p className="text-xs font-semibold text-zinc-200">{user.name}</p>
+                <p className="text-xs font-semibold text-zinc-200">
+                  {user.name}
+                </p>
                 <p className="text-[10px] text-zinc-500">{user.identity}</p>
               </div>
-              <button 
+              <button
                 onClick={logout}
                 className="text-xs bg-dark-bg border border-dark-border px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors"
               >
@@ -126,8 +131,8 @@ export function Header({
               </button>
             </div>
           ) : (
-            <button 
-              onClick={() => login('admin@corp.com', 'Admin User', 'admin')}
+            <button
+              onClick={() => login("admin@corp.com", "Admin User", "admin")}
               className="text-xs bg-dark-border border border-zinc-700 px-3 py-1.5 rounded-md hover:bg-zinc-800 transition-colors text-zinc-300"
             >
               Simulate Login
@@ -140,12 +145,12 @@ export function Header({
           disabled={loading}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
             loading
-              ? 'bg-zinc-800 text-zinc-500 border border-zinc-700/50 cursor-not-allowed'
-              : 'bg-neon-indigo hover:bg-neon-indigo/90 border border-neon-indigo/30 text-white shadow-lg shadow-neon-indigo/20'
+              ? "bg-zinc-800 text-zinc-500 border border-zinc-700/50 cursor-not-allowed"
+              : "bg-neon-indigo hover:bg-neon-indigo/90 border border-neon-indigo/30 text-white shadow-lg shadow-neon-indigo/20"
           }`}
         >
-          <FolderOpen className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Parsing Bundle...' : 'Select .okf Folder'}
+          <FolderOpen className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          {loading ? "Parsing Bundle..." : "Select .okf Folder"}
         </button>
       </div>
     </header>

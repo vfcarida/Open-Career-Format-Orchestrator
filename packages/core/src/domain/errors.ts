@@ -18,9 +18,13 @@ export class OKFError extends Error {
   public readonly code: string;
   public readonly details?: Record<string, unknown>;
 
-  constructor(message: string, code: string, details?: Record<string, unknown>) {
+  constructor(
+    message: string,
+    code: string,
+    details?: Record<string, unknown>,
+  ) {
     super(message);
-    this.name = 'OKFError';
+    this.name = "OKFError";
     this.code = code;
     this.details = details;
     Object.setPrototypeOf(this, new.target.prototype);
@@ -55,12 +59,12 @@ export class OKFValidationError extends OKFError {
   constructor(message: string, details?: Record<string, unknown>) {
     super(
       `OKF Validation Error: ${message}. ` +
-      'Ensure the document has valid YAML frontmatter with at least a "type" field. ' +
-      'See OKF v0.1 spec §4.1 for required fields.',
-      'OKF_VALIDATION_ERROR',
+        'Ensure the document has valid YAML frontmatter with at least a "type" field. ' +
+        "See OKF v0.1 spec §4.1 for required fields.",
+      "OKF_VALIDATION_ERROR",
       details,
     );
-    this.name = 'OKFValidationError';
+    this.name = "OKFValidationError";
   }
 }
 
@@ -71,11 +75,11 @@ export class OKFFileNotFoundError extends OKFError {
   constructor(filePath: string) {
     super(
       `OKF File Not Found: No document exists at "${filePath}". ` +
-      'Verify the concept ID or file path is correct and the OKF bundle directory is properly configured.',
-      'OKF_FILE_NOT_FOUND',
+        "Verify the concept ID or file path is correct and the OKF bundle directory is properly configured.",
+      "OKF_FILE_NOT_FOUND",
       { filePath },
     );
-    this.name = 'OKFFileNotFoundError';
+    this.name = "OKFFileNotFoundError";
   }
 }
 
@@ -86,11 +90,11 @@ export class OKFDuplicateConceptError extends OKFError {
   constructor(conceptId: string) {
     super(
       `OKF Duplicate Concept: A document with concept ID "${conceptId}" already exists. ` +
-      'Use a unique concept ID or update the existing document instead.',
-      'OKF_DUPLICATE_CONCEPT',
+        "Use a unique concept ID or update the existing document instead.",
+      "OKF_DUPLICATE_CONCEPT",
       { conceptId },
     );
-    this.name = 'OKFDuplicateConceptError';
+    this.name = "OKFDuplicateConceptError";
   }
 }
 
@@ -101,10 +105,10 @@ export class OKFParseError extends OKFError {
   constructor(filePath: string, reason: string) {
     super(
       `OKF Parse Error: Failed to parse "${filePath}". Reason: ${reason}. ` +
-      'Ensure the file uses valid YAML frontmatter delimited by "---" markers and valid UTF-8 Markdown.',
-      'OKF_PARSE_ERROR',
+        'Ensure the file uses valid YAML frontmatter delimited by "---" markers and valid UTF-8 Markdown.',
+      "OKF_PARSE_ERROR",
       { filePath, reason },
     );
-    this.name = 'OKFParseError';
+    this.name = "OKFParseError";
   }
 }

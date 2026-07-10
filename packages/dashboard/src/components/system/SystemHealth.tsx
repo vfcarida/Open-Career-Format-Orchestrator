@@ -1,5 +1,13 @@
-import { useState } from 'react';
-import { ServerCog, CheckCircle, XCircle, RefreshCw, AlertTriangle, FileText, Activity } from 'lucide-react';
+import { useState } from "react";
+import {
+  ServerCog,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  AlertTriangle,
+  FileText,
+  Activity,
+} from "lucide-react";
 
 export function SystemHealth() {
   const [validating, setValidating] = useState(false);
@@ -10,12 +18,14 @@ export function SystemHealth() {
     setValidating(true);
     setError(null);
     try {
-      const res = await fetch('/api/profile/validate', { method: 'POST' });
+      const res = await fetch("/api/profile/validate", { method: "POST" });
       const data = await res.json();
       if (data.isError || !res.ok) {
-        throw new Error(data.content?.[0]?.text || data.error || 'Server error');
+        throw new Error(
+          data.content?.[0]?.text || data.error || "Server error",
+        );
       }
-      
+
       const parsed = JSON.parse(data.content[0].text);
       if (parsed.ok === false && parsed.error) {
         throw new Error(parsed.error.message);
@@ -38,7 +48,8 @@ export function SystemHealth() {
             Bundle Health
           </h2>
           <p className="text-sm text-zinc-400 mt-1">
-            Validate your local Context Packs to ensure Agent-Ready Knowledge consistency.
+            Validate your local Context Packs to ensure Agent-Ready Knowledge
+            consistency.
           </p>
         </div>
         <button
@@ -70,9 +81,12 @@ export function SystemHealth() {
           <div className="w-16 h-16 bg-zinc-900/50 border border-dark-border rounded-2xl flex items-center justify-center mb-4">
             <FileText className="w-8 h-8 text-zinc-600" />
           </div>
-          <h3 className="text-lg font-medium text-zinc-300 mb-2">No Report Generated</h3>
+          <h3 className="text-lg font-medium text-zinc-300 mb-2">
+            No Report Generated
+          </h3>
           <p className="text-sm text-zinc-500 max-w-md">
-            Click 'Run Health Check' to trigger the Zod validation pipeline against your local `.agent-context` bundle.
+            Click 'Run Health Check' to trigger the Zod validation pipeline
+            against your local `.agent-context` bundle.
           </p>
         </div>
       )}
@@ -80,27 +94,38 @@ export function SystemHealth() {
       {validating && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <RefreshCw className="w-8 h-8 text-neon-indigo animate-spin mb-4" />
-          <p className="text-sm text-zinc-400">Validating bundle against strict schemas...</p>
+          <p className="text-sm text-zinc-400">
+            Validating bundle against strict schemas...
+          </p>
         </div>
       )}
 
       {report && !validating && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="grid grid-cols-2 gap-6">
-            <div className={`glass-panel p-6 rounded-2xl border relative overflow-hidden ${
-              report.valid ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-red-500/30 bg-red-950/10'
-            }`}>
+            <div
+              className={`glass-panel p-6 rounded-2xl border relative overflow-hidden ${
+                report.valid
+                  ? "border-emerald-500/30 bg-emerald-950/10"
+                  : "border-red-500/30 bg-red-950/10"
+              }`}
+            >
               <div className="absolute top-0 right-0 p-4 opacity-10">
-                {report.valid ? <CheckCircle className="w-24 h-24 text-emerald-500" /> : <XCircle className="w-24 h-24 text-red-500" />}
+                {report.valid ? (
+                  <CheckCircle className="w-24 h-24 text-emerald-500" />
+                ) : (
+                  <XCircle className="w-24 h-24 text-red-500" />
+                )}
               </div>
               <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">
                 Status
               </h3>
               <div className="text-3xl font-bold text-white mt-2">
-                {report.valid ? 'Healthy' : 'Invalid Bundle'}
+                {report.valid ? "Healthy" : "Invalid Bundle"}
               </div>
               <p className="text-sm text-zinc-400 mt-2">
-                {report.totalFiles} files checked across {report.totalProfiles} domains.
+                {report.totalFiles} files checked across {report.totalProfiles}{" "}
+                domains.
               </p>
             </div>
           </div>
@@ -113,8 +138,13 @@ export function SystemHealth() {
               </h3>
               <div className="space-y-3">
                 {report.errors.map((err: any, idx: number) => (
-                  <div key={idx} className="bg-red-950/30 border border-red-500/20 p-4 rounded-xl">
-                    <p className="font-mono text-xs text-red-300 mb-1">{err.file}</p>
+                  <div
+                    key={idx}
+                    className="bg-red-950/30 border border-red-500/20 p-4 rounded-xl"
+                  >
+                    <p className="font-mono text-xs text-red-300 mb-1">
+                      {err.file}
+                    </p>
                     <p className="text-sm text-red-200">{err.message}</p>
                   </div>
                 ))}

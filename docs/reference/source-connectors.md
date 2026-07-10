@@ -40,6 +40,7 @@ export interface KnowledgeSourceConnector {
 ```
 
 ### Regras para novos Connectors
+
 - **Connectors são plugins de build-time**, não de runtime.
 - **Evite adicionar dependências pesadas**. O connector OpenAPI, por exemplo, usa regex/JSON em vez de parsers swagger complexos para evitar sobrecarregar o compilador.
 - **Nenhum segredo deve ser inserido**. Cuidado ao importar arquivos raw que contenham senhas hardcoded. No futuro, Redaction Connectors agirão em conjunto para remover PII/Secrets.

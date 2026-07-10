@@ -5,6 +5,7 @@ The **Agent Knowledge IR** is a deterministic, JSON-serializable structure that 
 ## Why an IR?
 
 While OKF is excellent for humans (Markdown + YAML), runtime agents need pre-computed structural data:
+
 - **Capabilities & Policies:** Linking documents to specific tools and access rules.
 - **Budgets:** Pre-calculating character/token counts to enforce context window limits.
 - **Provenance:** Tracking exactly which file generated which concept and its last modified state.
@@ -58,8 +59,10 @@ An IR output typically contains:
 ```
 
 ## Preservation of Unknown Fields
+
 To adhere to the OKF v0.1 spec, the compiler **must** preserve any unknown frontmatter keys. The IR encapsulates this within the `frontmatter` object, ensuring no downstream metadata is lost during the compilation process.
 
 ## IR vs OKF
+
 - **OKF:** The source code (Markdown + YAML).
 - **IR:** The compiled binary (JSON). Used to feed the Control Plane.

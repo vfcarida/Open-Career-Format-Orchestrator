@@ -5,20 +5,26 @@ The **Context Economics** subsystem is responsible for optimizing the context wi
 ## Core Concepts
 
 ### 1. Token Estimator (`TokenEstimator`)
-A deterministic, LLM-agnostic heuristic token estimator. 
+
+A deterministic, LLM-agnostic heuristic token estimator.
+
 - It uses a standard heuristic `(1 token ~= 4 chars)` rather than embedding a heavy LLM tokenizer.
 - This ensures fast execution and zero third-party dependencies while providing a reliable baseline for budget planning.
 
 ### 2. Relevance Score (`RelevanceScore`)
+
 Calculates a deterministic relevance score (0.0 to 1.0) for each document against a specific task.
 The score is influenced by:
+
 - **Explicit Priority:** Driven by the document's frontmatter `priority` field (e.g., `high`, `critical`).
 - **Task Keywords:** Matching keywords from the task description against the document's `title` and `tags`.
 - **Type Matching:** If the task mentions the document's `type`.
 
 ### 3. Context Plan & Manifest (`ContextPlanner`)
+
 The planner takes a list of documents, calculates relevance scores, estimates token counts, and applies the `ContextBudget`.
 It outputs a `ContextPackManifest` documenting exactly:
+
 - `documentsIncluded`: Which documents were selected and their estimated cost.
 - `documentsExcluded`: Which documents were dropped and the exact reason (e.g., "Budget Exceeded").
 

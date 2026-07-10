@@ -1,6 +1,6 @@
 # Agent Knowledge Readiness Scorecard
 
-The **Agent Knowledge Readiness Scorecard** is a public benchmark used to evaluate how well-prepared a context bundle is for autonomous agent consumption. 
+The **Agent Knowledge Readiness Scorecard** is a public benchmark used to evaluate how well-prepared a context bundle is for autonomous agent consumption.
 
 ## Dimensions
 

@@ -1,20 +1,26 @@
-import { createHash } from 'node:crypto';
-import path from 'node:path';
-import type { IFileSystemAdapter } from '../domain/interfaces.js';
-import type { ConnectorConfig, KnowledgeSourceConnector, RawKnowledgeItem } from './types.js';
+import { createHash } from "node:crypto";
+import path from "node:path";
+import type { IFileSystemAdapter } from "../domain/interfaces.js";
+import type {
+  ConnectorConfig,
+  KnowledgeSourceConnector,
+  RawKnowledgeItem,
+} from "./types.js";
 
 /**
  * Experimental connector for ingesting OpenAPI specs as knowledge artifacts.
  * This implementation uses simple parsing without adding heavy external dependencies like 'swagger-parser'.
  */
 export class OpenApiConnector implements KnowledgeSourceConnector {
-  public readonly connectorType = 'openapi';
+  public readonly connectorType = "openapi";
 
   constructor(private readonly fsAdapter: IFileSystemAdapter) {}
 
   async ingest(config: ConnectorConfig): Promise<RawKnowledgeItem[]> {
     if (!config.path) {
-      throw new Error(`OpenApiConnector requires a 'path' config pointing to the openapi json/yaml file.`);
+      throw new Error(
+        `OpenApiConnector requires a 'path' config pointing to the openapi json/yaml file.`,
+      );
     }
 
     const items: RawKnowledgeItem[] = [];
@@ -25,14 +31,14 @@ export class OpenApiConnector implements KnowledgeSourceConnector {
     }
 
     const content = await this.fsAdapter.readFile(sourceFile);
-    
+
     // In a real robust implementation we might use a proper OpenAPI parser
     // but here we do naive extraction of paths to demonstrate the capability
     // without inflating the dependency tree.
     let spec: any;
     try {
-      if (sourceFile.endsWith('.yaml') || sourceFile.endsWith('.yml')) {
-        const yaml = await import('yaml');
+      if (sourceFile.endsWith(".yaml") || sourceFile.endsWith(".yml")) {
+        const yaml = await import("yaml");
         spec = yaml.parse(content);
       } else {
         spec = JSON.parse(content);
@@ -47,40 +53,55 @@ export class OpenApiConnector implements KnowledgeSourceConnector {
 
     // Convert each path/method into a distinct raw knowledge item
     for (const [apiPath, pathItem] of Object.entries(spec.paths)) {
-      if (typeof pathItem !== 'object' || !pathItem) continue;
+      if (typeof pathItem !== "object" || !pathItem) continue;
 
       for (const [method, operation] of Object.entries(pathItem)) {
-        if (typeof operation !== 'object' || !operation) continue;
+        if (typeof operation !== "object" || !operation) continue;
 
         // Skip non-http methods
-        if (!['get', 'post', 'put', 'delete', 'patch', 'options', 'head'].includes(method.toLowerCase())) {
+        if (
+          ![
+            "get",
+            "post",
+            "put",
+            "delete",
+            "patch",
+            "options",
+            "head",
+          ].includes(method.toLowerCase())
+        ) {
           continue;
         }
 
         const op = operation as any;
-        const conceptId = op.operationId || `${method}-${apiPath}`.replace(/[^a-zA-Z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-        
+        const conceptId =
+          op.operationId ||
+          `${method}-${apiPath}`
+            .replace(/[^a-zA-Z0-9-]/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "");
+
         const rawContent = `
 # ${op.summary || conceptId}
 
 Method: ${method.toUpperCase()}
 Path: ${apiPath}
 
-${op.description || ''}
+${op.description || ""}
         `.trim();
 
-        const hash = createHash('sha256').update(rawContent).digest('hex');
+        const hash = createHash("sha256").update(rawContent).digest("hex");
 
         items.push({
-          sourceUri: `file://${sourceFile}#/paths${apiPath.replace(/\//g, '~1')}/${method}`,
+          sourceUri: `file://${sourceFile}#/paths${apiPath.replace(/\//g, "~1")}/${method}`,
           contentHash: hash,
           metadata: {
             conceptId,
-            originalFormat: 'openapi/endpoint',
+            originalFormat: "openapi/endpoint",
             method: method.toUpperCase(),
-            apiPath
+            apiPath,
           },
-          rawContent
+          rawContent,
         });
       }
     }

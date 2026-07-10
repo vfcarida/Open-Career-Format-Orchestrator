@@ -1,0 +1,9 @@
+{
+  "file://C:\\Users\\vinicius\\Documents\\GeminiCode\\Open-Career-Format-Orchestrator\\packages\\conformance\\fixtures\\okf-valid-minimal\\skills\\minimal.md": {
+    "sourceHash": "bec614a841f2ccc28b08ef918dbdef75da8b77eb1c032281163b66b16b546c7e",
+    "normalizedHash": "",
+    "artifactHash": "../dummy",
+    "lastCompiledAt": "2026-07-10T20:11:03.570Z",
+    "dependencies": []
+  }
+}

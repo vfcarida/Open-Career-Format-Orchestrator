@@ -3,6 +3,7 @@
 The following metrics are exposed via the `@ocf/core` OpenTelemetry Meter:
 
 ## Counters
+
 - `ocf_mcp_tool_calls_total`: Total number of MCP tool calls executed.
 - `ocf_mcp_tool_failures_total`: Total number of MCP tool calls that resulted in errors.
 - `ocf_okf_parse_failures_total`: Total number of YAML/Markdown OKF parse failures.
@@ -15,4 +16,5 @@ The following metrics are exposed via the `@ocf/core` OpenTelemetry Meter:
 - `ocf_automation_submission_success_total`: Total number of successful job submissions registered in bundle.
 
 ## Histograms
+
 - `ocf_mcp_tool_duration_ms`: Duration of MCP tool executions in milliseconds.

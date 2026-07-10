@@ -2,7 +2,7 @@
 
 **Status:** ACCEPTED  
 **Date:** 2026-07-10  
-**Deciders:** Project Maintainers  
+**Deciders:** Project Maintainers
 
 ## Context
 

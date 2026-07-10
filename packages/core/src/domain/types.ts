@@ -32,8 +32,6 @@
  * interoperable with any LLM or agent that can read Markdown + YAML.
  */
 
-
-
 // Constants and Schemas are imported and re-exported from schemas.js
 
 export {
@@ -49,7 +47,7 @@ export {
   ProjectFrontmatterSchema,
   PreferenceFrontmatterSchema,
   CareerFrontmatterSchema,
-} from './schemas.js';
+} from "./schemas.js";
 
 // ─── TypeScript Interfaces ──────────────────────────────────────────────────────
 
@@ -69,13 +67,13 @@ export interface OKFFrontmatter {
   tags?: string[];
   /** ISO 8601 last-modified timestamp. */
   timestamp?: string;
-  
+
   // Lifecycle fields
-  priority?: 'low' | 'medium' | 'high' | 'critical';
+  priority?: "low" | "medium" | "high" | "critical";
   owner?: string;
   lastReviewedAt?: string;
   reviewCadenceDays?: number;
-  status?: 'active' | 'stale' | 'deprecated' | 'archived';
+  status?: "active" | "stale" | "deprecated" | "archived";
   successor?: string;
 
   /** Allow additional producer-defined fields. */

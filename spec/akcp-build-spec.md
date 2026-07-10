@@ -1,7 +1,7 @@
 # AKCP Build Specification
 
 > **Status:** DRAFT — v0.1.0-draft  
-> **Spec Section:** BUILD-1  
+> **Spec Section:** BUILD-1
 
 ## 1. Introduction
 
@@ -18,6 +18,7 @@ An AKCP-compliant compiler MUST implement the following pipeline stages in order
 ### 2.1 Parse
 
 The compiler MUST:
+
 1. Recursively discover all `.md` files within the bundle root directory.
 2. Parse the YAML frontmatter from each file, treating a missing frontmatter block as a parse warning (not a fatal error).
 3. Parse the Markdown body.
@@ -27,6 +28,7 @@ The compiler MUST NOT silently drop files. Unparseable files MUST be logged with
 ### 2.2 Normalize
 
 The compiler MUST:
+
 1. Apply all schema migrations for OKF versions older than the current supported version.
 2. Resolve `$ref` references and cross-document links.
 3. Compute a stable `id` for each node using the following algorithm: `sha256(bundle_root_relative_path)`.
@@ -40,6 +42,7 @@ The compiler SHOULD support a `--strict` flag that causes validation failures to
 ### 2.4 Compile
 
 The compiler MUST:
+
 1. Construct all `NodeObject` instances.
 2. Resolve cross-document relationships and construct `EdgeObject` instances.
 3. Compute `tokenEstimate` for each node using a deterministic estimator.
@@ -49,12 +52,12 @@ The compiler MUST:
 
 The compiler MUST support at minimum one of the following output targets:
 
-| Target ID | Description |
-|-----------|-------------|
-| `ir-json` | Raw AK-IR as a JSON file. |
+| Target ID       | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| `ir-json`       | Raw AK-IR as a JSON file.                                |
 | `openwiki-docs` | Markdown files formatted for OpenWiki/agent consumption. |
-| `eval-dataset` | JSONL evaluation dataset. |
-| `policy-bundle` | Compiled `.policy.json` file. |
+| `eval-dataset`  | JSONL evaluation dataset.                                |
+| `policy-bundle` | Compiled `.policy.json` file.                            |
 
 ## 3. Determinism
 

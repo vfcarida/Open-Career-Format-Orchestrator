@@ -1,35 +1,37 @@
-import { z } from 'zod';
-import { OKFFrontmatterSchema } from '../okf.js';
+import { z } from "zod";
+import { OKFFrontmatterSchema } from "../okf.js";
 
 export const OKFDocumentType = {
-  Skill: 'Skill',
-  Experience: 'Experience',
-  Education: 'Education',
-  Preference: 'Preference',
-  Application: 'Application',
-  Certificate: 'Certificate',
-  Project: 'Project',
+  Skill: "Skill",
+  Experience: "Experience",
+  Education: "Education",
+  Preference: "Preference",
+  Application: "Application",
+  Certificate: "Certificate",
+  Project: "Project",
 } as const;
 
-export type OKFDocumentType = (typeof OKFDocumentType)[keyof typeof OKFDocumentType];
+export type OKFDocumentType =
+  (typeof OKFDocumentType)[keyof typeof OKFDocumentType];
 
 export const ApplicationStatus = {
-  Saved: 'Saved',
-  Applied: 'Applied',
-  Screening: 'Screening',
-  Interview: 'Interview',
-  Offer: 'Offer',
-  Rejected: 'Rejected',
-  Withdrawn: 'Withdrawn',
+  Saved: "Saved",
+  Applied: "Applied",
+  Screening: "Screening",
+  Interview: "Interview",
+  Offer: "Offer",
+  Rejected: "Rejected",
+  Withdrawn: "Withdrawn",
 } as const;
 
-export type ApplicationStatus = (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
+export type ApplicationStatus =
+  (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
 
 export const SkillLevel = {
-  Beginner: 'Beginner',
-  Intermediate: 'Intermediate',
-  Advanced: 'Advanced',
-  Expert: 'Expert',
+  Beginner: "Beginner",
+  Intermediate: "Intermediate",
+  Advanced: "Advanced",
+  Expert: "Expert",
 } as const;
 
 export type SkillLevel = (typeof SkillLevel)[keyof typeof SkillLevel];
@@ -100,7 +102,7 @@ export const ApplicationFrontmatterSchema = OKFFrontmatterSchema.extend({
   location: z.string().optional(),
 });
 
-export const CareerFrontmatterSchema = z.discriminatedUnion('type', [
+export const CareerFrontmatterSchema = z.discriminatedUnion("type", [
   SkillFrontmatterSchema,
   ExperienceFrontmatterSchema,
   EducationFrontmatterSchema,

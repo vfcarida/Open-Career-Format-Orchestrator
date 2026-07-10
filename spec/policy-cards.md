@@ -39,15 +39,15 @@ requireApprovalFor:
   - "execute_command"
   - "modify_database"
 
-piiHandling: "mask"  # mask | redact | passthrough
+piiHandling: "mask" # mask | redact | passthrough
 ```
 
 ## 4. Autonomy Levels
 
-| Level | Description |
-|-------|-------------|
-| `read-only` | Agent may only retrieve information. No side-effects permitted. |
-| `read-write` | Agent may call tools that produce side-effects with no approval gate. |
+| Level        | Description                                                                            |
+| ------------ | -------------------------------------------------------------------------------------- |
+| `read-only`  | Agent may only retrieve information. No side-effects permitted.                        |
+| `read-write` | Agent may call tools that produce side-effects with no approval gate.                  |
 | `autonomous` | Agent may take autonomous multi-step actions. High-risk. Requires explicit escalation. |
 
 ## 5. Enforcement

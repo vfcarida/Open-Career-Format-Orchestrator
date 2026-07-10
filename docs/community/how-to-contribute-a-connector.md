@@ -34,6 +34,7 @@ plugins/
 ## Step 3: Implement the Entrypoint
 
 Your entrypoint must export a class or function that:
+
 1. Accepts configuration (e.g., API URL, credentials via env vars — never hardcoded).
 2. Fetches documents from the external source.
 3. Returns an array of OKF-compatible Markdown strings.
@@ -53,14 +54,14 @@ export class MySystemConnector {
     // 3. Return the list
     return [
       {
-        filename: 'my-doc.md',
+        filename: "my-doc.md",
         content: `---
 type: document
 title: "My Document"
 ---
 # My Document
-Content here.`
-      }
+Content here.`,
+      },
     ];
   }
 }
@@ -69,6 +70,7 @@ Content here.`
 ## Step 4: Write a README
 
 Your `plugins/my-system-connector/README.md` must include:
+
 - Prerequisites (API keys, environment variables required)
 - How to configure the connector in `akcp.yaml`
 - Example output

@@ -3,16 +3,22 @@
  * @description Job application automation strategy for the LinkedIn platform.
  */
 
-import type { Page } from 'playwright';
-import type { CareerContext } from '@ocf/core';
-import type { IApplicationStrategy, ApplicationResult } from '../interfaces.js';
-import { LinkedInJobPage, LinkedInEasyApplyDialog } from '../page-objects/linkedin-pages.js';
-import { AutomationError } from '../../errors.js';
+import type { Page } from "playwright";
+import type { CareerContext } from "@ocf/core";
+import type { IApplicationStrategy, ApplicationResult } from "../interfaces.js";
+import {
+  LinkedInJobPage,
+  LinkedInEasyApplyDialog,
+} from "../page-objects/linkedin-pages.js";
+import { AutomationError } from "../../errors.js";
 
 export class LinkedInStrategy implements IApplicationStrategy {
   /** @inheritdoc */
   supports(url: string): boolean {
-    return url.includes('linkedin.com/jobs/') || url.includes('linkedin.com/jobs/view/');
+    return (
+      url.includes("linkedin.com/jobs/") ||
+      url.includes("linkedin.com/jobs/view/")
+    );
   }
 
   /** @inheritdoc */
@@ -22,12 +28,12 @@ export class LinkedInStrategy implements IApplicationStrategy {
     url: string,
     dryRun?: boolean,
   ): Promise<ApplicationResult> {
-    const platform = 'LinkedIn';
+    const platform = "LinkedIn";
     const errors: string[] = [];
 
     try {
       // 1. Navigate to job posting
-      await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await page.goto(url, { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(2000);
 
       const jobPage = new LinkedInJobPage(page);
@@ -40,9 +46,9 @@ export class LinkedInStrategy implements IApplicationStrategy {
       if (!hasEasyApply) {
         throw new AutomationError(
           platform,
-          'detect_easy_apply',
-          'Only LinkedIn Easy Apply is currently supported for automated submission. ' +
-          'Standard "Apply" redirects to external pages, which cannot be reliably completed automatically.',
+          "detect_easy_apply",
+          "Only LinkedIn Easy Apply is currently supported for automated submission. " +
+            'Standard "Apply" redirects to external pages, which cannot be reliably completed automatically.',
         );
       }
 
@@ -56,22 +62,28 @@ export class LinkedInStrategy implements IApplicationStrategy {
       if (!filledSteps) {
         throw new AutomationError(
           platform,
-          'fill_form_steps',
-          'Could not complete job application form steps. Manual intervention required.',
+          "fill_form_steps",
+          "Could not complete job application form steps. Manual intervention required.",
         );
       }
 
       if (dryRun) {
         // Safe dismiss
         await dialog.closeButton.click();
-        await page.locator('button[data-control-name="discard_application_confirm_btn"]').click();
+        await page
+          .locator(
+            'button[data-control-name="discard_application_confirm_btn"]',
+          )
+          .click();
         return {
           success: true,
           platform,
           jobTitle,
           company,
           submittedAt: new Date().toISOString(),
-          errors: ['Dry run completed successfully. Application form was filled but not submitted.'],
+          errors: [
+            "Dry run completed successfully. Application form was filled but not submitted.",
+          ],
         };
       }
 
@@ -92,8 +104,8 @@ export class LinkedInStrategy implements IApplicationStrategy {
       return {
         success: false,
         platform,
-        jobTitle: 'Unknown Position',
-        company: 'Unknown Company',
+        jobTitle: "Unknown Position",
+        company: "Unknown Company",
         submittedAt: new Date().toISOString(),
         errors,
       };

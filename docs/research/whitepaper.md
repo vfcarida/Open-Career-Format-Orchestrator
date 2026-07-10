@@ -1,13 +1,13 @@
 # Whitepaper: Agent Knowledge Compiler and Control Plane
 
 > **Status:** DRAFT — v0.1.0-draft  
-> **Category:** Research & Thesis  
+> **Category:** Research & Thesis
 
 ---
 
 ## Abstract
 
-Modern AI agents suffer from a fundamental structural problem: they operate on probabilistic associations rather than deterministic, governed knowledge. This paper introduces the **Agent Knowledge Compiler and Control Plane (AKCP)** as a new product category that separates the *compilation* of organizational knowledge from its *runtime governance*. AKCP transforms unstructured documentation into type-safe, versioned, cryptographically-verified context artifacts, and then governs how agents discover and act upon them via machine-readable Policy Cards and a Zero-Trust Gateway.
+Modern AI agents suffer from a fundamental structural problem: they operate on probabilistic associations rather than deterministic, governed knowledge. This paper introduces the **Agent Knowledge Compiler and Control Plane (AKCP)** as a new product category that separates the _compilation_ of organizational knowledge from its _runtime governance_. AKCP transforms unstructured documentation into type-safe, versioned, cryptographically-verified context artifacts, and then governs how agents discover and act upon them via machine-readable Policy Cards and a Zero-Trust Gateway.
 
 ---
 
@@ -17,11 +17,12 @@ Modern AI agents suffer from a fundamental structural problem: they operate on p
 
 Large Language Models (LLMs) produce outputs based on the statistical distribution of their training data. When operating as agents within an enterprise, this statistical nature collides with organizational requirements for precision, verifiability, and accountability.
 
-We term this **Structural Hallucination**: the agent's inability to ground its responses in specific, verified, and up-to-date organizational facts—not because the model is fundamentally broken, but because the *knowledge infrastructure* is absent. The agent has no deterministic source of truth to anchor against.
+We term this **Structural Hallucination**: the agent's inability to ground its responses in specific, verified, and up-to-date organizational facts—not because the model is fundamentally broken, but because the _knowledge infrastructure_ is absent. The agent has no deterministic source of truth to anchor against.
 
 ### 1.2 The Knowledge Supply Chain Gap
 
 The contemporary AI tool landscape addresses parts of this problem:
+
 - **Vector databases** provide fuzzy semantic retrieval, but offer no provenance, versioning, or governance.
 - **RAG pipelines** are probabilistic and difficult to audit.
 - **API integrations** expose live systems, but carry inherent side-effect risk without guardrails.
@@ -32,12 +33,12 @@ No tool provides a complete **knowledge supply chain**: a pipeline from raw orga
 
 ## 2. Prior Art
 
-| Technology | Contribution | Limitation |
-|------------|--------------|------------|
-| **OKF (Open Knowledge Format)** | Provides portable Markdown + YAML frontmatter primitives for human and agent-friendly knowledge. | Describes the source format; does not define compilation, governance, or runtime behavior. |
-| **MCP (Model Context Protocol)** | Provides a standardized RPC protocol for agent-tool interaction. | Introduces a significant attack surface without built-in semantic structure or access control. |
-| **OpenWiki (LangChain)** | CI-driven documentation freshness for agent consumption. | Authors documentation; does not compile, govern, or control access to it. |
-| **REGAL** | Registry-driven grounding architecture for deterministic enterprise telemetry. | Focuses on structured data; does not address unstructured document compilation or policy enforcement. |
+| Technology                       | Contribution                                                                                     | Limitation                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **OKF (Open Knowledge Format)**  | Provides portable Markdown + YAML frontmatter primitives for human and agent-friendly knowledge. | Describes the source format; does not define compilation, governance, or runtime behavior.            |
+| **MCP (Model Context Protocol)** | Provides a standardized RPC protocol for agent-tool interaction.                                 | Introduces a significant attack surface without built-in semantic structure or access control.        |
+| **OpenWiki (LangChain)**         | CI-driven documentation freshness for agent consumption.                                         | Authors documentation; does not compile, govern, or control access to it.                             |
+| **REGAL**                        | Registry-driven grounding architecture for deterministic enterprise telemetry.                   | Focuses on structured data; does not address unstructured document compilation or policy enforcement. |
 
 AKCP synthesizes and extends these prior works, filling the gap between documentation authoring and governed runtime execution.
 
@@ -73,9 +74,11 @@ graph TD
 ```
 
 ### 3.1 Build Plane
+
 The compiler is a deterministic, multi-stage pipeline. Its output is a verifiable, byte-reproducible AK-IR artifact.
 
 ### 3.2 Runtime Plane
+
 The control plane intercepts all agent interactions at the MCP Gateway, evaluates the active Policy Card, solicits Human-in-the-Loop approvals for high-risk actions, and maintains an immutable audit log.
 
 ---
@@ -83,6 +86,7 @@ The control plane intercepts all agent interactions at the MCP Gateway, evaluate
 ## 4. The Compiler Model
 
 Inspired by traditional software compilers, AKCP treats knowledge transformation as a strictly defined compilation process:
+
 - **Lexing/Parsing:** OKF frontmatter + Markdown body parsing.
 - **Semantic Analysis:** Schema validation, relationship resolution, cross-document linking.
 - **Optimization:** Token estimation, deduplication, freshness filtering.
@@ -107,18 +111,19 @@ The control plane is modeled after principles from NIST AI RMF (Govern, Map, Mea
 
 AKCP's security model is designed to defend against the primary LLM/agentic attack vectors identified by OWASP and academic research:
 
-| Threat | AKCP Mitigation |
-|--------|-----------------|
-| **Prompt Injection (OWASP LLM01)** | MCP Gateway rejects tool calls that violate policy, regardless of prompt content. |
-| **Insecure Tool Plugins (OWASP LLM07)** | Plugin architecture requires explicit permission declarations in `akcp-plugin.json`. |
-| **MCP Tool Poisoning (arXiv:2512.06556)** | Compiled AK-IR provides a verified, canonical set of tool definitions. |
-| **Supply Chain Risk** | `sourceHash` and artifact-level hashes in `akcp-manifest.json` enable integrity verification. |
+| Threat                                    | AKCP Mitigation                                                                               |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Prompt Injection (OWASP LLM01)**        | MCP Gateway rejects tool calls that violate policy, regardless of prompt content.             |
+| **Insecure Tool Plugins (OWASP LLM07)**   | Plugin architecture requires explicit permission declarations in `akcp-plugin.json`.          |
+| **MCP Tool Poisoning (arXiv:2512.06556)** | Compiled AK-IR provides a verified, canonical set of tool definitions.                        |
+| **Supply Chain Risk**                     | `sourceHash` and artifact-level hashes in `akcp-manifest.json` enable integrity verification. |
 
 ---
 
 ## 7. Evaluation
 
 AKCP includes a built-in evaluation framework via the `eval-dataset` compilation target. This allows organizations to:
+
 1. Generate ground-truth Q&A pairs from their knowledge base.
 2. Continuously benchmark agent grounding accuracy against verified OKF content.
 3. Detect knowledge drift over time.

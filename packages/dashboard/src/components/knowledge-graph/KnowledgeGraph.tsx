@@ -3,9 +3,9 @@
  * @description Interactive D3.js force-directed graph visualizing skills, experiences, and relationships.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
-import type { CareerBundleData, OKFDoc } from '../../types/career.js';
+import { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
+import type { CareerBundleData, OKFDoc } from "../../types/career.js";
 
 interface KnowledgeGraphProps {
   data: CareerBundleData;
@@ -37,17 +37,18 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
 
     const addNode = (doc: OKFDoc, type: string) => {
       const id = doc.conceptId;
-      const label = doc.frontmatter.title || doc.conceptId.split('/').pop() || id;
+      const label =
+        doc.frontmatter.title || doc.conceptId.split("/").pop() || id;
       const node: GraphNode = { id, label, type, doc };
       nodes.push(node);
       nodeMap.set(id, node);
     };
 
     // Add all nodes
-    data.skills.forEach((s) => addNode(s, 'Skill'));
-    data.experiences.forEach((e) => addNode(e, 'Experience'));
-    data.applications.forEach((a) => addNode(a, 'Application'));
-    data.preferences.forEach((p) => addNode(p, 'Preference'));
+    data.skills.forEach((s) => addNode(s, "Skill"));
+    data.experiences.forEach((e) => addNode(e, "Experience"));
+    data.applications.forEach((a) => addNode(a, "Application"));
+    data.preferences.forEach((p) => addNode(p, "Preference"));
 
     // Automatically derive links based on links/references/tags
     const links: GraphLink[] = [];
@@ -60,14 +61,17 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
       // Check for skill references
       data.skills.forEach((skill) => {
         const skillId = skill.conceptId;
-        const skillName = (skill.frontmatter.title || '').toLowerCase();
-        const skillSlug = skill.conceptId.split('/').pop() || '';
+        const skillName = (skill.frontmatter.title || "").toLowerCase();
+        const skillSlug = skill.conceptId.split("/").pop() || "";
 
         if (node.id === skillId) return; // skip self link
 
         // Check if node has a tag matching the skill name/slug, or if the text references it
-        const hasTagMatch = tags.some((t) => t.toLowerCase() === skillSlug || t.toLowerCase() === skillName);
-        const hasTextMatch = bodyText.includes(skillName) || bodyText.includes(skillSlug);
+        const hasTagMatch = tags.some(
+          (t) => t.toLowerCase() === skillSlug || t.toLowerCase() === skillName,
+        );
+        const hasTextMatch =
+          bodyText.includes(skillName) || bodyText.includes(skillSlug);
 
         if (hasTagMatch || hasTextMatch) {
           links.push({
@@ -77,10 +81,14 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
         }
       });
 
-      if (node.type === 'Application') {
-        const appCompany = (node.doc.frontmatter.company as string | undefined || '').toLowerCase();
+      if (node.type === "Application") {
+        const appCompany = (
+          (node.doc.frontmatter.company as string | undefined) || ""
+        ).toLowerCase();
         data.experiences.forEach((exp) => {
-          const expCompany = (exp.frontmatter.company as string | undefined || '').toLowerCase();
+          const expCompany = (
+            (exp.frontmatter.company as string | undefined) || ""
+          ).toLowerCase();
           if (appCompany && expCompany && expCompany.includes(appCompany)) {
             links.push({
               source: node.id,
@@ -95,20 +103,22 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
     const width = containerRef.current.clientWidth;
     const height = 500;
 
-    const svg = d3.select(svgRef.current)
-      .attr('width', width)
-      .attr('height', height);
+    const svg = d3
+      .select(svgRef.current)
+      .attr("width", width)
+      .attr("height", height);
 
-    svg.selectAll('*').remove(); // clear canvas
+    svg.selectAll("*").remove(); // clear canvas
 
     // Group for zoom operations
-    const g = svg.append('g');
+    const g = svg.append("g");
 
     // Add zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.3, 3])
-      .on('zoom', (event) => {
-        g.attr('transform', event.transform);
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
       });
 
     svg.call(zoom);
@@ -116,77 +126,94 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
     // 3. Define color scheme based on node type
     const getNodeColor = (type: string) => {
       switch (type) {
-        case 'Skill': return '#6366f1'; // electric indigo
-        case 'Experience': return '#06b6d4'; // cyan
-        case 'Preference': return '#a855f7'; // neon purple
-        case 'Application': return '#f97316'; // orange
-        default: return '#71717a';
+        case "Skill":
+          return "#6366f1"; // electric indigo
+        case "Experience":
+          return "#06b6d4"; // cyan
+        case "Preference":
+          return "#a855f7"; // neon purple
+        case "Application":
+          return "#f97316"; // orange
+        default:
+          return "#71717a";
       }
     };
 
     // 4. Force Simulation setup
-    const simulation = d3.forceSimulation<GraphNode>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphLink>(links).id((d) => d.id).distance(100))
-      .force('charge', d3.forceManyBody().strength(-150))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(40));
+    const simulation = d3
+      .forceSimulation<GraphNode>(nodes)
+      .force(
+        "link",
+        d3
+          .forceLink<GraphNode, GraphLink>(links)
+          .id((d) => d.id)
+          .distance(100),
+      )
+      .force("charge", d3.forceManyBody().strength(-150))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius(40));
 
     // 5. Draw Links (Edges)
-    const link = g.append('g')
-      .selectAll('line')
+    const link = g
+      .append("g")
+      .selectAll("line")
       .data(links)
       .enter()
-      .append('line')
-      .attr('stroke', '#27272a')
-      .attr('stroke-opacity', 0.6)
-      .attr('stroke-width', 1.5);
+      .append("line")
+      .attr("stroke", "#27272a")
+      .attr("stroke-opacity", 0.6)
+      .attr("stroke-width", 1.5);
 
     // 6. Draw Nodes (G elements containing circles + labels)
-    const node = g.append('g')
-      .selectAll('.node')
+    const node = g
+      .append("g")
+      .selectAll(".node")
       .data(nodes)
       .enter()
-      .append('g')
-      .attr('class', 'node')
-      .call(d3.drag<SVGGElement, GraphNode>()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended) as any
+      .append("g")
+      .attr("class", "node")
+      .call(
+        d3
+          .drag<SVGGElement, GraphNode>()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended) as any,
       )
-      .on('click', (_event, d) => {
+      .on("click", (_event, d) => {
         setSelectedNode(d);
       });
 
     // Add circle to node
-    node.append('circle')
-      .attr('r', (d) => (d.type === 'Preference' ? 14 : 10))
-      .attr('fill', (d) => getNodeColor(d.type))
-      .attr('stroke', '#09090b')
-      .attr('stroke-width', 2)
-      .attr('class', 'cursor-pointer transition-all hover:scale-125')
-      .style('filter', (d) => `drop-shadow(0 0 4px ${getNodeColor(d.type)}80)`);
+    node
+      .append("circle")
+      .attr("r", (d) => (d.type === "Preference" ? 14 : 10))
+      .attr("fill", (d) => getNodeColor(d.type))
+      .attr("stroke", "#09090b")
+      .attr("stroke-width", 2)
+      .attr("class", "cursor-pointer transition-all hover:scale-125")
+      .style("filter", (d) => `drop-shadow(0 0 4px ${getNodeColor(d.type)}80)`);
 
     // Add text label to node
-    node.append('text')
+    node
+      .append("text")
       .text((d) => d.label)
-      .attr('dx', 15)
-      .attr('dy', 4)
-      .attr('fill', '#e4e4e7')
-      .attr('font-size', '10px')
-      .attr('font-weight', '500')
-      .attr('pointer-events', 'none')
-      .style('text-shadow', '0 1px 2px rgba(0,0,0,0.8)');
+      .attr("dx", 15)
+      .attr("dy", 4)
+      .attr("fill", "#e4e4e7")
+      .attr("font-size", "10px")
+      .attr("font-weight", "500")
+      .attr("pointer-events", "none")
+      .style("text-shadow", "0 1px 2px rgba(0,0,0,0.8)");
 
     // 7. Simulation tick updating coordinates
-    simulation.on('tick', () => {
+    simulation.on("tick", () => {
       link
-        .attr('x1', (d) => (d.source as GraphNode).x!)
-        .attr('y1', (d) => (d.source as GraphNode).y!)
-        .attr('x2', (d) => (d.target as GraphNode).x!)
-        .attr('y2', (d) => (d.target as GraphNode).y!);
+        .attr("x1", (d) => (d.source as GraphNode).x!)
+        .attr("y1", (d) => (d.source as GraphNode).y!)
+        .attr("x2", (d) => (d.target as GraphNode).x!)
+        .attr("y2", (d) => (d.target as GraphNode).y!);
 
-      node
-        .attr('transform', (d) => `translate(${d.x!},${d.y!})`);
+      node.attr("transform", (d) => `translate(${d.x!},${d.y!})`);
     });
 
     // Drag behavior helper events
@@ -221,7 +248,8 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
             Semantic Knowledge Graph
           </h2>
           <p className="text-xs text-zinc-500 mt-1">
-            Drag nodes to explore associations. Zoom with mouse scroll. Click a node for details.
+            Drag nodes to explore associations. Zoom with mouse scroll. Click a
+            node for details.
           </p>
         </div>
 
@@ -266,33 +294,55 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
             </h3>
 
             {/* Custom attributes display based on type */}
-            {selectedNode.type === 'Skill' && (
+            {selectedNode.type === "Skill" && (
               <div className="space-y-1 mb-4 text-xs">
-                {selectedNode.doc.frontmatter['level'] && (
-                  <p><span className="text-zinc-500">Proficiency:</span> {selectedNode.doc.frontmatter['level'] as string}</p>
+                {selectedNode.doc.frontmatter["level"] && (
+                  <p>
+                    <span className="text-zinc-500">Proficiency:</span>{" "}
+                    {selectedNode.doc.frontmatter["level"] as string}
+                  </p>
                 )}
-                {selectedNode.doc.frontmatter['yearsOfExperience'] && (
-                  <p><span className="text-zinc-500">Years of Experience:</span> {selectedNode.doc.frontmatter['yearsOfExperience'] as string} yrs</p>
+                {selectedNode.doc.frontmatter["yearsOfExperience"] && (
+                  <p>
+                    <span className="text-zinc-500">Years of Experience:</span>{" "}
+                    {
+                      selectedNode.doc.frontmatter[
+                        "yearsOfExperience"
+                      ] as string
+                    }{" "}
+                    yrs
+                  </p>
                 )}
-                {selectedNode.doc.frontmatter['category'] && (
-                  <p><span className="text-zinc-500">Category:</span> {selectedNode.doc.frontmatter['category'] as string}</p>
+                {selectedNode.doc.frontmatter["category"] && (
+                  <p>
+                    <span className="text-zinc-500">Category:</span>{" "}
+                    {selectedNode.doc.frontmatter["category"] as string}
+                  </p>
                 )}
               </div>
             )}
 
-            {selectedNode.type === 'Experience' && (
+            {selectedNode.type === "Experience" && (
               <div className="space-y-1 mb-4 text-xs">
-                {selectedNode.doc.frontmatter['company'] && (
-                  <p><span className="text-zinc-500">Company:</span> {selectedNode.doc.frontmatter['company'] as string}</p>
-                )}
-                {selectedNode.doc.frontmatter['role'] && (
-                  <p><span className="text-zinc-500">Role:</span> {selectedNode.doc.frontmatter['role'] as string}</p>
-                )}
-                {selectedNode.doc.frontmatter['startDate'] && (
+                {selectedNode.doc.frontmatter["company"] && (
                   <p>
-                    <span className="text-zinc-500">Period:</span>{' '}
-                    {selectedNode.doc.frontmatter['startDate'] as string}{' '}
-                    - {selectedNode.doc.frontmatter['current'] ? 'Present' : selectedNode.doc.frontmatter['endDate'] as string}
+                    <span className="text-zinc-500">Company:</span>{" "}
+                    {selectedNode.doc.frontmatter["company"] as string}
+                  </p>
+                )}
+                {selectedNode.doc.frontmatter["role"] && (
+                  <p>
+                    <span className="text-zinc-500">Role:</span>{" "}
+                    {selectedNode.doc.frontmatter["role"] as string}
+                  </p>
+                )}
+                {selectedNode.doc.frontmatter["startDate"] && (
+                  <p>
+                    <span className="text-zinc-500">Period:</span>{" "}
+                    {selectedNode.doc.frontmatter["startDate"] as string} -{" "}
+                    {selectedNode.doc.frontmatter["current"]
+                      ? "Present"
+                      : (selectedNode.doc.frontmatter["endDate"] as string)}
                   </p>
                 )}
               </div>
@@ -303,7 +353,7 @@ export function KnowledgeGraph({ data }: KnowledgeGraphProps) {
                 Document Body
               </h4>
               <p className="whitespace-pre-line bg-zinc-950/20 p-3 border border-dark-border/40 rounded-lg text-zinc-300">
-                {selectedNode.doc.body || 'No details provided.'}
+                {selectedNode.doc.body || "No details provided."}
               </p>
             </div>
           </div>

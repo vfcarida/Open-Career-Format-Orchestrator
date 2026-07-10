@@ -2,11 +2,12 @@
 
 The `akcp.yaml` file is the declarative build specification and desired-state contract for the Agent Knowledge Compiler and Control Plane.
 
-By defining an `akcp.yaml` file at the root of your project, you shift from imperatively building the Knowledge IR to a declarative *Control Plane* approach, ensuring reproducibility, validation, and policy compliance.
+By defining an `akcp.yaml` file at the root of your project, you shift from imperatively building the Knowledge IR to a declarative _Control Plane_ approach, ensuring reproducibility, validation, and policy compliance.
 
 ## Structure Overview
 
 The file is divided into two primary sections:
+
 - `compile`: Defines build-time behaviors (where to find markdown, how to build the IR, context budgets).
 - `controlPlane`: Defines runtime behaviors (governance policies, MCP server configurations, evaluation gates).
 

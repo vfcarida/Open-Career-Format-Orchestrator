@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [0.1.0] - Initial Enterprise Blueprint Release
+
 ### Added
+
 - OCF Profile v1 schemas mapped over Open Knowledge Format (OKF).
 - Model Context Protocol (MCP) servers (`@ocf/mcp-profile-server`, `@ocf/mcp-automation-server`).
 - Centralized ApprovalStore via `better-sqlite3` providing time-limited (TTL) token validation.

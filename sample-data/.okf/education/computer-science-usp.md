@@ -18,6 +18,7 @@ tags: [computer science, algorithms, distributed systems]
 Completed a rigorous 4-year computer science program.
 
 ### Key Coursework
+
 - Data Structures and Algorithms
 - Operating Systems
 - Database Management Systems
