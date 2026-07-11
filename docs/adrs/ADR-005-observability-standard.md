@@ -12,7 +12,7 @@ Troubleshooting autonomous agents requires tracking multi-step tool calls, parse
 
 ## Decision
 
-Adopt OpenTelemetry (OTel) for standardized metrics (`ocf_mcp_tool_calls_total`) and distributed tracing across all core and server packages.
+Adopt OpenTelemetry (OTel) for standardized metrics (`akcp_mcp_tool_calls_total`) and distributed tracing across all core and server packages.
 
 ## Consequences
 

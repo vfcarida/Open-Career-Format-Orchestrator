@@ -2,7 +2,7 @@
 
 ## Proposal
 
-Generalize the OCF orchestration engine beyond Career Management to domains like Finance, Health, and IT Ops.
+Generalize the AKCP orchestration engine beyond Career Management to domains like Finance, Health, and IT Ops.
 
 ## Rationale
 

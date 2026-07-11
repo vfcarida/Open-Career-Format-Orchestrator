@@ -1,4 +1,4 @@
-# OCF Telemetry Guidelines
+# AKCP Telemetry Guidelines
 
 The Agent Knowledge Compiler and Control Plane uses OpenTelemetry (OTel) for distributed tracing, metrics, and structured logging.
 
@@ -8,7 +8,7 @@ Telemetry is initialized automatically when the MCP servers start. It intercepts
 
 ## Redaction
 
-Since OCF handles highly sensitive personal data (PII), we strictly adhere to:
+Since AKCP handles highly sensitive personal data (PII), we strictly adhere to:
 
 1. No raw file contents in traces.
 2. No cookie/session tokens in HTTP spans.

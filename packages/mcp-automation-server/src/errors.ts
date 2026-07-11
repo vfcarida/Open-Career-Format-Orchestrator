@@ -1,6 +1,6 @@
 /**
  * @module errors
- * @description Custom error classes for the OCF MCP Server.
+ * @description Custom error classes for the AKCP MCP Server.
  *
  * All errors return structured, descriptive messages that help the LLM client
  * understand why a tool call failed and self-correct if possible.

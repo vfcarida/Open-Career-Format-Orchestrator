@@ -13,7 +13,7 @@ The lowest level of certification. A bundle is OKF-compatible if it adheres to t
 - Every frontmatter block contains a `type: <string>` field.
 - The bundle may optionally include an `index.md` and `log.md`.
 
-## 2. OCF-profile-compatible
+## 2. AKCP-profile-compatible
 
 This tier certifies that the bundle aligns with a domain-specific schema (an "Open Context Profile"). For example, the `career` profile.
 
@@ -29,7 +29,7 @@ This tier guarantees that the bundle can be compiled into an Agent Knowledge Int
 
 **Requirements:**
 
-- Must meet all `OCF-profile-compatible` requirements.
+- Must meet all `AKCP-profile-compatible` requirements.
 - Cross-document links are semantically analyzable.
 - The bundle compiles cleanly through `buildKnowledgeIR`.
 

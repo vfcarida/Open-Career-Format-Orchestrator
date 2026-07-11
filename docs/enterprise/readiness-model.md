@@ -23,7 +23,7 @@ This document maps the Agent Knowledge Compiler and Control Plane to the **NIST 
 
 ## Data Classification
 
-In the OCF Career domain, data is classified as:
+In the AKCP Career domain, data is classified as:
 
 - **Confidential/PII**: `preferences`, `experiences` containing sensitive contact info.
 - **Internal**: `applications` statuses.

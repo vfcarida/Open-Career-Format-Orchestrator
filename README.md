@@ -1,40 +1,79 @@
-# Agent Knowledge Compiler and Control Plane
+# Agent Knowledge Compiler and Control Plane (AKCP)
 
-## What this is
+Agent Knowledge Compiler and Control Plane (AKCP) is an open-source system for compiling organizational knowledge into governed, versioned, testable, cost-aware, agent-consumable artifacts, and for controlling how agents discover, retrieve, use, and act on that knowledge through MCP-compatible capabilities.
 
-AKCP is an open-source compiler and control plane for turning organizational knowledge into versioned, governed, cost-efficient, agent-consumable artifacts, and for controlling how agents discover, retrieve and act on that knowledge through MCP-compatible capabilities.
-
-## What this is not
-
-- Not just a vector database or probabilistic RAG pipeline.
-- Not a generic framework for building AI agents.
-- Not an LLM prompt manager.
-
-## Why this exists
-
-AI agents today suffer from structural hallucination: they lack deterministic grounding. Enterprises cannot afford unpredictable agentic behavior. Standard tools solve parts of the problem, but fail to provide a cohesive supply chain from raw documentation to controlled agent side-effects.
-
-## How it relates to OKF, MCP and OpenWiki
-
-- **OKF (Open Knowledge Format):** Provides the static semantic primitives (YAML + Markdown), but lacks a runtime mechanism. AKCP compiles raw OKF into an optimized Agent Knowledge IR (AK-IR).
-- **MCP (Model Context Protocol):** A powerful RPC standard, but raw MCP exposes a massive attack surface. AKCP wraps MCP with budgetary controls and human-in-the-loop (HITL) approval boundaries.
-- **OpenWiki:** Authors and maintains agent-oriented documentation. OpenWiki _authors_; AKCP _compiles, validates, and controls_.
-
-## Current maturity status
-
-| Surface             | Maturity          | Evidence              | Limitation                 |
-| ------------------- | ----------------- | --------------------- | -------------------------- |
-| CLI local workspace | Beta              | commands + tests      | no npm release yet         |
-| Global npm install  | Planned           | package private       | not available              |
-| MCP serving         | Beta/Experimental | server implementation | security hardening ongoing |
-| OpenWiki import     | Alpha/Beta        | importer exists       | sync depth limited         |
-
-## Architecture overview
+## What AKCP is
 
 AKCP explicitly separates the lifecycle of agent knowledge into two operational planes:
 
-1. **Build Plane (Compiler):** Ingests raw organizational context, normalizes it, and compiles it into semantically dense, strictly-typed context packs.
-2. **Runtime Plane (Control Plane):** Governs how agents discover tools, budgets context retrieval, authorizes side-effects via Human-In-The-Loop (HITL), and provides full auditability.
+1. **Compiler Pipeline**: Ingests raw organizational knowledge (docs, wikis, runbooks), normalizes it into OKF and AK-IR formats, and compiles it into semantically dense, strictly-typed artifacts (Context Packs, MCP Resources, OpenWiki Docs, Eval datasets).
+2. **Control Plane**: Governs how autonomous agents interact with these artifacts at runtime. It features a capability registry, machine-readable policy cards, strict Human-In-The-Loop (HITL) approvals, and full audit telemetry.
+
+## What AKCP is not
+
+- **Not just a vector database or probabilistic RAG pipeline**: AKCP focuses on determinism, governance, and static context compilation.
+- **Not a generic framework for building AI agents**: AKCP does not orchestrate agents (like LangGraph or AutoGen). Instead, it provides the deterministic _context_ and _capabilities_ those agents consume.
+- **Not OpenWiki**: OpenWiki _authors_ and maintains codebase documentation. AKCP _compiles and governs_ knowledge across formats.
+- **Not OKF**: OKF provides a minimal portable knowledge format. AKCP implements the runtime orchestrator around it.
+- **Not MCP**: MCP provides a protocol for tools and resources. AKCP wraps MCP with budgetary controls and governance.
+
+## Why this matters
+
+AI agents today suffer from structural hallucination: they lack deterministic grounding. Enterprises cannot afford unpredictable agentic behavior, especially when agents have side-effect capabilities (e.g., executing scripts, deploying infrastructure). Standard tools solve parts of the problem, but fail to provide a cohesive supply chain from raw documentation to controlled agent side-effects. AKCP solves this by treating knowledge and tools as governed, versioned artifacts.
+
+## Architecture at a glance
+
+```mermaid
+flowchart LR
+  Sources[Knowledge Sources] --> OKF[OKF Bundles]
+  OKF --> IR[AK-IR]
+  IR --> Compiler[AKCP Compiler]
+  Compiler --> Artifacts[Compiled Artifacts]
+  Artifacts --> MCP[MCP Resources / Tools / Prompts]
+  Artifacts --> Packs[Context Packs]
+  Artifacts --> OpenWiki[OpenWiki Docs]
+  MCP --> Control[Control Plane]
+  Control --> Policy[Policy Cards]
+  Control --> Audit[Audit Evidence]
+  Control --> Evals[Evals]
+```
+
+## Compiler Pipeline
+
+The AKCP compiler treats organizational knowledge like source code:
+1. **Source**: Knowledge is structured using [OKF (Open Knowledge Format)](docs/integrations/okf.md).
+2. **IR**: It parses into the [Agent Knowledge IR (AK-IR)](docs/reference/agent-knowledge-ir.md) for AST-level validation and linkage.
+3. **Target**: It generates optimized outputs via [Compile Targets](docs/reference/compile-targets.md) tailored for different agents and systems.
+
+## Control Plane Model
+
+At runtime, the Control Plane ensures safe agent execution:
+1. **Capability Registry**: Maps tools and resources.
+2. **Policy Cards**: Define strict constraints (e.g., [Policy Cards Spec](docs/reference/policy-cards.md)).
+3. **Approvals**: Pauses execution for Human-In-The-Loop confirmation.
+4. **Telemetry & Audit**: Logs every token and action for [Audit Evidence](docs/observability/telemetry.md).
+
+## Flagship Domains
+
+To prove its domain-agnostic architecture, AKCP implements distinct flagship scenarios:
+
+| Domain | Why it exists | What it demonstrates |
+|---|---|---|
+| Career | low-friction starter domain | personal knowledge compilation |
+| IT Operations | enterprise flagship | runbooks, incidents, approvals, audit |
+| Customer Support | future enterprise flagship | PII, policies, macros, escalation, history |
+
+## Current Maturity Status
+
+| Area | Status | Evidence | Limitation | Next milestone |
+|---|---|---|---|---|
+| Compiler CLI | Beta | tests + examples | no npm release yet | global CLI distribution |
+| AK-IR | Beta | spec + fixtures | requires manual tuning | automatic normalization |
+| MCP servers | Beta | contract tests | local-only | secure remote hosting |
+| Control Plane | Alpha/Beta | policy cards + audit | dashboard is a stub | comprehensive dashboard |
+| Career flagship | Stable demo | walkthrough | limited tool scope | expansion |
+| IT Ops flagship | Beta enterprise demo | walkthrough | mocked infrastructure | real cloud integrations |
+| Customer Support | Planned | design prompt | not implemented | future flagship |
 
 ## Quickstart
 
@@ -56,64 +95,78 @@ pnpm build
 pnpm akcp doctor
 ```
 
-### Published Package (Planned)
+## CLI Examples
 
-_AKCP is not published to npm yet. Use the local workspace flow above._
+The `akcp` CLI manages your knowledge bundles:
 
-## CLI usage
+| Command          | Purpose                                | Example                                             |
+| ---------------- | -------------------------------------- | --------------------------------------------------- |
+| `akcp doctor`    | Validate local environment             | `akcp doctor`                                       |
+| `akcp compile`   | Compile knowledge into AK-IR/artifacts | `akcp compile --bundle ./my-project/.agent-context` |
+| `akcp validate`  | Validate bundle/spec/config            | `akcp validate ./my-project/.agent-context`         |
+| `akcp serve:mcp` | Serve compiled artifacts through MCP   | `akcp serve:mcp ./my-project/.agent-context`        |
 
-| Command          | Status       | Purpose                                | Example                                             |
-| ---------------- | ------------ | -------------------------------------- | --------------------------------------------------- |
-| `akcp doctor`    | Stable       | Validate local environment             | `akcp doctor`                                       |
-| `akcp compile`   | Beta         | Compile knowledge into AK-IR/artifacts | `akcp compile --bundle ./my-project/.agent-context` |
-| `akcp validate`  | Beta         | Validate bundle/spec/config            | `akcp validate ./my-project/.agent-context`         |
-| `akcp serve:mcp` | Experimental | Serve compiled artifacts through MCP   | `akcp serve:mcp ./my-project/.agent-context`        |
+For full details, see [CLI Usage](docs/cli/usage.md).
 
-For full details on all 22 commands, see [docs/cli/usage.md](docs/cli/usage.md) and [docs/specs/cli.md](docs/specs/cli.md).
+## Repository Structure
 
-## Flagship demos
+- `packages/core/`: The OKF parser, compiler, and AK-IR normalization engine.
+- `packages/cli/`: The `akcp` command-line interface.
+- `packages/mcp-profile-server/`: Exposes context via MCP.
+- `packages/mcp-automation-server/`: Controls agentic side-effects via Playwright/HITL.
+- `packages/conformance/`: Test suite for OKF and AKCP compatibility.
+- `examples/domains/`: Working demo architectures for the flagship domains.
 
-To prove the model-independent nature of the compiler and its enterprise value, this repository ships with `examples/domains/`.
+## Specs and Standards
 
-- **IT Operations Flagship**: The primary enterprise demo. Showcases platform runbooks, incident response, strict policy-controlled actions, and MCP runtime governance with Human-In-The-Loop (HITL) gates.
-- **Career Knowledge Demo**: An individual, approachable onboarding demo.
-- **Software Projects**: Included to prove cross-industry extensibility.
+AKCP relies on Spec-Driven Development:
+- [Agent Knowledge IR (AK-IR)](docs/reference/agent-knowledge-ir.md)
+- [AKCP Configuration (`akcp.yaml`)](docs/reference/akcp-yaml.md)
+- [Compile Targets & Manifests](docs/reference/compile-targets.md)
+- [Policy Cards](docs/reference/policy-cards.md)
+- [Conformance Specification](docs/reference/conformance.md)
 
-## MCP integration
+## MCP and OKF Compatibility
 
-AKCP uses the Model Context Protocol to serve context.
+- AKCP natively supports the Model Context Protocol. See [MCP Security](docs/security/mcp-security.md) and [Tool Contracts](docs/reference/mcp-tool-contracts.md).
+- AKCP acts as the orchestrator for [Open Knowledge Format (OKF)](docs/integrations/okf.md).
 
-```bash
-# Serve your compiled context via MCP
-pnpm akcp serve:mcp ./my-project/.agent-context
-```
+## Security and Governance
 
-## Conformance and evals
+Security is embedded at the architectural level:
+- [Threat Model](docs/security/threat-model.md)
+- [Automation Safety](docs/security/automation-safety.md)
+- [NIST AI RMF Mapping](docs/governance/nist-ai-rmf-mapping.md)
+- [OWASP LLM Controls](docs/governance/owasp-llm-controls.md)
 
-AKCP ships with a rigorous conformance and evaluation suite.
+## Testing and Conformance
 
+Ensure quality by running the comprehensive test suite:
 ```bash
 pnpm test -- --run
+pnpm check:docs
+pnpm check:links
 ```
-
-## Security and governance
-
-AKCP implements strict security controls over agentic execution, enforcing OWASP Top 10 for LLMs policies through machine-readable `PolicyCards`.
-
-## Development
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for code-level guidelines. We strictly adhere to the NIST AI RMF.
+For evaluation frameworks, see the [Evals Documentation](docs/testing/evals.md).
 
 ## Roadmap
 
-AKCP evolves as a formal specification.
-
-- **Current focus:** Hardening the React Dashboard for real-time Human-In-The-Loop approvals.
-- **Next up:** Remote MCP exposure guidelines and Authentication flows.
+See the [Community Roadmap](docs/community/roadmap.md).
 
 ## Contributing
 
-Issues and PRs are welcome!
+See [CONTRIBUTING.md](CONTRIBUTING.md) for code-level guidelines.
+
+## Backwards Compatibility & Migration
+
+The repository was previously known as Open Career Format (OCF), ContextOps, and Agent-ready Knowledge Reference Architecture. Legacy CLI commands (`ocf`, `agent-ready`) continue to route to the main `akcp` binary while emitting a deprecation warning.
+
+| Legacy Concept | Canonical AKCP Concept | Migration Status |
+| --- | --- | --- |
+| `Open Career Format (OCF)` | Agent Knowledge Compiler and Control Plane (AKCP) | Identity updated. Internal references are deprecated. |
+| `ContextOps` | AKCP Control Plane | Identity updated. |
+| `ocf` CLI command | `akcp` | Supported with deprecation warning. |
+| `agent-ready` CLI command | `akcp` | Supported with deprecation warning. |
 
 ---
 

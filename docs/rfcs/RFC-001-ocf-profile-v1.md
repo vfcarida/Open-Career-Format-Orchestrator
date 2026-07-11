@@ -1,4 +1,4 @@
-# RFC 1: OCF Profile v1
+# RFC 1: AKCP Profile v1
 
 ## Proposal
 
@@ -10,4 +10,4 @@ To provide LLMs with deterministic JSON schemas when tailoring resumes or queryi
 
 ## Status
 
-Implemented. See `docs/reference/ocf-profile.md`.
+Implemented. See `docs/reference/akcp-profile.md`.

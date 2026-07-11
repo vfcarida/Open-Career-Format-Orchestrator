@@ -1,6 +1,6 @@
 # MCP Security Guidelines
 
-This document outlines the security mechanisms implemented in the OCF MCP Servers.
+This document outlines the security mechanisms implemented in the AKCP MCP Servers.
 
 ## 1. Local-First Boundary
 

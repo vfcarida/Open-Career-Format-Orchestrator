@@ -1,4 +1,4 @@
-# ADR-002: OCF Profile Extension Over OKF Base
+# ADR-002: AKCP Profile Extension Over OKF Base
 
 ## Status
 
@@ -10,7 +10,7 @@ The OKF v0.1 format standardises metadata directory files but intentionally leav
 
 ## Decision
 
-We establish **OCF Profile v1** as a versioned extension profile over OKF. Every career record must identify:
+We establish **AKCP Profile v1** as a versioned extension profile over OKF. Every career record must identify:
 
 - `schemaVersion: "ocf.profile/v1"`
 - `bundleVersion: "1.0.0"`

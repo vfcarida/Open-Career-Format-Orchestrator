@@ -1,6 +1,6 @@
-# OCF Profile v1
+# AKCP Profile v1
 
-The Agent Knowledge Compiler and Control Plane (AKCP) (OCF) Profile v1 is an extension of the Open Knowledge Format (OKF) specification, heavily tailored for modeling professional career management data.
+The Agent Knowledge Compiler and Control Plane (AKCP) (AKCP) Profile v1 is an extension of the Open Knowledge Format (OKF) specification, heavily tailored for modeling professional career management data.
 
 ## Base Conformance
 
@@ -13,7 +13,7 @@ As per the OKF specification:
 
 ## Profile Metadata
 
-A valid OCF bundle should specify the following in its configurations or root index:
+A valid AKCP bundle should specify the following in its configurations or root index:
 
 ```yaml
 schemaVersion: "ocf.profile/v1"
@@ -25,7 +25,7 @@ profile: "career-management"
 
 ## Standard Base Fields
 
-While OKF only strictly requires `type`, the OCF Profile RECOMMENDS the following standard OKF fields for all document types:
+While OKF only strictly requires `type`, the AKCP Profile RECOMMENDS the following standard OKF fields for all document types:
 
 - `title`: A human-readable title.
 - `description`: A brief summary of the document.
@@ -34,7 +34,7 @@ While OKF only strictly requires `type`, the OCF Profile RECOMMENDS the followin
 
 ## Defined Collections (Types)
 
-The OCF Profile strictly defines the following types, typically stored in matching directory structures:
+The AKCP Profile strictly defines the following types, typically stored in matching directory structures:
 
 ### `Skill` (Directory: `skills/`)
 

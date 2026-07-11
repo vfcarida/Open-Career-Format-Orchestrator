@@ -6,7 +6,8 @@
   "type": "module",
   "bin": {
     "akcp": "./dist/index.js",
-    "agent-ready": "./dist/legacy-bin.js"
+    "agent-ready": "./dist/legacy-bin.js",
+    "ocf": "./dist/legacy-ocf-bin.js"
   },
   "scripts": {
     "build": "tsc",

@@ -16,4 +16,4 @@ We establish the `ocf.profile/v1` schema running strictly over standard OKF dire
 
 ## Consequences
 
-Generic OKF tooling can still parse OCF bundles. Domain-specific LLMs can leverage the stricter schema.
+Generic OKF tooling can still parse AKCP bundles. Domain-specific LLMs can leverage the stricter schema.

@@ -4,7 +4,7 @@ This checklist ensures that all documentation within the AKCP repository adheres
 
 ## 1. Category Alignment
 
-- [ ] **No "Reference Architecture" framing:** The repository is positioned as the "Agent Knowledge Compiler and Control Plane (AKCP)".
+- [ ] **No "Agent Knowledge Compiler and Control Plane" framing:** The repository is positioned as the "Agent Knowledge Compiler and Control Plane (AKCP)".
 - [ ] **Separation of Planes:** Documentation clearly distinguishes between the "Build-Time Compiler" (CLI, validation, packing) and the "Runtime Control Plane" (MCP Servers, HITL, Dashboard).
 
 ## 2. Competitive Differentiation

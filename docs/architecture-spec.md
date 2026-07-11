@@ -1,6 +1,6 @@
 # Agent-Oriented Architecture: Unifying Knowledge and Execution via OKF & MCP
 
-This document establishes the official architectural specification and engineering guidelines for the **Agent Knowledge Compiler and Control Plane (OCF)**. It describes the integration of Google Cloud's **Open Knowledge Format (OKF)** for structured career memory and Anthropic's **Model Context Protocol (MCP)** for secure, automated execution.
+This document establishes the official architectural specification and engineering guidelines for the **Agent Knowledge Compiler and Control Plane (AKCP)**. It describes the integration of Google Cloud's **Open Knowledge Format (OKF)** for structured career memory and Anthropic's **Model Context Protocol (MCP)** for secure, automated execution.
 
 ---
 
@@ -8,14 +8,14 @@ This document establishes the official architectural specification and engineeri
 
 Maximizing the ROI of Artificial Intelligence within enterprise software and personal agents depends on how knowledge is structured. Historically, corporate and personal data resides in fragmented silos: department wikis, legacy databases, untracked logs, and loose comments. Unstructured data forces developers to write complex, ad-hoc integrations for every new LLM or tool.
 
-To bypass this integration debt, OCF integrates two core industry standards:
+To bypass this integration debt, AKCP integrates two core industry standards:
 
 1.  **Open Knowledge Format (OKF)**: A vendor-neutral standard initiated by Google Cloud. It structures knowledge concepts inside standard directories using Markdown files and structured YAML frontmatter, making data readable by both humans and LLMs without heavy SDK dependencies.
 2.  **Model Context Protocol (MCP)**: An open standard created by Anthropic that defines how AI clients securely connect to local or remote data sources, filesystem contexts, and external automation tools using a unified client-server interface.
 
-### 1.1 The Practical Materialization: Agent Knowledge Compiler and Control Plane (OCF)
+### 1.1 The Practical Materialization: Agent Knowledge Compiler and Control Plane (AKCP)
 
-While the combined pattern of OKF and MCP is vertical-agnostic (applicable to finance, medical records, or IT operations), the **Agent Knowledge Compiler and Control Plane (OCF)** serves as the reference implementation. OCF maps a candidate's complete professional journey, including skills, experiences, target job preferences, and application funnels, allowing autonomous agents to evaluate vacancies, tailor resumes, and execute browser automation securely.
+While the combined pattern of OKF and MCP is vertical-agnostic (applicable to finance, medical records, or IT operations), the **Agent Knowledge Compiler and Control Plane (AKCP)** serves as the reference implementation. AKCP maps a candidate's complete professional journey, including skills, experiences, target job preferences, and application funnels, allowing autonomous agents to evaluate vacancies, tailor resumes, and execute browser automation securely.
 
 ---
 
@@ -70,7 +70,7 @@ OKF avoids vendor lock-in by relying on simple filesystems. A career bundle cont
 │   ├── aws-solutions-architect.md
 │   └── index.md
 ├── projects/
-│   ├── open-career-format.md
+│   ├── Agent-Knowledge-Compiler-and-Control-Plane.md
 │   └── index.md
 ├── preferences/
 │   └── job-search.md
@@ -98,7 +98,7 @@ To reduce context costs when consuming large amounts of text, developers can ado
 
 ## 📐 4. Spec-Driven Development (SDD)
 
-OCF relies on Spec-Driven Development. Specifications and architectural plans serve as the primary source of truth, minimizing cognitive debt.
+AKCP relies on Spec-Driven Development. Specifications and architectural plans serve as the primary source of truth, minimizing cognitive debt.
 
 ### 4.1 Spec-Anchored Lifecycle
 

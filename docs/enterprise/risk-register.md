@@ -1,6 +1,6 @@
 # Risk Register
 
-This register documents the primary risks of deploying the OCF Orchestrator in an enterprise environment.
+This register documents the primary risks of deploying the AKCP Orchestrator in an enterprise environment.
 
 | Risk ID | Description                                           | Severity | Mitigation                                                                                                 |
 | ------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |

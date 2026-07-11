@@ -1,5 +1,5 @@
 name: Feature Request
-description: Propose a new feature or enhancement for OCF
+description: Propose a new feature or enhancement for AKCP
 title: "feat: <title>"
 labels: ["enhancement"]
 body:
@@ -15,7 +15,7 @@ body:
     id: rationale
     attributes:
       label: Rationale & Value
-      description: Why is this feature valuable for the OCF ecosystem?
+      description: Why is this feature valuable for the AKCP ecosystem?
     validations:
       required: true
   - type: textarea

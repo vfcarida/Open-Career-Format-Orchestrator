@@ -139,7 +139,7 @@ Organizations can adopt AKCP incrementally, following the maturity model:
 3. **Level 3 (Governed):** Policy Cards and HITL gates active.
 4. **Level 4 (Enterprise):** Centralized governance, provenance tracking, scorecard monitoring.
 
-See the full enterprise playbooks in [`docs/enterprise/playbooks/`](../docs/enterprise/playbooks/).
+For deployment playbooks across domains (like HR onboarding or support tier-1 macros), refer to the [Enterprise Domain Adapters](../enterprise/domain-adapter-guide.md).
 
 ---
 

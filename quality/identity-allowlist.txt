@@ -1,0 +1,17 @@
+# Identity Allowlist
+# This file contains intentionally preserved legacy strings for backward compatibility, migration docs, or changelogs.
+
+# Core CLI deprecations
+package.json
+packages/cli/package.json
+packages/cli/src/legacy-bin.ts
+packages/cli/src/legacy-ocf-bin.ts
+
+# Documentation of migration
+README.md
+
+# Cache files might contain the local repo path
+build-state.json
+
+# Scratch files
+scratch/migrate.ts

@@ -40,7 +40,7 @@ The following terms are considered legacy and must not be used in new documentat
 
 - Agent Knowledge Compiler and Control Plane
 - Agent Knowledge Compiler and Control Plane
-- OCF
-- Agent-ready Knowledge Reference Architecture
-- Agent-ready
-- ContextOps
+- AKCP
+- Agent Knowledge Compiler and Control Plane
+- akcp
+- AKCP

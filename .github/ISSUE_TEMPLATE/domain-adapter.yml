@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Domain Adapters are pre-packaged templates that users can bootstrap via `agent-ready init --profile X`.
+        Domain Adapters are pre-packaged templates that users can bootstrap via `akcp init --profile X`.
   - type: input
     id: adapter-name
     attributes:

@@ -12,7 +12,7 @@ A feature, name, or variable is marked as deprecated if it is currently supporte
 
 ### CLI Commands
 
-- **Legacy:** `agent-ready`
+- **Legacy:** `akcp`
 - **Status:** Deprecated Alias.
 - **Action:** Triggers a console warning, then delegates to `akcp`.
 - **Removal Date:** Next major release (v1.0.0).

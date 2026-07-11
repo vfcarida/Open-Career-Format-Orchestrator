@@ -2,7 +2,7 @@
   "name": "@akcp/core",
   "version": "0.1.0",
   "private": true,
-  "description": "OKF (Open Knowledge Format) engine for career data management. Domain layer with file-based repository, frontmatter parsing, and document lifecycle services.",
+  "description": "Agent Knowledge Compiler and Control Plane (AKCP) Core Engine. Handles bundle parsing, schema validation, and profile compliance.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

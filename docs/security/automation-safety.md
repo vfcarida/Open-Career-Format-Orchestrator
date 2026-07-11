@@ -1,6 +1,6 @@
 # Automation Safety Guidelines
 
-Browser automation (via Playwright) poses significant risks if weaponized. OCF mitigates these risks via architecture:
+Browser automation (via Playwright) poses significant risks if weaponized. AKCP mitigates these risks via architecture:
 
 ## 1. Sandbox by Default
 

@@ -1,4 +1,4 @@
-# OCF Reference Architecture Threat Model
+# AKCP Agent Knowledge Compiler and Control Plane Threat Model
 
 This document outlines the threat model for the Agent Knowledge Compiler and Control Plane using the STRIDE methodology.
 
@@ -33,4 +33,4 @@ This document outlines the threat model for the Agent Knowledge Compiler and Con
 ### 4. PII Data Exfiltration (Information Disclosure)
 
 **Risk**: Career context (address, phone, resume) is exposed to an unauthorized or public model.
-**Mitigation**: The architecture strongly recommends local-first execution (e.g., Gemma 4 via Ollama). The OCF Profile specification ensures standard modeling, so redacting tools can be built generically before context is sent externally.
+**Mitigation**: The architecture strongly recommends local-first execution (e.g., Gemma 4 via Ollama). The AKCP Profile specification ensures standard modeling, so redacting tools can be built generically before context is sent externally.
