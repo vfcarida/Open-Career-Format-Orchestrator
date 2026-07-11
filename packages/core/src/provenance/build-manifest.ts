@@ -1,24 +1,33 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { AgentKnowledgeIR } from "../ir/types.js";
-import type { BuildManifest, ArtifactProvenance } from "./types.js";
+import type { BuildManifest, ArtifactProvenance, ConformanceInfo } from "./types.js";
 import type { TargetOutput } from "../targets/types.js";
 
 export class ProvenanceManifestBuilder {
   private outputs: ArtifactProvenance[] = [];
-  private warnings: string[] = [];
+  private diagnostics: string[] = [];
+  private conformance: ConformanceInfo = {
+    level: "none",
+    checks: [],
+  };
 
   addOutput(output: TargetOutput) {
     this.outputs.push({
-      targetType: output.targetType,
-      outputPath: output.outputPath,
+      name: output.targetType,
+      status: "success",
+      outputs: [output.outputPath],
       hash: output.hash,
-      bytesWritten: output.bytesWritten,
+      sizeBytes: output.bytesWritten,
     });
   }
 
   addWarning(warning: string) {
-    this.warnings.push(warning);
+    this.diagnostics.push(warning);
+  }
+
+  setConformance(conformance: ConformanceInfo) {
+    this.conformance = conformance;
   }
 
   async writeManifest(
@@ -26,6 +35,7 @@ export class ProvenanceManifestBuilder {
     manifestPath: string,
     configHash: string,
     toolVersion: string,
+    bundleRoot: string = ".",
   ): Promise<void> {
     const fullPath = path.resolve(process.cwd(), manifestPath);
     const outDir = path.dirname(fullPath);
@@ -33,15 +43,21 @@ export class ProvenanceManifestBuilder {
     await fs.mkdir(outDir, { recursive: true });
 
     const manifest: BuildManifest = {
-      version: "1.0.0",
+      schemaVersion: "akcp.artifact-manifest/v1",
       buildId: ir.buildId,
-      bundleId: ir.bundleId,
-      timestamp: ir.timestamp,
-      toolVersion,
-      configHash,
-      sourceHashes: ir.sourceHashes || {},
+      createdAt: ir.timestamp,
+      source: {
+        root: bundleRoot,
+        config: "akcp.yaml",
+        hash: configHash || ir.sourceHashes?.["akcp.yaml"] || "unknown",
+      },
+      compiler: {
+        name: "akcp",
+        version: toolVersion,
+      },
       targets: this.outputs,
-      warnings: this.warnings,
+      diagnostics: this.diagnostics,
+      conformance: this.conformance,
     };
 
     await fs.writeFile(fullPath, JSON.stringify(manifest, null, 2), "utf-8");

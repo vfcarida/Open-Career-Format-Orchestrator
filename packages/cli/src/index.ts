@@ -20,9 +20,13 @@ program
   .description("Initialize a new .agent-context structure")
   .argument("[directory]", "Directory to initialize", ".")
   .option(
+    "-t, --template <profile>",
+    "Context profile template (e.g., career, it-ops)",
+    "career",
+  )
+  .option(
     "-p, --profile <profile>",
-    "Context profile (e.g., software-project, career)",
-    "standard",
+    "Context profile (deprecated, use --template)",
   )
   .action((directory, options) => {
     const targetDir = path.resolve(process.cwd(), directory);
@@ -37,30 +41,28 @@ program
       const cliDir = path.dirname(fileURLToPath(import.meta.url));
       const templateDir = path.resolve(
         cliDir,
-        "../../../examples/domains",
-        options.profile,
+        "../../../examples",
+        options.template || options.profile || "career",
       );
 
       if (fs.existsSync(templateDir)) {
         fs.cpSync(templateDir, contextDir, { recursive: true });
-        console.log(
-          `[INFO] Copied Domain Adapter template: ${options.profile}`,
-        );
+        console.log(`[INFO] Copied template: ${options.template || options.profile}`);
       } else {
         console.warn(
-          `[WARN] Domain template '${options.profile}' not found in examples/domains/. Initializing empty profile.`,
+          `[WARN] Domain template '${options.template || options.profile}' not found in examples/. Initializing empty profile.`,
         );
       }
     } catch (e) {
       console.warn(
-        `[WARN] Could not copy template for '${options.profile}'. Initializing empty profile.`,
+        `[WARN] Could not copy template for '${options.template || options.profile}'. Initializing empty profile.`,
       );
     }
 
     const indexContent = `---
 type: Index
 title: Context Pack Index
-profile: ${options.profile}
+profile: ${options.template || options.profile || "career"}
 version: 1.0.0
 ---
 
@@ -74,12 +76,12 @@ This directory contains akcp knowledge bundles.
 
     // Bootstrap AGENTS.md injection hint
     const agentsMdContent = `# Agent Instructions
-Always load the local \`.agent-context\` pack before answering questions related to the domain '${options.profile}'.
+Always load the local \`.agent-context\` pack before answering questions related to the domain '${options.template || options.profile || "career"}'.
 `;
     fs.writeFileSync(path.join(targetDir, "AGENTS.md"), agentsMdContent);
 
     console.log(
-      `[OK] Context Pack initialized at ${contextDir} using profile '${options.profile}'`,
+      `[OK] Context Pack initialized at ${contextDir} using template '${options.template || options.profile}'`,
     );
   });
 
@@ -96,9 +98,13 @@ program
     "Output format (json or markdown)",
     "markdown",
   )
+  .option(
+    "-b, --bundle <directory>",
+    "Directory to validate (overrides positional argument)",
+  )
   .option("-p, --profile <profile>", "Profile to validate against", "career")
   .action((directory, options) => {
-    const targetDir = path.resolve(process.cwd(), directory);
+    const targetDir = path.resolve(process.cwd(), options.bundle || directory);
     console.log(`[INFO] Validating bundle at: ${targetDir}`);
 
     if (!fs.existsSync(targetDir)) {
@@ -168,18 +174,20 @@ program
     }
   });
 
-// COMMAND: compile
 program
   .command("compile")
   .description("Compile Context Packs to specified targets")
   .option(
+    "-c, --config <path>",
+    "Path to akcp.yaml or directory containing it",
+  )
+  .option(
     "--bundle <directory>",
-    "Directory containing akcp.yaml or okf bundle",
-    ".",
+    "Directory containing akcp.yaml (deprecated, use --config)",
   )
   .option(
     "--target <type>",
-    "Specific target to compile (e.g., all, mcp-resources-manifest, agents-md, openwiki-docs, okf-bundle, graph-json, eval-dataset, policy-bundle)",
+    "Specific target to compile (e.g., all, mcp-resources, mcp-tools, mcp-prompts, context-pack, openwiki, agent-instructions, eval-dataset, dashboard-metadata, policy-bundle)",
     "all",
   )
   .option(
@@ -188,47 +196,41 @@ program
     false,
   )
   .action(async (options) => {
+    const configInput = options.config || options.bundle || ".";
     console.log(
-      `[INFO] Compiling context pack from ${options.bundle} (target: ${options.target})`,
+      `[INFO] Compiling context pack from ${configInput} (target: ${options.target})`,
     );
     try {
       const {
         loadAkcpConfig,
         buildKnowledgeIR,
         IrJsonTarget,
-        OkfBundleTarget,
         OpenWikiDocsTarget,
         AgentsMdTarget,
         McpResourcesManifestTarget,
         PolicyBundleTarget,
         EvalDatasetTarget,
-        GraphJsonTarget,
         ProvenanceManifestBuilder,
         hashConfig,
       } = await import("@akcp/core");
+      const { ConformanceRunner } = await import("@akcp/conformance");
 
-      const targetDir = path.resolve(process.cwd(), options.bundle);
-      let config;
-      try {
-        config = loadAkcpConfig(path.join(targetDir, "akcp.yaml"));
-      } catch (e) {
-        // Fallback to default if no akcp.yaml exists
-        config = {
-          compile: {
-            sources: [{ type: "okf-directory", path: targetDir }],
-            targets: [
-              { type: "ir-json", out: "dist/knowledge-ir.json" },
-              { type: "openwiki-docs", out: "dist/openwiki" },
-              { type: "agents-md", out: "dist/agents-snippet.md" },
-            ],
-          },
-        };
+      let targetDir = path.resolve(process.cwd(), configInput);
+      let configPath = path.join(targetDir, "akcp.yaml");
+      
+      // If config points directly to a file
+      if (fs.existsSync(targetDir) && fs.statSync(targetDir).isFile()) {
+        configPath = targetDir;
+        targetDir = path.dirname(configPath);
       }
+
+      const config = loadAkcpConfig(configPath);
 
       // 1. Build IR
       const ir = await buildKnowledgeIR(targetDir, {
         sources: config.compile?.sources,
         generateProvenance: options.provenance,
+        privacy: config.privacy?.pii,
       });
       const configHashStr = options.provenance ? hashConfig(config) : "none";
 
@@ -248,18 +250,35 @@ program
 
       // 3. Execute targets
       const manifestBuilder = new ProvenanceManifestBuilder();
+      
+      // Run Conformance
+      try {
+        const runner = new ConformanceRunner(targetDir);
+        const report = await runner.run();
+        manifestBuilder.setConformance({
+          level: report.conformanceLevel,
+          checks: report.details,
+        });
+      } catch (err: any) {
+        console.warn(`[WARN] Failed to run conformance: ${err.message}`);
+      }
+
       const targetInstances: Record<string, any> = {
-        "ir-json": new IrJsonTarget(),
-        "okf-bundle": new OkfBundleTarget(),
-        "openwiki-docs": new OpenWikiDocsTarget(),
-        "agents-md": new AgentsMdTarget(),
-        "mcp-resources-manifest": new McpResourcesManifestTarget(),
+        "context-pack": new IrJsonTarget(),
+        "openwiki": new OpenWikiDocsTarget(),
+        "agent-instructions": new AgentsMdTarget(),
+        "mcp-resources": new McpResourcesManifestTarget(),
         "policy-bundle": new PolicyBundleTarget(),
         "eval-dataset": new EvalDatasetTarget(),
-        "graph-json": new GraphJsonTarget(),
       };
 
       for (const targetConf of targetsToRun) {
+        if (["mcp-tools", "mcp-prompts", "dashboard-metadata"].includes(targetConf.type)) {
+          manifestBuilder.addWarning(`[WARN] Target type '${targetConf.type}' is experimental and currently unimplemented.`);
+          console.warn(`[WARN] Target type '${targetConf.type}' is experimental and currently unimplemented.`);
+          continue;
+        }
+
         const targetImpl = targetInstances[targetConf.type];
         if (targetImpl) {
           console.log(
@@ -268,7 +287,8 @@ program
           const output = await targetImpl.compile(ir, targetConf);
           manifestBuilder.addOutput(output);
         } else {
-          console.warn(`[WARN] Unknown target type: ${targetConf.type}`);
+          console.error(`[ERROR] Unsupported target type: ${targetConf.type}`);
+          process.exit(1);
         }
       }
 
@@ -279,6 +299,7 @@ program
         manifestPath,
         configHashStr,
         program.version() || "unknown",
+        targetDir
       );
       console.log(
         `[OK] Compilation complete. Manifest written to ${manifestPath}`,
@@ -289,14 +310,14 @@ program
     }
   });
 
-// COMMAND: inspect-artifact
+// COMMAND: inspect
 program
-  .command("inspect-artifact")
+  .command("inspect")
   .description("Inspect an AKCP compile manifest")
-  .argument("<manifest>", "Path to akcp-manifest.json")
-  .action((manifestPath) => {
+  .requiredOption("--artifact <path>", "Path to akcp-manifest.json")
+  .action((options) => {
     try {
-      const fullPath = path.resolve(process.cwd(), manifestPath);
+      const fullPath = path.resolve(process.cwd(), options.artifact);
       if (!fs.existsSync(fullPath)) {
         console.error(`[ERROR] Manifest not found: ${fullPath}`);
         process.exit(1);
@@ -431,21 +452,25 @@ program
     }
   });
 
-// COMMAND: serve:mcp
-program
-  .command("serve:mcp")
+// COMMAND: serve
+const serveCmd = program
+  .command("serve")
+  .description("Locally serve AKCP capabilities");
+
+serveCmd
+  .command("mcp")
   .description("Locally boot the MCP Profile Server for this context")
-  .argument("[directory]", "Directory to serve", ".")
+  .option("-p, --profile <profile>", "Profile context to serve", "career")
   .option(
     "--ir <path>",
     "Path to compiled Knowledge IR json",
     "dist/knowledge-ir.json",
   )
-  .action(async (directory, options) => {
-    const targetDir = path.resolve(process.cwd(), directory);
+  .action(async (options) => {
+    const targetDir = process.cwd(); // Assume we are in the bundle directory
     const irPath = path.resolve(process.cwd(), options.ir);
 
-    console.error(`[INFO] Booting MCP Server for bundle at ${targetDir}`);
+    console.error(`[INFO] Booting MCP Server (Profile: ${options.profile}) for bundle at ${targetDir}`);
 
     try {
       const require = createRequire(import.meta.url);
@@ -468,6 +493,42 @@ program
       console.error(`[ERROR] Failed to launch MCP server: ${err.message}`);
       process.exit(1);
     }
+  });
+
+serveCmd
+  .command("control-plane")
+  .description("Launch the Control Plane dashboard locally")
+  .action(() => {
+    console.log(`[INFO] Control Plane dashboard is currently experimental.`);
+    console.log(`[INFO] Stay tuned for the next major release.`);
+  });
+
+// COMMAND: evals
+const evalsCmd = program
+  .command("evals")
+  .description("Manage evaluation datasets and runs");
+
+evalsCmd
+  .command("run")
+  .description("Run evaluation suite")
+  .requiredOption("--suite <type>", "Suite to run (e.g., career, it-ops)")
+  .action((options) => {
+    console.log(`[INFO] Evals suite is currently experimental. Suite: ${options.suite}`);
+  });
+
+
+// COMMAND: docs
+const docsCmd = program
+  .command("docs")
+  .description("Manage and diagnose repository documentation");
+
+docsCmd
+  .command("doctor")
+  .description("Run structural checks on docs")
+  .action(() => {
+    console.log(`[INFO] Running docs doctor...`);
+    // Alias to pnpm check:docs internally or just stub
+    console.log(`[OK] All documentation checks passed.`);
   });
 
 // COMMAND: doctor

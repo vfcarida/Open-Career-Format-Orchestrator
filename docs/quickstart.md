@@ -1,49 +1,42 @@
 # Quickstart
 
-Welcome to the Agent Knowledge Compiler and Control Plane (AKCP). This quickstart will help you compile and serve your first context pack in under 5 minutes.
+Welcome to Agent Knowledge Compiler and Control Plane (AKCP). This guide will help you get your first environment compiled and running in under 5 minutes.
 
 ## Prerequisites
 
-- Node.js >= 20.0
-- corepack enabled (`corepack enable`)
+- Node.js >= 20.x
+- [Corepack](https://nodejs.org/api/corepack.html) enabled (`corepack enable`)
 
-## 1. Local workspace flow (Recommended)
+## Minimal Happy Path
 
-Since AKCP is not yet published to npm, you must run it directly from source via a local clone.
+As AKCP is not yet published to the npm registry, the fastest way to use it is by cloning the repository and running the CLI directly from the source workspace.
 
 ```bash
-# Clone the repository
-git clone https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git akcp
-cd akcp
-
-# Setup the environment
+git clone https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git
+cd Agent-Knowledge-Compiler-and-Control-Plane
+corepack enable
 pnpm install --frozen-lockfile
 pnpm build
-
-# Validate your environment
-pnpm akcp doctor
+pnpm akcp --help
+pnpm akcp validate --bundle examples/career
+pnpm akcp compile --config examples/career/akcp.yaml
 ```
 
-## 2. Compile and Serve
+## What did this do?
 
-AKCP ships with sample data to help you get started.
+1. **`pnpm akcp validate`**: Validated the schema, structure, and integrity of the `.agent-context` directory.
+2. **`pnpm akcp compile`**: Ingested the raw markdown files, built the Agent Knowledge IR (AK-IR) in memory, linked all references, and generated compiled targets to `examples/career/dist`.
+
+## Serving to Agents
+
+Once compiled, you can boot the local MCP server to allow AI Agents (like Claude or Cursor) to interact with the capabilities:
 
 ```bash
-# Validate the sample OKF bundle
-pnpm akcp validate sample-data/.okf
-
-# Compile the bundle into an Agent Knowledge IR
-pnpm akcp compile --bundle sample-data/.okf
-
-# Serve the compiled context to agents via MCP
-pnpm akcp serve:mcp sample-data/.okf
+pnpm akcp serve mcp --profile career
 ```
-
-## Published Package (Planned)
-
-_AKCP is not published to npm yet. Use the local workspace flow above._
 
 ## Next Steps
 
-- Read the full [CLI Usage Guide](cli/usage.md).
-- Explore the [Example Domains](../examples/domains/).
+- Explore the [Enterprise Domain Adapters](enterprise/domain-adapter-guide.md).
+- Learn about [Policy Cards](../reference/policy-cards.md).
+- Dig into [MCP Security](../security/mcp-security.md).

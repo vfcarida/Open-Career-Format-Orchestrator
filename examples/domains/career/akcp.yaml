@@ -5,9 +5,14 @@ bundle:
   profile: career
 
 compile:
+  sources:
+    - type: okf-directory
+      path: .
   targets:
-    - ir-json
-    - openwiki-docs
+    - type: context-pack
+      out: dist/context-pack.json
+    - type: openwiki
+      out: dist/openwiki
 
 policy:
   defaultAutonomyLevel: read-only

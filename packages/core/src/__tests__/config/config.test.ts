@@ -12,8 +12,8 @@ compile:
   sources:
     - path: "./sample-data/.okf"
   targets:
-    - type: ir-json
-      out: "./dist/knowledge-ir.json"
+    - type: context-pack
+      out: "./dist/context-pack.json"
 controlPlane:
   policies:
     disableDangerousTools: true
@@ -22,8 +22,8 @@ controlPlane:
   const invalidYaml = `
 compile:
   targets:
-    - type: ir-json
-      out: "./dist/ir.json"
+    - type: context-pack
+      out: "./dist/context-pack.json"
 `; // missing sources
 
   it("should load and validate a valid configuration", () => {
@@ -33,13 +33,13 @@ compile:
 
     const config = loadAkcpConfig(filePath);
     expect(config.compile.sources[0].path).toBe("./sample-data/.okf");
-    expect(config.compile.targets[0].out).toBe("./dist/knowledge-ir.json");
+    expect(config.compile.targets[0].out).toBe("./dist/context-pack.json");
     expect(config.controlPlane?.policies?.disableDangerousTools).toBe(true);
 
     // Test planner
     const plan = generateBuildPlan(config);
     expect(plan.sourcesToRead[0]).toBe("./sample-data/.okf");
-    expect(plan.targetsToGenerate[0]).toContain("./dist/knowledge-ir.json");
+    expect(plan.targetsToGenerate[0]).toContain("./dist/context-pack.json");
     expect(plan.activePolicies).toContain("disableDangerousTools");
   });
 
@@ -63,7 +63,7 @@ compile:
   sources:
     - path: "./does-not-exist-dir-123"
   targets:
-    - type: ir-json
+    - type: context-pack
       out: "./does-not-exist-either.json"
 `,
     );

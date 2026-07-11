@@ -5,22 +5,33 @@ export interface ProvenanceRecord {
   timestamp: string;
 }
 
+export interface ConformanceInfo {
+  level: string;
+  checks: any[];
+}
+
 export interface BuildManifest {
-  version: string;
+  schemaVersion: string;
   buildId: string;
-  bundleId: string;
-  timestamp: string;
-  toolVersion: string;
-  configHash: string;
-  policyBundleHash?: string;
-  sourceHashes: Record<string, string>;
+  createdAt: string;
+  source: {
+    root: string;
+    config: string;
+    hash: string;
+  };
+  compiler: {
+    name: string;
+    version: string;
+  };
   targets: ArtifactProvenance[];
-  warnings: string[];
+  diagnostics: any[];
+  conformance: ConformanceInfo;
 }
 
 export interface ArtifactProvenance {
-  targetType: string;
-  outputPath: string;
-  hash: string; // SHA-256 of the emitted artifact
-  bytesWritten: number;
+  name: string;
+  status: string;
+  outputs: string[];
+  hash?: string;
+  sizeBytes?: number;
 }

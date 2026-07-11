@@ -92,7 +92,9 @@ pnpm install --frozen-lockfile
 pnpm build
 
 # 3. Validate your environment
-pnpm akcp doctor
+pnpm akcp --help
+pnpm akcp validate --bundle examples/career
+pnpm akcp compile --config examples/career/akcp.yaml
 ```
 
 ## CLI Examples
@@ -102,9 +104,9 @@ The `akcp` CLI manages your knowledge bundles:
 | Command          | Purpose                                | Example                                             |
 | ---------------- | -------------------------------------- | --------------------------------------------------- |
 | `akcp doctor`    | Validate local environment             | `akcp doctor`                                       |
-| `akcp compile`   | Compile knowledge into AK-IR/artifacts | `akcp compile --bundle ./my-project/.agent-context` |
-| `akcp validate`  | Validate bundle/spec/config            | `akcp validate ./my-project/.agent-context`         |
-| `akcp serve:mcp` | Serve compiled artifacts through MCP   | `akcp serve:mcp ./my-project/.agent-context`        |
+| `akcp compile`   | Compile knowledge into AK-IR/artifacts | `akcp compile --config examples/career/akcp.yaml`   |
+| `akcp validate`  | Validate bundle/spec/config            | `akcp validate --bundle examples/career`            |
+| `akcp serve mcp` | Serve compiled artifacts through MCP   | `akcp serve mcp --profile career`                   |
 
 For full details, see [CLI Usage](docs/cli/usage.md).
 

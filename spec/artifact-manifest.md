@@ -11,25 +11,31 @@ The Artifact Manifest is a machine-readable file (`akcp-manifest.json`) generate
 
 ```json
 {
-  "manifestVersion": "1.0",
-  "specVersion": "0.1.0",
-  "bundleId": "<uuid>",
-  "bundleName": "<string>",
-  "compiledAt": "<ISO-8601>",
-  "sourceHash": "<sha256-hex>",
-  "artifacts": [
+  "schemaVersion": "akcp.artifact-manifest/v1",
+  "buildId": "<uuid>",
+  "createdAt": "<ISO-8601>",
+  "source": {
+    "root": "<absolute-path-or-uri>",
+    "config": "akcp.yaml",
+    "hash": "<sha256-hex>"
+  },
+  "compiler": {
+    "name": "akcp",
+    "version": "0.1.0"
+  },
+  "targets": [
     {
-      "target": "ir-json",
-      "path": "dist/ir.json",
-      "hash": "<sha256-hex>",
-      "sizeBytes": 12345
+      "name": "mcp-resources",
+      "status": "success",
+      "outputs": [
+        "dist/mcp-resources.json"
+      ]
     }
   ],
-  "stats": {
-    "nodeCount": 42,
-    "edgeCount": 18,
-    "totalTokenEstimate": 15000,
-    "durationMs": 320
+  "diagnostics": [],
+  "conformance": {
+    "level": "Level 1: OKF-compatible",
+    "checks": []
   }
 }
 ```
@@ -38,24 +44,23 @@ The Artifact Manifest is a machine-readable file (`akcp-manifest.json`) generate
 
 | Field             | Type                 | Required    | Description                                     |
 | ----------------- | -------------------- | ----------- | ----------------------------------------------- |
-| `manifestVersion` | string               | REQUIRED    | Schema version of the manifest itself.          |
-| `specVersion`     | string               | REQUIRED    | The AK-IR spec version used during compilation. |
-| `bundleId`        | string (UUID v4)     | REQUIRED    | Matches the `bundleId` in the AK-IR.            |
-| `bundleName`      | string               | REQUIRED    | Human-readable name from `akcp.yaml`.           |
-| `compiledAt`      | string (ISO-8601)    | REQUIRED    | Timestamp of the compilation run.               |
-| `sourceHash`      | string (SHA-256 hex) | REQUIRED    | Deterministic hash of all source files.         |
-| `artifacts`       | array                | REQUIRED    | List of produced output files.                  |
-| `stats`           | object               | RECOMMENDED | Compilation statistics.                         |
+| `schemaVersion`   | string               | REQUIRED    | Schema version of the manifest itself (`akcp.artifact-manifest/v1`). |
+| `buildId`         | string (UUID v4)     | REQUIRED    | Unique ID for this compilation run.             |
+| `createdAt`       | string (ISO-8601)    | REQUIRED    | Timestamp of the compilation run.               |
+| `source`          | object               | REQUIRED    | Source details (root path, config path, hash).  |
+| `compiler`        | object               | REQUIRED    | Compiler name and version.                      |
+| `targets`         | array                | REQUIRED    | List of target output records.                  |
+| `diagnostics`     | array                | REQUIRED    | List of compilation warnings and errors.        |
+| `conformance`     | object               | REQUIRED    | Conformance level and check details.            |
 
-### 2.2 ArtifactEntry Fields
+### 2.2 Target Fields
 
 | Field       | Type                 | Required    | Description                            |
 | ----------- | -------------------- | ----------- | -------------------------------------- |
-| `target`    | string               | REQUIRED    | The target ID (e.g., `ir-json`).       |
-| `path`      | string               | REQUIRED    | Path relative to the output directory. |
-| `hash`      | string (SHA-256 hex) | REQUIRED    | Hash of the produced artifact file.    |
-| `sizeBytes` | integer              | RECOMMENDED | File size in bytes.                    |
+| `name`      | string               | REQUIRED    | The target ID (e.g., `mcp-resources`). |
+| `status`    | string               | REQUIRED    | `success`, `failed`, or `skipped`.     |
+| `outputs`   | array of strings     | REQUIRED    | File paths produced by this target.    |
 
 ## 3. Usage
 
-Downstream tools (CI pipelines, MCP servers, audit systems) MUST use the `sourceHash` and per-artifact `hash` fields to verify the integrity of a compiled bundle before loading it into production.
+Downstream tools (CI pipelines, MCP servers, audit systems) MUST use the `source.hash` and output integrity properties to verify the integrity of a compiled bundle before loading it into production. The `conformance.level` SHOULD be asserted by downstream systems.

@@ -17,19 +17,17 @@ export const SourceConfigSchema = z
 export const TargetConfigSchema = z.object({
   type: z
     .enum([
-      "ir-json",
-      "okf-bundle",
-      "openwiki-docs",
-      "agents-md",
-      "mcp-resources-manifest",
-      "policy-bundle",
-      "eval-dataset",
-      "graph-json",
-      "context-pack",
       "mcp-resources",
-      "dashboard-metadata"
+      "mcp-tools",
+      "mcp-prompts",
+      "context-pack",
+      "openwiki",
+      "agent-instructions",
+      "eval-dataset",
+      "dashboard-metadata",
+      "policy-bundle",
     ])
-    .default("ir-json"),
+    .default("context-pack"),
   out: z.string().min(1).optional(),
   path: z.string().min(1).optional()
 });

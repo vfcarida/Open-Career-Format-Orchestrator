@@ -49,6 +49,6 @@ test("invalid commands suggest alternatives", () => {
   } catch (err: any) {
     const stderr = err.stderr.toString();
     expect(stderr).toContain("error: unknown command 'compie'");
-    expect(stderr).toContain("Did you mean 'compile'?");
+    expect(stderr).toContain("(Did you mean compile?)");
   }
 });

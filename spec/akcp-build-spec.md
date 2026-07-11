@@ -52,12 +52,17 @@ The compiler MUST:
 
 The compiler MUST support at minimum one of the following output targets:
 
-| Target ID       | Description                                              |
-| --------------- | -------------------------------------------------------- |
-| `ir-json`       | Raw AK-IR as a JSON file.                                |
-| `openwiki-docs` | Markdown files formatted for OpenWiki/agent consumption. |
-| `eval-dataset`  | JSONL evaluation dataset.                                |
-| `policy-bundle` | Compiled `.policy.json` file.                            |
+| Target ID            | Description                                              | Status       |
+| -------------------- | -------------------------------------------------------- | ------------ |
+| `mcp-resources`      | Compiled MCP resources manifest.                         | Supported    |
+| `mcp-tools`          | Compiled MCP tools manifest.                             | Experimental |
+| `mcp-prompts`        | Compiled MCP prompts manifest.                           | Experimental |
+| `context-pack`       | Raw AK-IR and associated context structures.             | Supported    |
+| `openwiki`           | Markdown files formatted for OpenWiki/agent consumption. | Supported    |
+| `agent-instructions` | Compiled AGENTS.md / CLAUDE.md guidance.                 | Supported    |
+| `eval-dataset`       | JSONL evaluation dataset.                                | Experimental |
+| `dashboard-metadata` | Control plane dashboard metadata.                        | Experimental |
+| `policy-bundle`      | Compiled `.policy.json` file.                            | Supported    |
 
 ## 3. Determinism
 

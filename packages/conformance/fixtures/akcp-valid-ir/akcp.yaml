@@ -3,5 +3,5 @@ compile:
     - type: okf-directory
       path: .
   targets:
-    - type: ir-json
-      out: dist/knowledge-ir.json
+    - type: context-pack
+      out: dist/context-pack.json

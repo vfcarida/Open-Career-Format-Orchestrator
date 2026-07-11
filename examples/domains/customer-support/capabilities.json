@@ -1,0 +1,47 @@
+{
+  "profile": "customer-support",
+  "tools": [
+    {
+      "name": "search_kb",
+      "description": "Searches the support knowledge base and FAQs for solutions to customer problems.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "lookup_ticket_history",
+      "description": "Looks up the recent tickets for a specific customer email or ID.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customerEmail": { "type": "string" }
+        },
+        "required": ["customerEmail"]
+      }
+    },
+    {
+      "name": "draft_reply",
+      "description": "Drafts a reply to the customer and places it in the Zendesk draft box for human review. Does NOT send it.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ticketId": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "required": ["ticketId", "message"]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "akcp://customer-support/macros",
+      "name": "Support Macros",
+      "mimeType": "text/markdown",
+      "description": "Canned responses and standardized macros for common issues."
+    }
+  ]
+}

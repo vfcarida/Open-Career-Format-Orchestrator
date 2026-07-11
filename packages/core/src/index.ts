@@ -42,7 +42,6 @@ export * from "./ir/build-ir.js";
 
 // Targets
 export * from "./targets/types.js";
-export * from "./targets/manifest-builder.js";
 export { IrJsonTarget } from "./targets/ir-json.js";
 export { OkfBundleTarget } from "./targets/okf-bundle.js";
 export { OpenWikiDocsTarget } from "./targets/openwiki-docs.js";

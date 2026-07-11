@@ -11,8 +11,8 @@ test("akcp CLI is the main binary", () => {
   // Should mention AKCP
   expect(output).toContain("AKCP");
 
-  // Should NOT mention Agent Knowledge Compiler and Control Plane
-  expect(output).not.toContain("Agent Knowledge Compiler and Control Plane");
+  // Should NOT mention Open Career Format
+  expect(output).not.toContain("Open Career Format");
 });
 
 test("doctor returns AKCP Diagnostics", () => {

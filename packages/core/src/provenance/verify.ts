@@ -33,25 +33,44 @@ export async function verifyManifest(
     isValid: true,
     tamperedFiles: [],
     missingFiles: [],
-    manifestTimestamp: manifest.timestamp,
+    manifestTimestamp: manifest.createdAt,
   };
 
   const basePath = process.cwd(); // Assume paths in manifest are relative to CWD
 
   for (const target of manifest.targets) {
-    const fullTargetPath = path.resolve(basePath, target.outputPath);
-    try {
-      const currentHash = await hashFile(fullTargetPath);
-      if (currentHash !== target.hash) {
-        report.isValid = false;
-        report.tamperedFiles.push(target.outputPath);
+    // Only verify hash if we have a single primary output matching the recorded hash
+    if (target.outputs.length === 1 && typeof target.hash === "string") {
+      const outputPath = target.outputs[0] as string;
+      const fullTargetPath = path.resolve(basePath, outputPath);
+      try {
+        const currentHash = await hashFile(fullTargetPath);
+        if (currentHash !== target.hash) {
+          report.isValid = false;
+          report.tamperedFiles.push(outputPath);
+        }
+      } catch (err: any) {
+        if (err.code === "ENOENT") {
+          report.isValid = false;
+          report.missingFiles.push(outputPath);
+        } else {
+          throw err;
+        }
       }
-    } catch (err: any) {
-      if (err.code === "ENOENT") {
-        report.isValid = false;
-        report.missingFiles.push(target.outputPath);
-      } else {
-        throw err;
+    } else {
+      // Fallback: just check existence if no single hash is provided
+      for (const outputPath of target.outputs) {
+        const fullTargetPath = path.resolve(basePath, outputPath);
+        try {
+          await fs.access(fullTargetPath);
+        } catch (err: any) {
+          if (err.code === "ENOENT") {
+            report.isValid = false;
+            report.missingFiles.push(outputPath);
+          } else {
+            throw err;
+          }
+        }
       }
     }
   }
