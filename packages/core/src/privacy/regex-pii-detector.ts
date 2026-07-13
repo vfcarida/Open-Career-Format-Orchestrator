@@ -5,6 +5,7 @@ const PATTERNS: Record<string, RegExp> = {
   phone: /(?:\+\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}/g,
   credit_card: /(?:\d[ -]*?){13,16}/g,
   password: /(?<=password["':\s]*)([A-Za-z0-9@#$%^&+=]{8,})/gi,
+  ssn: /\b\d{3}[-]?\d{2}[-]?\d{4}\b/g,
 };
 
 export class RegexPiiDetector implements PiiDetector {

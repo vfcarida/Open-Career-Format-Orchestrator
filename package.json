@@ -20,6 +20,8 @@
     "test:unit": "pnpm -r run test -- --run",
     "test:integration": "pnpm -r run test -- --run",
     "test:contract": "vitest run packages/mcp-profile-server packages/mcp-automation-server",
+    "test:security": "vitest run packages/mcp-profile-server/src/__tests__/security",
+    "test:mcp": "pnpm run test:contract && pnpm run test:security",
     "test:e2e": "pnpm --filter @akcp/dashboard exec playwright install chromium && pnpm --filter @akcp/dashboard exec playwright test",
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",

@@ -7,6 +7,7 @@ export type ToolSuccess<T> = {
     toolVersion: string;
     schemaVersion: string;
     durationMs: number;
+    riskLevel?: "low" | "medium" | "high" | "critical";
   };
 };
 

@@ -1,47 +1,73 @@
-{
-  "profile": "customer-support",
-  "tools": [
-    {
-      "name": "search_kb",
-      "description": "Searches the support knowledge base and FAQs for solutions to customer problems.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "query": { "type": "string" }
-        },
-        "required": ["query"]
-      }
-    },
-    {
-      "name": "lookup_ticket_history",
-      "description": "Looks up the recent tickets for a specific customer email or ID.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "customerEmail": { "type": "string" }
-        },
-        "required": ["customerEmail"]
-      }
-    },
-    {
-      "name": "draft_reply",
-      "description": "Drafts a reply to the customer and places it in the Zendesk draft box for human review. Does NOT send it.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "ticketId": { "type": "string" },
-          "message": { "type": "string" }
-        },
-        "required": ["ticketId", "message"]
-      }
+[
+  {
+    "id": "customer-support.search_kb",
+    "kind": "tool",
+    "name": "search_kb",
+    "description": "Searches the support knowledge base and FAQs for solutions to customer problems.",
+    "owner": "akcp",
+    "version": "1.0.0",
+    "riskLevel": "low",
+    "sideEffects": "external-read",
+    "requiresApproval": false,
+    "readsPII": false,
+    "writesPII": false,
+    "inputsSchema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string", "description": "The search query" }
+      },
+      "required": ["query"]
     }
-  ],
-  "resources": [
-    {
-      "uri": "akcp://customer-support/macros",
-      "name": "Support Macros",
-      "mimeType": "text/markdown",
-      "description": "Canned responses and standardized macros for common issues."
+  },
+  {
+    "id": "customer-support.lookup_ticket_history",
+    "kind": "tool",
+    "name": "lookup_ticket_history",
+    "description": "Looks up the recent tickets for a specific customer email or ID.",
+    "owner": "akcp",
+    "version": "1.0.0",
+    "riskLevel": "medium",
+    "sideEffects": "external-read",
+    "requiresApproval": false,
+    "readsPII": true,
+    "writesPII": false,
+    "inputsSchema": {
+      "type": "object",
+      "properties": {
+        "customerEmail": { "type": "string", "description": "The customer's email address" }
+      },
+      "required": ["customerEmail"]
     }
-  ]
-}
+  },
+  {
+    "id": "customer-support.draft_reply",
+    "kind": "tool",
+    "name": "draft_reply",
+    "description": "Drafts a reply to the customer and places it in the Zendesk draft box for human review. Does NOT send it.",
+    "owner": "akcp",
+    "version": "1.0.0",
+    "riskLevel": "medium",
+    "sideEffects": "external-write",
+    "requiresApproval": true,
+    "readsPII": true,
+    "writesPII": true,
+    "inputsSchema": {
+      "type": "object",
+      "properties": {
+        "ticketId": { "type": "string", "description": "The ID of the ticket" },
+        "message": { "type": "string", "description": "The message to draft" }
+      },
+      "required": ["ticketId", "message"]
+    }
+  },
+  {
+    "id": "customer-support.macros",
+    "kind": "resource",
+    "name": "Support Macros",
+    "description": "Canned responses and standardized macros for common issues.",
+    "owner": "akcp",
+    "version": "1.0.0",
+    "riskLevel": "low",
+    "sideEffects": "none"
+  }
+]

@@ -132,23 +132,32 @@ export async function buildKnowledgeIR(
 
       concept.body = redactionResult.redactedText;
       
-      // Also redact frontmatter string values
-      for (const [k, v] of Object.entries(concept.frontmatter)) {
-        if (typeof v === "string") {
-          const fmResult = await piiRedactor.redact(v, {
-            mode,
-            allowedClasses: options.privacy.allowedPiiClasses,
-            blockedClasses: options.privacy.blockedPiiClasses,
-            tokenFormat: options.privacy.redactionTokenFormat,
-            failOnUnredactedHighRiskPii: options.privacy.failOnUnredactedHighRiskPii
-          });
-          if (fmResult.blocked) {
-            throw new Error(`[PII_ERROR] Build failed: Unredacted high-risk PII detected in frontmatter key '${k}' of ${item.sourceUri}`);
+      // Also redact frontmatter string values recursively
+      const redactObject = async (obj: any) => {
+        for (const [k, v] of Object.entries(obj)) {
+          if (typeof v === "string") {
+            const fmResult = await piiRedactor.redact(v, {
+              mode,
+              allowedClasses: options.privacy.allowedPiiClasses,
+              blockedClasses: options.privacy.blockedPiiClasses,
+              tokenFormat: options.privacy.redactionTokenFormat,
+              failOnUnredactedHighRiskPii: options.privacy.failOnUnredactedHighRiskPii
+            });
+            if (fmResult.blocked) {
+              throw new Error(`[PII_ERROR] Build failed: Unredacted high-risk PII detected in frontmatter of ${item.sourceUri}`);
+            }
+            obj[k] = fmResult.redactedText;
+            for (const finding of fmResult.findings) {
+              piiReport.addFinding(item.sourceUri, finding);
+            }
+          } else if (v && typeof v === "object") {
+            await redactObject(v);
           }
-          concept.frontmatter[k] = fmResult.redactedText;
         }
-      }
-
+      };
+      
+      await redactObject(concept.frontmatter);
+      
       for (const finding of redactionResult.findings) {
         piiReport.addFinding(item.sourceUri, finding);
       }

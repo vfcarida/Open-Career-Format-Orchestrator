@@ -1,29 +1,48 @@
-# MCP Security Guidelines
+# MCP Security and Hardening
 
-This document outlines the security mechanisms implemented in the AKCP MCP Servers.
+AKCP provides a highly robust, governed Model Context Protocol (MCP) layer. Security is built-in at both the schema and runtime levels.
 
-## 1. Local-First Boundary
+## Capability Risk Metadata
 
-The Model Context Protocol establishes a local client-server relationship over standard I/O (stdio). Traffic does not traverse the internet, limiting the attack surface to the local host boundary.
+All tools exposed to an agent via MCP must include Risk Metadata defined in their `CapabilityRegistry` entry:
 
-## 2. Permission Model
+- **riskLevel**: Defines the inherent danger of the tool (`low`, `medium`, `high`, `critical`).
+- **sideEffects**: Classifies whether the tool interacts with external systems or performs destructive actions.
+- **requiresApproval**: Determines if human-in-the-loop (HITL) approval is needed.
 
-All read operations via `@akcp/mcp-profile-server` are inherently safe to execute without side effects but expose Personally Identifiable Information (PII).
-All write operations to the local bundle (e.g. `create_document`, `update_document`) are isolated to the `.okf` directory explicitly configured via `AKCP_BUNDLE_PATH`. Path traversal is mitigated by strict internal routing.
-All external execution operations via `@akcp/mcp-automation-server` (e.g., job submission) are blocked by default.
+## Tool Contracts & Telemetry
 
-## 3. Human-In-The-Loop (HITL) Controls
+When an agent invokes a tool, AKCP's `MCPGateway` ensures the result conforms to the `ToolSuccess` or `ToolFailure` contract. 
 
-The automation server implements a strict, token-based verification process for destructive or external actions:
+```json
+{
+  "ok": true,
+  "data": { ... },
+  "meta": {
+    "requestId": "1234-abcd",
+    "toolName": "execute_runbook",
+    "toolVersion": "1.0.0",
+    "schemaVersion": "1.0.0",
+    "durationMs": 150,
+    "riskLevel": "critical"
+  }
+}
+```
 
-1. `prepare_application`: Validates context, establishes parameters, locks the state, and returns a time-limited (15-minute) token securely tied to the exact context payload hash.
-2. The User intervenes to review the locked context (via Dashboard or Terminal log).
-3. `confirm_application_submission`: The agent provides the token. The server verifies token validity, expiration, tool match, and payload integrity.
+The gateway intercepts every execution. Tools with `requiresApproval = true` will block execution until explicit approval is granted via the AKCP dashboard (this flow can be simulated locally).
 
-## 4. Prompt Injection Defense
+## Prompt Injection and Tool Shadowing
 
-Tool descriptors and schema validations strictly define constraints:
+AKCP mitigates common LLM attack vectors:
+- **Schema Bypass Attempt:** Tools validate inputs strictly against their defined `inputsSchema` via Zod before invoking underlying logic.
+- **Tool Shadowing:** The compiler errors out if two capabilities share the same `name` or `id`.
+- **Side Effect Exfiltration:** Tools with `external-write` side effects are logged with full provenance, including the originating `requestId`.
 
-- Input parameters are validated via `zod`.
-- Responses are typed securely through the JSON `ToolSuccess<T>` and `ToolFailure` structures to prevent malformed text output that could cause LLM hallucinations.
-- Known malicious vectors in job URLs (SSRF) are contained by running Playwright locally in sandbox mode unless explicitly overriden.
+## Running Conformance Tests
+
+To verify the security of the MCP surface, AKCP includes dedicated contract and security tests:
+
+```bash
+pnpm run test:security
+pnpm run test:mcp
+```

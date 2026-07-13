@@ -1,20 +1,11 @@
 /**
  * @module index
- * @description Entrypoint for the MCP Profile Server.
+ * @description Entrypoint for the dynamic MCP Profile Server.
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import path from "node:path";
-import {
-  FileSystemAdapter,
-  FrontmatterParser,
-  OKFFileRepository,
-  OKFCachedRepository,
-  IndexService,
-  LogService,
-  OKFDocumentService,
-  startTelemetry,
-} from "@akcp/core";
+import { startTelemetry, type AgentKnowledgeIR } from "@akcp/core";
 import { AKCPProfileServer } from "./server.js";
 import fs from "node:fs";
 
@@ -23,65 +14,24 @@ async function main() {
     // Start telemetry NodeSDK
     startTelemetry();
 
-    const bundleRootEnv =
-      process.env["AKCP_BUNDLE_PATH"] || process.env["AKCP_BUNDLE_PATH"];
-    if (process.env["AKCP_BUNDLE_PATH"] && !process.env["AKCP_BUNDLE_PATH"]) {
-      console.warn(
-        "[WARNING] AKCP_BUNDLE_PATH is deprecated. Please use AKCP_BUNDLE_PATH.",
-      );
+    const contextPackEnv = process.env["AKCP_CONTEXT_PACK_PATH"];
+    if (!contextPackEnv) {
+      throw new Error("[AKCP Profile Server] AKCP_CONTEXT_PACK_PATH environment variable is required.");
     }
-    const bundleRoot = path.resolve(bundleRootEnv || "./.okf");
+    
+    const contextPackPath = path.resolve(contextPackEnv);
 
-    const irPathEnv = process.env["AKCP_IR_PATH"] || process.env["AKCP_IR_PATH"];
-    if (process.env["AKCP_IR_PATH"] && !process.env["AKCP_IR_PATH"]) {
-      console.warn(
-        "[WARNING] AKCP_IR_PATH is deprecated. Please use AKCP_IR_PATH.",
-      );
-    }
-    const irPath = path.resolve(irPathEnv || "./dist/knowledge-ir.json");
+    console.error(`[AKCP Profile Server] Initializing with Context Pack at: ${contextPackPath}`);
 
-    console.error(
-      `[AKCP Profile Server] Initializing bundle at: ${bundleRoot}`,
-    );
-
-    const fsAdapter = new FileSystemAdapter();
-    const fmParser = new FrontmatterParser();
-
-    await fsAdapter.mkdir(bundleRoot);
-    let repo: any = new OKFFileRepository(fsAdapter, fmParser, bundleRoot);
-
-    if (fs.existsSync(irPath)) {
-      console.error(
-        `[AKCP Profile Server] Found Knowledge IR at ${irPath}. Enabling in-memory cache.`,
-      );
-      try {
-        const irContent = fs.readFileSync(irPath, "utf-8");
-        const ir = JSON.parse(irContent);
-        repo = new OKFCachedRepository(repo, ir);
-      } catch (err: any) {
-        console.error(
-          `[AKCP Profile Server] Failed to load IR, falling back to disk-only: ${err.message}`,
-        );
-      }
-    } else {
-      console.error(
-        `[AKCP Profile Server] No Knowledge IR found. Running in disk-only mode.`,
-      );
+    if (!fs.existsSync(contextPackPath)) {
+      throw new Error(`[AKCP Profile Server] Context pack not found at ${contextPackPath}`);
     }
 
-    const indexService = new IndexService(fsAdapter, fmParser, bundleRoot);
-    const logService = new LogService(
-      fsAdapter,
-      path.join(bundleRoot, "log.md"),
-    );
-    const docService = new OKFDocumentService(
-      repo,
-      indexService,
-      logService,
-      bundleRoot,
-    );
+    const irContent = fs.readFileSync(contextPackPath, "utf-8");
+    const ir: AgentKnowledgeIR = JSON.parse(irContent);
 
-    const mcpProfileServer = new AKCPProfileServer(docService);
+    // Provide the dynamic IR to the new server
+    const mcpProfileServer = new AKCPProfileServer(ir, { policies: ir.policies || {} });
     const serverInstance = mcpProfileServer.getServerInstance();
 
     const transport = new StdioServerTransport();

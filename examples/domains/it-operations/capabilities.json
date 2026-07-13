@@ -1,20 +1,42 @@
 [
   {
+    "id": "it-operations.execute_runbook",
     "name": "execute_runbook",
     "version": "1.0.0",
     "description": "Executes an automated runbook step for incident mitigation.",
     "kind": "tool",
     "riskLevel": "critical",
-    "sideEffectLevel": "external-write",
-    "requiredApproval": true
+    "sideEffects": "external-write",
+    "requiresApproval": true,
+    "readsPII": false,
+    "writesPII": false,
+    "inputsSchema": {
+      "type": "object",
+      "properties": {
+        "runbookId": { "type": "string" },
+        "step": { "type": "string" }
+      },
+      "required": ["runbookId", "step"]
+    }
   },
   {
+    "id": "it-operations.query_logs",
     "name": "query_logs",
     "version": "1.0.0",
     "description": "Queries historical logs for the affected service.",
     "kind": "tool",
     "riskLevel": "medium",
-    "sideEffectLevel": "external-read",
-    "requiredApproval": false
+    "sideEffects": "external-read",
+    "requiresApproval": false,
+    "readsPII": false,
+    "writesPII": false,
+    "inputsSchema": {
+      "type": "object",
+      "properties": {
+        "serviceName": { "type": "string" },
+        "query": { "type": "string" }
+      },
+      "required": ["serviceName", "query"]
+    }
   }
 ]

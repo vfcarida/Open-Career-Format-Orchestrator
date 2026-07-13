@@ -226,11 +226,22 @@ program
 
       const config = loadAkcpConfig(configPath);
 
+      const capabilitiesPath = path.join(targetDir, "capabilities.json");
+      let capabilities = [];
+      if (fs.existsSync(capabilitiesPath)) {
+        try {
+          capabilities = JSON.parse(fs.readFileSync(capabilitiesPath, "utf-8"));
+        } catch (e) {
+          console.warn(`[WARNING] Failed to parse ${capabilitiesPath}`);
+        }
+      }
+
       // 1. Build IR
       const ir = await buildKnowledgeIR(targetDir, {
         sources: config.compile?.sources,
         generateProvenance: options.provenance,
-        privacy: config.privacy?.pii,
+        privacy: config.privacy,
+        capabilities,
       });
       const configHashStr = options.provenance ? hashConfig(config) : "none";
 

@@ -23,7 +23,8 @@ export function normalizeRawItem(item: RawKnowledgeItem): IRConcept {
       // We pass dummy paths because we only want to parse the frontmatter and body.
       // FrontmatterParser validates okf strictly, but for normal markdown we might need leniency.
       // We'll use the parser and catch errors.
-      const doc = parser.parse(item.rawContent, "dummy.md", "dummy");
+      const filename = item.metadata.relativePath || "dummy.md";
+      const doc = parser.parse(item.rawContent, filename, "");
       frontmatter = doc.frontmatter;
       type = doc.frontmatter.type || "Document";
       body = doc.body;

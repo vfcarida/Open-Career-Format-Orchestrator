@@ -25,8 +25,9 @@ controlPlane:
       - ./policy.ts
 
 privacy:
-  pii:
-    redactEmails: true
-    redactPhones: true
-    redactSSN: true
-    redactCreditCards: true
+  defaultPiiMode: "redact"
+  blockedPiiClasses: 
+    - "EMAIL"
+    - "PHONE"
+    - "SSN"
+    - "CREDIT_CARD"
