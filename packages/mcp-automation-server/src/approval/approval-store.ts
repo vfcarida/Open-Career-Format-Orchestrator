@@ -28,29 +28,38 @@ export class ApprovalStore implements IApprovalStore {
   }
 
   generateToken(
-    toolName: string,
-    payload: unknown,
+    requestId: string,
+    capabilityId: string,
+    payloadHash: string,
+    riskLevel: string,
+    sideEffectLevel: string,
+    requestedBy: string,
     metadata?: Record<string, unknown>,
-    requesterIdentity?: string,
     ttlMs = 15 * 60 * 1000,
   ): string {
     const token = crypto.randomBytes(32).toString("hex");
-    const payloadHash = this.hashPayload(payload);
     const expiresAt = Date.now() + ttlMs;
+    const createdAt = Date.now();
     const metaStr = metadata ? JSON.stringify(metadata) : null;
-    const reqId = requesterIdentity || null;
 
     const stmt = this.db.prepare(
-      `INSERT INTO pending_approvals (token, toolName, payloadHash, expiresAt, metadata, requesterIdentity, status) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO pending_approvals (token, toolName, payloadHash, expiresAt, metadata, requesterIdentity, status, requestId, capabilityId, riskLevel, sideEffectLevel, requestedBy, createdAt, auditEventIds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     stmt.run(
       token,
-      toolName,
+      capabilityId, // Map to legacy toolName for now
       payloadHash,
       expiresAt,
       metaStr,
-      reqId,
+      requestedBy, // Map to legacy requesterIdentity
       "PENDING",
+      requestId,
+      capabilityId,
+      riskLevel,
+      sideEffectLevel,
+      requestedBy,
+      createdAt,
+      "[]"
     );
 
     return token;
@@ -70,11 +79,18 @@ export class ApprovalStore implements IApprovalStore {
 
     return rows.map((row) => ({
       token: row.token,
-      toolName: row.toolName,
+      requestId: row.requestId,
+      capabilityId: row.capabilityId || row.toolName,
       payloadHash: row.payloadHash,
+      riskLevel: row.riskLevel,
+      sideEffectLevel: row.sideEffectLevel,
+      requestedBy: row.requestedBy || row.requesterIdentity,
+      approvedBy: row.approvedBy,
+      createdAt: row.createdAt,
       expiresAt: row.expiresAt,
+      consumedAt: row.consumedAt,
+      auditEventIds: row.auditEventIds ? JSON.parse(row.auditEventIds) : [],
       metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
-      requesterIdentity: row.requesterIdentity,
       status: row.status,
     }));
   }
@@ -92,8 +108,8 @@ export class ApprovalStore implements IApprovalStore {
 
   validateAndConsume(
     token: string,
-    toolName: string,
-    payload: unknown,
+    capabilityId: string,
+    payloadHash: string,
     actorIdentity?: string,
   ): boolean {
     const now = Date.now();
@@ -111,8 +127,8 @@ export class ApprovalStore implements IApprovalStore {
     if (!record) {
       this.logAudit(
         "REJECTED_NOT_FOUND",
-        toolName,
-        this.hashPayload(payload),
+        capabilityId,
+        payloadHash,
         undefined,
         actorIdentity,
       );
@@ -120,11 +136,11 @@ export class ApprovalStore implements IApprovalStore {
     }
 
     // Check tool match
-    if (record.toolName !== toolName) {
+    if (record.capabilityId !== capabilityId && record.toolName !== capabilityId) {
       this.logAudit(
         "REJECTED_TOOL_MISMATCH",
-        toolName,
-        this.hashPayload(payload),
+        capabilityId,
+        payloadHash,
         record.metadata,
         actorIdentity,
       );
@@ -132,11 +148,10 @@ export class ApprovalStore implements IApprovalStore {
     }
 
     // Check payload hash match
-    const payloadHash = this.hashPayload(payload);
     if (record.payloadHash !== payloadHash) {
       this.logAudit(
         "REJECTED_HASH_MISMATCH",
-        toolName,
+        capabilityId,
         payloadHash,
         record.metadata,
         actorIdentity,
@@ -148,8 +163,8 @@ export class ApprovalStore implements IApprovalStore {
     if (record.status !== "APPROVED") {
       this.logAudit(
         "REJECTED_NOT_APPROVED",
-        toolName,
-        this.hashPayload(payload),
+        capabilityId,
+        payloadHash,
         record.metadata,
         actorIdentity,
       );
@@ -157,10 +172,10 @@ export class ApprovalStore implements IApprovalStore {
     }
 
     // Consume token (One-time use)
-    this.db.prepare(`DELETE FROM pending_approvals WHERE token = ?`).run(token);
+    this.db.prepare(`UPDATE pending_approvals SET status = 'CONSUMED', consumedAt = ? WHERE token = ?`).run(Date.now(), token);
     this.logAudit(
       "CONSUMED",
-      toolName,
+      capabilityId,
       payloadHash,
       record.metadata,
       actorIdentity,
@@ -177,12 +192,12 @@ export class ApprovalStore implements IApprovalStore {
     if (record) {
       this.db
         .prepare(
-          `UPDATE pending_approvals SET status = 'APPROVED' WHERE token = ?`,
+          `UPDATE pending_approvals SET status = 'APPROVED', approvedBy = ? WHERE token = ?`,
         )
-        .run(token);
+        .run(actorIdentity || null, token);
       this.logAudit(
         "APPROVED",
-        record.toolName,
+        record.capabilityId || record.toolName,
         record.payloadHash,
         record.metadata,
         actorIdentity,
@@ -194,17 +209,19 @@ export class ApprovalStore implements IApprovalStore {
 
   revokeToken(token: string, actorIdentity?: string): boolean {
     const stmt = this.db.prepare(
-      `SELECT * FROM pending_approvals WHERE token = ?`,
+      `SELECT * FROM pending_approvals WHERE token = ? AND status = 'PENDING'`,
     );
     const record = stmt.get(token) as any;
 
     if (record) {
       this.db
-        .prepare(`DELETE FROM pending_approvals WHERE token = ?`)
+        .prepare(
+          `UPDATE pending_approvals SET status = 'REVOKED' WHERE token = ?`,
+        )
         .run(token);
       this.logAudit(
         "REVOKED",
-        record.toolName,
+        record.capabilityId || record.toolName,
         record.payloadHash,
         record.metadata,
         actorIdentity,
@@ -234,8 +251,4 @@ export class ApprovalStore implements IApprovalStore {
     );
   }
 
-  private hashPayload(payload: unknown): string {
-    const data = JSON.stringify(payload || {});
-    return crypto.createHash("sha256").update(data).digest("hex");
-  }
 }

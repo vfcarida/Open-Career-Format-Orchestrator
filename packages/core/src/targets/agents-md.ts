@@ -5,7 +5,7 @@ import type { CompileTarget, TargetConfig, TargetOutput } from "./types.js";
 import type { AgentKnowledgeIR } from "../ir/types.js";
 
 export class AgentsMdTarget implements CompileTarget {
-  public readonly targetType = "agents-md";
+  public readonly targetType = "agent-instructions";
 
   async compile(
     ir: AgentKnowledgeIR,

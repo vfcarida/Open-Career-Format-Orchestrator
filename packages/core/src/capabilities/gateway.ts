@@ -14,10 +14,14 @@ export class MCPGatewayError extends Error {
   }
 }
 
+import type { IAuditLogService } from "../infrastructure/audit-log.js";
+import crypto from "crypto";
+
 export interface GatewayConfig {
   policies: Record<string, PolicyCard>; // Map of agentId -> PolicyCard
   defaultPolicy?: PolicyCard;
   approvalStore?: IApprovalStore;
+  auditLogService?: IAuditLogService;
 }
 
 export class MCPGateway {
@@ -28,8 +32,13 @@ export class MCPGateway {
     executor: () => Promise<T>,
   ): Promise<T> {
     const policy = this.resolvePolicy(request.agentId);
+    const requestId = crypto.randomUUID();
+    const payloadHash = crypto.createHash('sha256').update(JSON.stringify(request.payload || {})).digest('hex');
 
     if (!policy) {
+      if (this.config.auditLogService) {
+        await this.config.auditLogService.logEvent({ type: "policy-error", agentId: request.agentId, capabilityId: request.toolName });
+      }
       throw new MCPGatewayError(
         `Unauthorized: No valid policy found for agent '${request.agentId || "anonymous"}'.`,
         "UNAUTHORIZED_AGENT",
@@ -43,13 +52,18 @@ export class MCPGateway {
     });
 
     if (!evalResult.allowed) {
+      if (this.config.auditLogService) {
+        await this.config.auditLogService.logEvent({ type: "policy-deny", agentId: request.agentId, capabilityId: request.toolName, payloadHash, metadata: { reason: evalResult.reason } });
+      }
       throw new MCPGatewayError(
         `[LLM06: Excessive Agency] Policy Violation: ${evalResult.reason}`,
         "POLICY_VIOLATION",
       );
     }
 
-    // Output Sanitization Rules logic could be initialized here based on evalResult.requirements.piiHandling
+    if (this.config.auditLogService) {
+      await this.config.auditLogService.logEvent({ type: "policy-allow", agentId: request.agentId, capabilityId: request.toolName, payloadHash });
+    }
 
     // Evaluate HITL requirement
     if (evalResult.requirements?.approvalRequired) {
@@ -62,15 +76,29 @@ export class MCPGateway {
 
       const payloadObj = (request.payload as Record<string, unknown>) || {};
       const token = payloadObj._approvalToken as string | undefined;
+      
+      // Clean up token from payload so it doesn't affect hash verification
+      const cleanPayload = { ...payloadObj };
+      delete cleanPayload._approvalToken;
+      const cleanPayloadHash = crypto.createHash('sha256').update(JSON.stringify(cleanPayload)).digest('hex');
 
       if (!token) {
+        if (this.config.auditLogService) {
+          await this.config.auditLogService.logEvent({ type: "approval-required", agentId: request.agentId, capabilityId: request.toolName, payloadHash: cleanPayloadHash });
+        }
         // No token provided, generate one and throw APPROVAL_REQUIRED
         const generatedToken = await this.config.approvalStore.generateToken(
+          requestId,
           request.toolName,
-          request.payload,
-          { sideEffectLevel: request.sideEffect, agentId: request.agentId },
-          request.agentId,
+          cleanPayloadHash,
+          "high", // default risk level
+          request.sideEffect,
+          request.agentId || "anonymous",
+          { payload: cleanPayload },
         );
+        if (this.config.auditLogService) {
+          await this.config.auditLogService.logEvent({ type: "approval-created", agentId: request.agentId, capabilityId: request.toolName, payloadHash: cleanPayloadHash, metadata: { token: generatedToken } });
+        }
         throw new MCPGatewayError(
           `Approval Required. The execution of '${request.toolName}' has been paused and requires human authorization. Provide this token to the user: ${generatedToken}`,
           "APPROVAL_REQUIRED",
@@ -82,18 +110,25 @@ export class MCPGateway {
       const isValid = await this.config.approvalStore.validateAndConsume(
         token,
         request.toolName,
-        request.payload,
+        cleanPayloadHash,
         request.agentId,
       );
       if (!isValid) {
+        if (this.config.auditLogService) {
+          await this.config.auditLogService.logEvent({ type: "approval-expired", agentId: request.agentId, capabilityId: request.toolName, payloadHash: cleanPayloadHash });
+        }
         throw new MCPGatewayError(
           `[LLM06: Excessive Agency] Policy Violation: Invalid, expired, or tampered approval token: ${token}`,
           "POLICY_VIOLATION",
         );
       }
+      
+      if (this.config.auditLogService) {
+        await this.config.auditLogService.logEvent({ type: "approval-consumed", agentId: request.agentId, capabilityId: request.toolName, payloadHash: cleanPayloadHash });
+      }
 
-      // Cleanup token from payload before executing
-      delete payloadObj._approvalToken;
+      // Ensure execution continues with the cleaned payload
+      request.payload = cleanPayload;
     }
 
     try {

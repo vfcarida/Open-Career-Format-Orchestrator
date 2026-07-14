@@ -1,0 +1,215 @@
+import { describe, it, expect, beforeEach } from "vitest";
+import { MCPGateway } from "../capabilities/gateway.js";
+import { InMemoryAuditLogService } from "../infrastructure/audit-log.js";
+import type { IApprovalStore, PendingApproval } from "../capabilities/approval-store.js";
+import type { PolicyCard } from "../policy/types.js";
+import crypto from "crypto";
+
+class MockApprovalStore implements IApprovalStore {
+  private approvals: PendingApproval[] = [];
+  
+  async generateToken(
+    requestId: string,
+    capabilityId: string,
+    payloadHash: string,
+    riskLevel: string,
+    sideEffectLevel: string,
+    requestedBy: string,
+    metadata?: Record<string, unknown>,
+    ttlMs?: number
+  ): Promise<string> {
+    const token = "mock-token-123";
+    this.approvals.push({
+      token,
+      requestId,
+      capabilityId,
+      payloadHash,
+      riskLevel,
+      sideEffectLevel,
+      requestedBy,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (ttlMs || 60000),
+      status: "PENDING",
+      auditEventIds: [],
+      metadata
+    });
+    return token;
+  }
+
+  async getPendingApprovals(): Promise<PendingApproval[]> {
+    return this.approvals;
+  }
+  
+  async getAuditLogs(limit?: number): Promise<any[]> {
+    return [];
+  }
+
+  async approveToken(token: string, actorIdentity?: string): Promise<boolean> {
+    const app = this.approvals.find(a => a.token === token);
+    if (app && app.status === "PENDING") {
+      app.status = "APPROVED";
+      app.approvedBy = actorIdentity;
+      return true;
+    }
+    return false;
+  }
+
+  async validateAndConsume(token: string, capabilityId: string, payloadHash: string, actorIdentity?: string): Promise<boolean> {
+    const app = this.approvals.find(a => a.token === token);
+    if (app && app.status === "APPROVED" && app.capabilityId === capabilityId && app.payloadHash === payloadHash) {
+      app.status = "CONSUMED";
+      app.consumedAt = Date.now();
+      return true;
+    }
+    return false;
+  }
+
+  async revokeToken(token: string, actorIdentity?: string): Promise<boolean> {
+    const app = this.approvals.find(a => a.token === token);
+    if (app && app.status === "PENDING") {
+      app.status = "REVOKED";
+      return true;
+    }
+    return false;
+  }
+}
+
+describe("Control Plane & Runtime Governance", () => {
+  let auditLog: InMemoryAuditLogService;
+  let approvalStore: MockApprovalStore;
+  let gateway: MCPGateway;
+
+  const policyAllowAll: PolicyCard = {
+    metadata: { name: "allow-all" },
+    appliesTo: { capabilities: ["*"] },
+    rules: [{ effect: "allow" }]
+  };
+
+  const policyDenyAll: PolicyCard = {
+    metadata: { name: "deny-all" },
+    appliesTo: { capabilities: ["*"] },
+    rules: [{ effect: "deny" }]
+  };
+
+  const policyRequiresApproval: PolicyCard = {
+    metadata: { name: "require-approval" },
+    appliesTo: { capabilities: ["akcp.external_submit"] },
+    rules: [{ effect: "require_approval" }]
+  };
+
+  beforeEach(() => {
+    auditLog = new InMemoryAuditLogService();
+    approvalStore = new MockApprovalStore();
+  });
+
+  it("should allow execution and emit policy-allow audit event", async () => {
+    gateway = new MCPGateway({
+      policies: { "agent-1": policyAllowAll },
+      auditLogService: auditLog
+    });
+
+    const result = await gateway.execute(
+      { agentId: "agent-1", toolName: "akcp.read_document", sideEffect: "read", payload: {} },
+      async () => "success"
+    );
+
+    expect(result).toBe("success");
+    const events = await auditLog.getEvents();
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("policy-allow");
+  });
+
+  it("should block execution and emit policy-deny audit event", async () => {
+    gateway = new MCPGateway({
+      policies: { "agent-1": policyDenyAll },
+      auditLogService: auditLog
+    });
+
+    await expect(gateway.execute(
+      { agentId: "agent-1", toolName: "akcp.read_document", sideEffect: "read", payload: {} },
+      async () => "success"
+    )).rejects.toThrow("Policy Violation");
+
+    const events = await auditLog.getEvents();
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("policy-deny");
+  });
+
+  it("should pause execution, require approval, and resume when token is provided", async () => {
+    gateway = new MCPGateway({
+      policies: { "agent-1": policyRequiresApproval },
+      auditLogService: auditLog,
+      approvalStore
+    });
+
+    const payload = { data: "test" };
+
+    // 1. Initial attempt fails with APPROVAL_REQUIRED
+    let generatedToken = "";
+    try {
+      await gateway.execute(
+        { agentId: "agent-1", toolName: "akcp.external_submit", sideEffect: "submit", payload },
+        async () => "success"
+      );
+      expect.fail("Should have thrown APPROVAL_REQUIRED");
+    } catch (err: any) {
+      expect(err.code).toBe("APPROVAL_REQUIRED");
+      generatedToken = err.data.approvalToken;
+    }
+
+    // Check Audit logs for approval requirement
+    let events = await auditLog.getEvents();
+    expect(events.map(e => e.type)).toContain("approval-required");
+    expect(events.map(e => e.type)).toContain("approval-created");
+
+    // 2. Approve token out of band
+    await approvalStore.approveToken(generatedToken, "human-approver");
+
+    // 3. Resume execution with token
+    const result = await gateway.execute(
+      { agentId: "agent-1", toolName: "akcp.external_submit", sideEffect: "submit", payload: { ...payload, _approvalToken: generatedToken } },
+      async () => "success"
+    );
+
+    expect(result).toBe("success");
+
+    events = await auditLog.getEvents();
+    expect(events.map(e => e.type)).toContain("approval-consumed");
+  });
+
+  it("should block execution if payload hash does not match approval token", async () => {
+    gateway = new MCPGateway({
+      policies: { "agent-1": policyRequiresApproval },
+      auditLogService: auditLog,
+      approvalStore
+    });
+
+    const payload = { data: "test" };
+
+    // 1. Initial attempt fails with APPROVAL_REQUIRED
+    let generatedToken = "";
+    try {
+      await gateway.execute(
+        { agentId: "agent-1", toolName: "akcp.external_submit", sideEffect: "submit", payload },
+        async () => "success"
+      );
+      expect.fail("Should have thrown APPROVAL_REQUIRED");
+    } catch (err: any) {
+      generatedToken = err.data.approvalToken;
+    }
+
+    // 2. Approve token out of band
+    await approvalStore.approveToken(generatedToken, "human-approver");
+
+    // 3. Attempt execution with token but MODIFIED payload
+    const modifiedPayload = { data: "malicious-change", _approvalToken: generatedToken };
+
+    await expect(gateway.execute(
+      { agentId: "agent-1", toolName: "akcp.external_submit", sideEffect: "submit", payload: modifiedPayload },
+      async () => "success"
+    )).rejects.toThrow("Invalid, expired, or tampered approval token");
+
+    const events = await auditLog.getEvents();
+    expect(events.map(e => e.type)).toContain("approval-expired"); // Maps to invalid/expired
+  });
+});

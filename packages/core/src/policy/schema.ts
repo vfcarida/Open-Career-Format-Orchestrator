@@ -5,7 +5,13 @@ export const PolicyMappingSchema = z.object({
   owasp_llm: z.array(z.string()).optional(),
 });
 
+export const PolicyRuleSchema = z.object({
+  effect: z.enum(["allow", "deny", "require_approval"]),
+  condition: z.string().optional(),
+});
+
 export const PolicyCardSchema = z.object({
+  id: z.string().optional(),
   apiVersion: z
     .literal("policy.akcp.dev/v1alpha1")
     .default("policy.akcp.dev/v1alpha1"),
@@ -14,7 +20,14 @@ export const PolicyCardSchema = z.object({
     name: z.string(),
     description: z.string().optional(),
     version: z.string().optional(),
-  }),
+  }).optional(),
+  appliesTo: z.object({
+    capabilities: z.array(z.string()).default(["*"]),
+  }).optional(),
+  rules: z.array(PolicyRuleSchema).optional(),
+  evidence: z.object({
+    required: z.array(z.string()).default([]),
+  }).optional(),
   spec: z.object({
     allowedAgents: z.array(z.string()).default(["*"]),
     allowedContextPacks: z.array(z.string()).default(["*"]),
@@ -36,5 +49,5 @@ export const PolicyCardSchema = z.object({
     evidenceRequirements: z.array(z.string()).optional(),
     piiHandling: z.enum(["deny", "redact", "allow-with-audit"]).default("deny"),
     mappings: PolicyMappingSchema.optional(),
-  }),
+  }).optional(),
 });

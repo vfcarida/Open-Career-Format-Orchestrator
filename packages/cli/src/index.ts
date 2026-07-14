@@ -507,11 +507,45 @@ serveCmd
   });
 
 serveCmd
-  .command("control-plane")
-  .description("Launch the Control Plane dashboard locally")
+  .command("dashboard")
+  .description("Launch the Dashboard locally")
   .action(() => {
-    console.log(`[INFO] Control Plane dashboard is currently experimental.`);
+    console.log(`[INFO] Dashboard is currently experimental.`);
     console.log(`[INFO] Stay tuned for the next major release.`);
+  });
+
+// COMMAND: control-plane
+const controlPlaneCmd = program
+  .command("control-plane")
+  .description("Manage runtime governance, policies, and HITL approvals");
+
+controlPlaneCmd
+  .command("inspect")
+  .description("Inspect the desired state model for agents")
+  .action(() => {
+    console.log("[INFO] Inspecting desired state model...");
+    console.log("Agents loaded: 0 (placeholder)");
+  });
+
+controlPlaneCmd
+  .command("policies")
+  .description("List registered policy cards")
+  .action(() => {
+    console.log("[INFO] Listing policy cards...");
+  });
+
+controlPlaneCmd
+  .command("approvals")
+  .description("List pending approvals")
+  .action(() => {
+    console.log("[INFO] Listing pending approvals...");
+  });
+
+controlPlaneCmd
+  .command("audit")
+  .description("Tail the audit event log")
+  .action(() => {
+    console.log("[INFO] Tailing audit logs...");
   });
 
 // COMMAND: evals

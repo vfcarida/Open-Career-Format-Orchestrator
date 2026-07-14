@@ -73,9 +73,18 @@ export const AgentIdentityConfigSchema = z.object({
   policyCardName: z.string(),
 });
 
+export const AgentConfigSchema = z.object({
+  id: z.string().min(1),
+  allowedCapabilities: z.array(z.string()).default(["*"]),
+  deniedCapabilities: z.array(z.string()).default([]),
+  maxContextTokens: z.number().optional(),
+  requiresApprovalFor: z.array(z.string()).default([]),
+});
+
 export const ControlPlaneConfigSchema = z.object({
   policies: PoliciesConfigSchema.optional(),
   identities: z.array(AgentIdentityConfigSchema).optional(),
+  agents: z.array(AgentConfigSchema).optional(),
   mcp: McpConfigSchema.optional(),
   evalGates: z.array(EvalGateSchema).optional(),
 });

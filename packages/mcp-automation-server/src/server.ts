@@ -209,9 +209,14 @@ export class AKCPAutomationServer {
                     jobUrl,
                     platform: this.detectPlatform(jobUrl),
                   };
+                  const payloadHash = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
                   const token = await approvalStore.generateToken(
+                    reqId,
                     "confirm_application_submission",
-                    payload,
+                    payloadHash,
+                    "high",
+                    "write",
+                    _agentId || "anonymous",
                     metadata,
                   );
 
@@ -339,11 +344,12 @@ export class AKCPAutomationServer {
                   };
 
                   const expectedPayload = { jobUrl, context, preparedFields };
+                  const expectedPayloadHash = crypto.createHash("sha256").update(JSON.stringify(expectedPayload)).digest("hex");
 
                   const isValid = await approvalStore.validateAndConsume(
                     approvalToken,
                     "confirm_application_submission",
-                    expectedPayload,
+                    expectedPayloadHash,
                     approverIdentity,
                   );
 
@@ -881,13 +887,22 @@ export class AKCPAutomationServer {
         reason: z.string().describe("Reason for action"),
         _agentId: z.string().optional(),
       },
-      async ({ ticketId, actionType, reason }) => {
+      async ({ ticketId, actionType, reason, _agentId }) => {
         mcpToolCallsCounter.add(1);
 
         try {
           const payload = { ticketId, actionType, reason };
           const metadata = { platform: "support-crm" };
-          const token = await approvalStore.generateToken("record_support_resolution", payload, metadata);
+          const payloadHash = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+          const token = await approvalStore.generateToken(
+            crypto.randomUUID(),
+            "record_support_resolution",
+            payloadHash,
+            "high",
+            "write",
+            _agentId || "anonymous",
+            metadata
+          );
 
           return {
             content: [
@@ -921,7 +936,8 @@ export class AKCPAutomationServer {
 
         try {
           const expectedPayload = { ticketId, actionType, reason };
-          const isValid = await approvalStore.validateAndConsume(approvalToken, toolName, expectedPayload, approverIdentity);
+          const expectedPayloadHash = crypto.createHash("sha256").update(JSON.stringify(expectedPayload)).digest("hex");
+          const isValid = await approvalStore.validateAndConsume(approvalToken, toolName, expectedPayloadHash, approverIdentity);
           if (!isValid) throw new Error("Execution Blocked: Invalid, expired, or tampered approval token.");
 
           auditLogger.log({

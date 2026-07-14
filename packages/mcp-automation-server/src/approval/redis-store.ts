@@ -13,24 +13,31 @@ export class RedisApprovalStore implements IApprovalStore {
   }
 
   generateToken(
-    toolName: string,
-    payload: unknown,
+    requestId: string,
+    capabilityId: string,
+    payloadHash: string,
+    riskLevel: string,
+    sideEffectLevel: string,
+    requestedBy: string,
     metadata?: Record<string, unknown>,
-    requesterIdentity?: string,
     ttlMs = 15 * 60 * 1000,
   ): string {
     const token = crypto.randomBytes(32).toString("hex");
-    const payloadHash = this.hashPayload(payload);
     const expiresAt = Date.now() + ttlMs;
 
     const record: PendingApproval = {
       token,
-      toolName,
+      requestId,
+      capabilityId,
       payloadHash,
+      riskLevel,
+      sideEffectLevel,
+      requestedBy,
+      createdAt: Date.now(),
       expiresAt,
       metadata,
-      requesterIdentity,
       status: "PENDING",
+      auditEventIds: [],
     };
 
     // Store with TTL
@@ -64,8 +71,8 @@ export class RedisApprovalStore implements IApprovalStore {
 
   async validateAndConsume(
     token: string,
-    toolName: string,
-    payload: unknown,
+    capabilityId: string,
+    payloadHash: string,
     actorIdentity?: string,
   ): Promise<boolean> {
     const key = `${this.prefix}pending:${token}`;
@@ -74,8 +81,8 @@ export class RedisApprovalStore implements IApprovalStore {
     if (!data) {
       this.logAudit(
         "REJECTED_NOT_FOUND",
-        toolName,
-        this.hashPayload(payload),
+        capabilityId,
+        payloadHash,
         undefined,
         actorIdentity,
       );
@@ -84,11 +91,11 @@ export class RedisApprovalStore implements IApprovalStore {
 
     const record: PendingApproval = JSON.parse(data);
 
-    if (record.toolName !== toolName) {
+    if (record.capabilityId !== capabilityId) {
       this.logAudit(
         "REJECTED_TOOL_MISMATCH",
-        toolName,
-        this.hashPayload(payload),
+        capabilityId,
+        payloadHash,
         record.metadata,
         actorIdentity,
       );
@@ -98,19 +105,18 @@ export class RedisApprovalStore implements IApprovalStore {
     if (record.status !== "APPROVED") {
       this.logAudit(
         "REJECTED_NOT_APPROVED",
-        toolName,
-        this.hashPayload(payload),
+        capabilityId,
+        payloadHash,
         record.metadata,
         actorIdentity,
       );
       return false;
     }
 
-    const payloadHash = this.hashPayload(payload);
     if (record.payloadHash !== payloadHash) {
       this.logAudit(
         "REJECTED_HASH_MISMATCH",
-        toolName,
+        capabilityId,
         payloadHash,
         record.metadata,
         actorIdentity,
@@ -123,7 +129,7 @@ export class RedisApprovalStore implements IApprovalStore {
     if (deleted > 0) {
       this.logAudit(
         "APPROVED",
-        toolName,
+        capabilityId,
         payloadHash,
         record.metadata,
         actorIdentity,
@@ -142,6 +148,7 @@ export class RedisApprovalStore implements IApprovalStore {
       const record: PendingApproval = JSON.parse(data);
       if (record.status === "PENDING") {
         record.status = "APPROVED";
+        record.approvedBy = actorIdentity;
         // Compute remaining TTL
         const ttl = await this.redis.ttl(key);
         if (ttl > 0) {
@@ -151,7 +158,7 @@ export class RedisApprovalStore implements IApprovalStore {
         }
         this.logAudit(
           "APPROVED",
-          record.toolName,
+          record.capabilityId,
           record.payloadHash,
           record.metadata,
           actorIdentity,
@@ -171,7 +178,7 @@ export class RedisApprovalStore implements IApprovalStore {
       await this.redis.del(key);
       this.logAudit(
         "REVOKED",
-        record.toolName,
+        record.capabilityId,
         record.payloadHash,
         record.metadata,
         actorIdentity,
@@ -203,10 +210,5 @@ export class RedisApprovalStore implements IApprovalStore {
       "event",
       JSON.stringify(log),
     );
-  }
-
-  private hashPayload(payload: unknown): string {
-    const data = JSON.stringify(payload || {});
-    return crypto.createHash("sha256").update(data).digest("hex");
   }
 }

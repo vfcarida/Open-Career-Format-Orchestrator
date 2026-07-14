@@ -9,7 +9,57 @@ export function evaluatePolicy(
   policy: PolicyCard,
   context: PolicyContext,
 ): PolicyEvaluationResult {
+  
+  // V2 Rule Evaluation (if appliesTo and rules exist)
+  if (policy.appliesTo?.capabilities && policy.rules) {
+    const matchesCapability = policy.appliesTo.capabilities.some(
+      (cap) => cap === "*" || 
+               context.toolName === cap || 
+               (cap.endsWith("*") && context.toolName.startsWith(cap.replace("*", "")))
+    );
+
+    if (matchesCapability) {
+      for (const rule of policy.rules) {
+        // Evaluate first matching rule (no condition logic implemented yet, assume all match if no condition)
+        if (!rule.condition) {
+          if (rule.effect === "deny") {
+            return {
+              allowed: false,
+              reason: `Tool '${context.toolName}' is denied by rule in policy '${policy.id || policy.metadata?.name}'.`,
+            };
+          }
+          if (rule.effect === "require_approval") {
+            return {
+              allowed: true,
+              requirements: {
+                approvalRequired: true,
+                evidenceRequired: policy.evidence?.required || [],
+                piiHandling: policy.spec?.piiHandling || "deny",
+              },
+            };
+          }
+          if (rule.effect === "allow") {
+            return {
+              allowed: true,
+              requirements: {
+                approvalRequired: false,
+                evidenceRequired: policy.evidence?.required || [],
+                piiHandling: policy.spec?.piiHandling || "deny",
+              },
+            };
+          }
+        }
+      }
+    }
+  }
+
+  // V1 Rule Evaluation (Fallback)
   const spec = policy.spec;
+  if (!spec) {
+    return {
+      allowed: true,
+    };
+  }
 
   // 1. Check if tool is explicitly forbidden
   if (
@@ -18,7 +68,7 @@ export function evaluatePolicy(
   ) {
     return {
       allowed: false,
-      reason: `Tool '${context.toolName}' is explicitly forbidden by policy '${policy.metadata.name}'.`,
+      reason: `Tool '${context.toolName}' is explicitly forbidden by policy '${policy.metadata?.name}'.`,
     };
   }
 
@@ -29,7 +79,7 @@ export function evaluatePolicy(
   if (!isAllowed) {
     return {
       allowed: false,
-      reason: `Tool '${context.toolName}' is not in the allowed list of policy '${policy.metadata.name}'.`,
+      reason: `Tool '${context.toolName}' is not in the allowed list of policy '${policy.metadata?.name}'.`,
     };
   }
 
@@ -44,7 +94,7 @@ export function evaluatePolicy(
   if (rule === "deny") {
     return {
       allowed: false,
-      reason: `Side-effect level '${context.sideEffect}' is denied by policy '${policy.metadata.name}'.`,
+      reason: `Side-effect level '${context.sideEffect}' is denied by policy '${policy.metadata?.name}'.`,
     };
   }
 
@@ -59,7 +109,7 @@ export function evaluatePolicy(
     allowed: true, // It is allowed, but possibly with requirements
     requirements: {
       approvalRequired: requiresApproval,
-      evidenceRequired: spec.evidenceRequirements || [],
+      evidenceRequired: spec.evidenceRequirements || policy.evidence?.required || [],
       piiHandling: spec.piiHandling,
     },
   };

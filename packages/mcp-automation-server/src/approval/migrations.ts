@@ -61,6 +61,29 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    version: 4,
+    up: (db) => {
+      const pendingCols = [
+        "requestId TEXT",
+        "capabilityId TEXT",
+        "riskLevel TEXT",
+        "sideEffectLevel TEXT",
+        "requestedBy TEXT",
+        "approvedBy TEXT",
+        "createdAt INTEGER",
+        "consumedAt INTEGER",
+        "auditEventIds TEXT"
+      ];
+      for (const col of pendingCols) {
+        try {
+          db.exec(`ALTER TABLE pending_approvals ADD COLUMN ${col};`);
+        } catch (e: any) {
+          if (!e.message.includes("duplicate column")) throw e;
+        }
+      }
+    },
+  },
 ];
 
 export function runMigrations(db: Database.Database) {

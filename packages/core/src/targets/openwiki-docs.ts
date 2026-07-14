@@ -3,9 +3,10 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import type { CompileTarget, TargetConfig, TargetOutput } from "./types.js";
 import type { AgentKnowledgeIR } from "../ir/types.js";
+import { FrontmatterParser } from "../infrastructure/frontmatter-parser.js";
 
 export class OpenWikiDocsTarget implements CompileTarget {
-  public readonly targetType = "openwiki-docs";
+  public readonly targetType = "openwiki";
 
   async compile(
     ir: AgentKnowledgeIR,
@@ -17,15 +18,20 @@ export class OpenWikiDocsTarget implements CompileTarget {
 
     let totalBytes = 0;
     const hash = createHash("sha256");
+    const parser = new FrontmatterParser();
 
     // Generate an index.md
     let indexContent = `# Context Knowledge\n\nGenerated automatically from AKCP Compiler.\n\n`;
 
     for (const concept of ir.concepts) {
-      const fileName = `${concept.conceptId}.md`;
+      const fileName = `${concept.conceptId.replace(/\//g, "-")}.md`;
       const filePath = path.join(outDir, fileName);
 
-      const content = `# ${concept.conceptId}\n\n${concept.body}`;
+      // Restore frontmatter to ensure OpenWiki interoperability
+      const frontmatter = concept.frontmatter || { type: concept.type || "Document" };
+      let bodyWithHeading = `# ${concept.conceptId}\n\n${concept.body}`;
+      
+      const content = parser.serialize(frontmatter as any, bodyWithHeading);
 
       await fs.writeFile(filePath, content, "utf-8");
 
@@ -37,9 +43,23 @@ export class OpenWikiDocsTarget implements CompileTarget {
 
     const indexPath = path.join(outDir, "index.md");
     await fs.writeFile(indexPath, indexContent, "utf-8");
-
     hash.update(indexContent);
     totalBytes += Buffer.byteLength(indexContent, "utf8");
+
+    // Generate OpenWiki metadata manifest
+    const metadata = {
+      generatedAt: ir.timestamp || new Date().toISOString(),
+      targetType: this.targetType,
+      bundleId: ir.bundleId,
+      sourceHashes: ir.sourceHashes || {},
+      compilerVersion: "AKCP-v1"
+    };
+
+    const metadataPath = path.join(outDir, ".akcp-openwiki-metadata.json");
+    const metadataContent = JSON.stringify(metadata, null, 2);
+    await fs.writeFile(metadataPath, metadataContent, "utf-8");
+    hash.update(metadataContent);
+    totalBytes += Buffer.byteLength(metadataContent, "utf8");
 
     return {
       targetType: this.targetType,

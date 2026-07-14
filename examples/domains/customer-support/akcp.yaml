@@ -15,6 +15,10 @@ compile:
       out: dist/mcp-resources.json
     - type: policy-bundle
       out: dist/policy-bundle.json
+    - type: openwiki
+      out: dist/openwiki
+    - type: agent-instructions
+      out: dist/AGENTS.md
 
 controlPlane:
   policies:

@@ -185,10 +185,13 @@ describe("MCPGateway", () => {
       expect(error.code).toBe("APPROVAL_REQUIRED");
       expect(error.data.approvalToken).toBe("mock-token-123");
       expect(mockApprovalStore.generateToken).toHaveBeenCalledWith(
+        expect.any(String), // requestId
         "restricted_tool",
-        { someData: "test" },
-        expect.any(Object),
+        expect.any(String), // hash
+        "high",
+        "write",
         "agent-hitl",
+        expect.any(Object)
       );
     });
 
@@ -209,7 +212,7 @@ describe("MCPGateway", () => {
       expect(mockApprovalStore.validateAndConsume).toHaveBeenCalledWith(
         "valid-token",
         "restricted_tool",
-        expect.objectContaining({ someData: "test" }),
+        expect.any(String), // hash
         "agent-hitl",
       );
     });

@@ -1,19 +1,29 @@
 export interface PendingApproval {
   token: string;
-  toolName: string;
+  requestId: string;
+  capabilityId: string;
   payloadHash: string;
+  riskLevel: string;
+  sideEffectLevel: string;
+  requestedBy: string;
+  approvedBy?: string;
+  createdAt: number;
   expiresAt: number;
+  consumedAt?: number;
+  status: "PENDING" | "APPROVED" | "REVOKED" | "EXPIRED" | "CONSUMED";
+  auditEventIds: string[];
   metadata?: Record<string, unknown>;
-  requesterIdentity?: string;
-  status?: "PENDING" | "APPROVED" | "REVOKED";
 }
 
 export interface IApprovalStore {
   generateToken(
-    toolName: string,
-    payload: unknown,
+    requestId: string,
+    capabilityId: string,
+    payloadHash: string,
+    riskLevel: string,
+    sideEffectLevel: string,
+    requestedBy: string,
     metadata?: Record<string, unknown>,
-    requesterIdentity?: string,
     ttlMs?: number,
   ): string | Promise<string>;
   getPendingApprovals(): PendingApproval[] | Promise<PendingApproval[]>;
@@ -24,8 +34,8 @@ export interface IApprovalStore {
   ): boolean | Promise<boolean>;
   validateAndConsume(
     token: string,
-    toolName: string,
-    payload: unknown,
+    capabilityId: string,
+    payloadHash: string,
     actorIdentity?: string,
   ): boolean | Promise<boolean>;
   revokeToken(
