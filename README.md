@@ -61,7 +61,7 @@ To prove its domain-agnostic architecture, AKCP implements distinct flagship sce
 |---|---|---|
 | Career | low-friction starter domain | personal knowledge compilation |
 | IT Operations | enterprise flagship | runbooks, incidents, approvals, audit |
-| Customer Support | future enterprise flagship | PII, policies, macros, escalation, history |
+| Customer Support | future enterprise flagship for policy-aware, privacy-preserving support knowledge compilation | showing how AKCP handles tickets, macros, policies, customer history, PII redaction, escalation, and quality evaluation |
 
 ## Current Maturity Status
 
