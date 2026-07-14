@@ -1,12 +1,6 @@
----
-id: "slo-payment"
-type: "SLO"
-title: "Payment Service SLOs"
-targetService: "svc-payment"
----
+# Note: This file is superseded
 
-# Payment Service SLOs
+The SLO document for the Payment Service has moved to:
+`../services/slo-payment-availability.md`
 
-- **Availability:** 99.99% uptime over a 30-day window.
-- **Latency:** 99th percentile response time < 200ms.
-- **Error Rate:** 5xx response rate < 0.1%.
+This file is kept here only for historical reference and is not included in the OKF source scan.

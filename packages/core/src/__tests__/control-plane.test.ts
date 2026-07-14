@@ -116,7 +116,7 @@ describe("Control Plane & Runtime Governance", () => {
     expect(result).toBe("success");
     const events = await auditLog.getEvents();
     expect(events).toHaveLength(1);
-    expect(events[0].type).toBe("policy-allow");
+    expect(events[0].decision).toBe("allow");
   });
 
   it("should block execution and emit policy-deny audit event", async () => {
@@ -132,7 +132,7 @@ describe("Control Plane & Runtime Governance", () => {
 
     const events = await auditLog.getEvents();
     expect(events).toHaveLength(1);
-    expect(events[0].type).toBe("policy-deny");
+    expect(events[0].decision).toBe("deny");
   });
 
   it("should pause execution, require approval, and resume when token is provided", async () => {
@@ -159,8 +159,7 @@ describe("Control Plane & Runtime Governance", () => {
 
     // Check Audit logs for approval requirement
     let events = await auditLog.getEvents();
-    expect(events.map(e => e.type)).toContain("approval-required");
-    expect(events.map(e => e.type)).toContain("approval-created");
+    expect(events.map(e => e.decision)).toContain("require_approval");
 
     // 2. Approve token out of band
     await approvalStore.approveToken(generatedToken, "human-approver");
@@ -174,7 +173,7 @@ describe("Control Plane & Runtime Governance", () => {
     expect(result).toBe("success");
 
     events = await auditLog.getEvents();
-    expect(events.map(e => e.type)).toContain("approval-consumed");
+    expect(events.map(e => e.decision)).toContain("consumed");
   });
 
   it("should block execution if payload hash does not match approval token", async () => {
@@ -210,6 +209,6 @@ describe("Control Plane & Runtime Governance", () => {
     )).rejects.toThrow("Invalid, expired, or tampered approval token");
 
     const events = await auditLog.getEvents();
-    expect(events.map(e => e.type)).toContain("approval-expired"); // Maps to invalid/expired
+    expect(events.map(e => e.decision)).toContain("expired"); // Maps to invalid/expired
   });
 });

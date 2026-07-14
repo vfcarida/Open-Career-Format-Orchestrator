@@ -33,10 +33,14 @@ describe("Golden Compiler Tests", () => {
     // Check manifest exists
     expect(fs.existsSync(outManifest)).toBe(true);
 
-    // Snapshot manifest (omit timestamp/buildId for determinism)
+    // Snapshot manifest (omit timestamp/buildId/hashes for determinism)
     const manifest = JSON.parse(fs.readFileSync(outManifest, "utf-8"));
     manifest.timestamp = "2026-01-01T00:00:00.000Z";
+    manifest.createdAt = "2026-01-01T00:00:00.000Z";
     manifest.buildId = "deterministic_build_id";
+    manifest.targets.forEach((t: any) => {
+      t.hash = "deterministic_hash";
+    });
 
     await expect(manifest).toMatchFileSnapshot("__snapshots__/career-manifest.json");
   });
@@ -57,10 +61,14 @@ describe("Golden Compiler Tests", () => {
     // Check manifest exists
     expect(fs.existsSync(outManifest)).toBe(true);
 
-    // Snapshot manifest (omit timestamp/buildId for determinism)
+    // Snapshot manifest (omit timestamp/buildId/hashes for determinism)
     const manifest = JSON.parse(fs.readFileSync(outManifest, "utf-8"));
     manifest.timestamp = "2026-01-01T00:00:00.000Z";
+    manifest.createdAt = "2026-01-01T00:00:00.000Z";
     manifest.buildId = "deterministic_build_id";
+    manifest.targets.forEach((t: any) => {
+      t.hash = "deterministic_hash";
+    });
 
     await expect(manifest).toMatchFileSnapshot("__snapshots__/it-operations-manifest.json");
   });

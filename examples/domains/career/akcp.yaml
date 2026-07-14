@@ -7,12 +7,21 @@ bundle:
 compile:
   sources:
     - type: okf-directory
-      path: .
+      path: knowledge
   targets:
     - type: context-pack
       out: dist/context-pack.json
     - type: openwiki
       out: dist/openwiki
+    - type: mcp-resources
+      out: dist/akcp-manifest.json
+    - type: dashboard-metadata
+      out: dist/dashboard-meta.json
 
 policy:
   defaultAutonomyLevel: read-only
+  policies:
+    - career.policy.yaml
+
+conformance:
+  level: "AKCP-control-plane-compatible"

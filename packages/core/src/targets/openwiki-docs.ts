@@ -24,7 +24,7 @@ export class OpenWikiDocsTarget implements CompileTarget {
     let indexContent = `# Context Knowledge\n\nGenerated automatically from AKCP Compiler.\n\n`;
 
     for (const concept of ir.concepts) {
-      const fileName = `${concept.conceptId.replace(/\//g, "-")}.md`;
+      const fileName = `${concept.conceptId.replace(/[\\/]/g, "-")}.md`;
       const filePath = path.join(outDir, fileName);
 
       // Restore frontmatter to ensure OpenWiki interoperability

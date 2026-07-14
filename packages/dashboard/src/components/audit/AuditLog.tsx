@@ -7,34 +7,42 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-interface AuditLogEntry {
-  id: number;
-  timestamp: number;
+export interface AuditEvent {
+  schemaVersion: "akcp.audit/v1";
+  eventId: string;
+  timestamp: string;
+  requestId: string;
+  actor: string;
   action: string;
-  toolName: string;
-  payloadHash: string;
-  metadata?: Record<string, any>;
-  actorIdentity?: string;
+  capabilityId?: string;
+  decision: string;
+  riskLevel: string;
+  evidence: {
+    payloadHash?: string;
+    policyIds?: string[];
+    reason?: string;
+    [key: string]: any;
+  };
 }
 
 export function AuditLog() {
-  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+  const [logs, setLogs] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await fetch("/api/audit/logs");
+        const response = await fetch("/data/audit-log.jsonl");
         if (!response.ok) {
-          throw new Error("Failed to fetch audit logs from BFF");
+          throw new Error("No audit logs found (or failed to fetch /data/audit-log.jsonl)");
         }
-        const data = await response.json();
-        if (data.isError) {
-          throw new Error(data.content[0].text);
-        }
-        const parsedContent = JSON.parse(data.content[0].text);
-        setLogs(parsedContent.data.logs || []);
+        const text = await response.text();
+        const lines = text.split("\n").filter(l => l.trim().length > 0);
+        const parsedLogs = lines.map(l => JSON.parse(l) as AuditEvent);
+        // Sort newest first
+        parsedLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setLogs(parsedLogs);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -42,45 +50,43 @@ export function AuditLog() {
       }
     };
     fetchLogs();
-
-    // Poll every 5s for new logs
-    const interval = setInterval(fetchLogs, 5000);
-    return () => clearInterval(interval);
   }, []);
 
-  const getStatusIcon = (action: string) => {
-    switch (action) {
-      case "APPROVED":
+  const getStatusIcon = (decision: string) => {
+    switch (decision) {
+      case "allow":
+      case "consumed":
         return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
-      case "REVOKED":
+      case "require_approval":
+      case "pending":
         return <Clock className="w-4 h-4 text-orange-400" />;
-      case "REJECTED_NOT_FOUND":
-      case "REJECTED_TOOL_MISMATCH":
-      case "REJECTED_HASH_MISMATCH":
+      case "deny":
+      case "error":
+      case "expired":
         return <XCircle className="w-4 h-4 text-red-400" />;
       default:
         return <AlertTriangle className="w-4 h-4 text-zinc-400" />;
     }
   };
 
-  const getStatusBadge = (action: string) => {
-    if (action === "APPROVED") {
+  const getStatusBadge = (decision: string) => {
+    if (decision === "allow" || decision === "consumed") {
       return (
         <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md text-[10px] font-bold uppercase tracking-wider">
-          APPROVED
+          {decision}
         </span>
       );
     }
-    if (action === "REVOKED") {
+    if (decision === "require_approval" || decision === "pending") {
       return (
         <span className="px-2 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-md text-[10px] font-bold uppercase tracking-wider">
-          REVOKED
+          {decision}
         </span>
       );
     }
     return (
       <span className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md text-[10px] font-bold uppercase tracking-wider">
-        REJECTED
+        {decision}
       </span>
     );
   };
@@ -125,13 +131,13 @@ export function AuditLog() {
             ) : error ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center text-red-400">
-                  Error: {error}
+                  {error}
                 </td>
               </tr>
             ) : (
               logs.map((event) => (
                 <tr
-                  key={event.id}
+                  key={event.eventId}
                   className="hover:bg-zinc-900/30 transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-zinc-300 font-mono text-xs">
@@ -140,24 +146,23 @@ export function AuditLog() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-zinc-300 text-xs">
-                        {event.actorIdentity || "System/Local"}
+                        {event.actor || "System/Local"}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      {getStatusIcon(event.action)}
+                      {getStatusIcon(event.decision)}
                       <span className="font-medium text-zinc-200">
-                        {event.toolName}
+                        {event.capabilityId || event.action}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-zinc-300 text-xs">
-                    {event.metadata ? (
-                      <div className="max-w-[200px] truncate">
-                        {event.metadata.platform ||
-                          event.metadata.jobUrl ||
-                          JSON.stringify(event.metadata)}
+                    {event.evidence ? (
+                      <div className="max-w-[200px] truncate" title={JSON.stringify(event.evidence)}>
+                        {event.evidence.reason ||
+                          JSON.stringify(event.evidence)}
                       </div>
                     ) : (
                       "-"
@@ -166,18 +171,13 @@ export function AuditLog() {
                   <td className="px-6 py-4">
                     <div
                       className="font-mono text-[10px] text-zinc-500 max-w-[150px] truncate"
-                      title={event.payloadHash}
+                      title={event.evidence?.payloadHash}
                     >
-                      {event.payloadHash}
+                      {event.evidence?.payloadHash || "-"}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    {getStatusBadge(event.action)}
-                    {event.action.startsWith("REJECTED") && (
-                      <div className="text-[10px] text-red-500/70 mt-1 uppercase">
-                        {event.action.replace("REJECTED_", "")}
-                      </div>
-                    )}
+                    {getStatusBadge(event.decision)}
                   </td>
                 </tr>
               ))

@@ -8,6 +8,7 @@ import { OKFFrontmatterSchema } from "./okf.js";
 import { CareerFrontmatterSchema } from "./profiles/career.js";
 import { SoftwareProjectFrontmatterSchema } from "./profiles/software-project.js";
 import { CustomerSupportDomainSchema } from "./profiles/customer-support.js";
+import { ITOperationsDomainSchema } from "./profiles/it-operations.js";
 
 /**
  * Profile Registry to dynamically resolve Zod schemas based on the target profile.
@@ -22,6 +23,9 @@ export const ProfileRegistry = {
         return SoftwareProjectFrontmatterSchema;
       case "customer-support":
         return CustomerSupportDomainSchema;
+      case "it-operations":
+      case "it-ops":
+        return ITOperationsDomainSchema;
       case "none":
       case "okf":
       case "standard":
@@ -39,3 +43,4 @@ export * from "./okf.js";
 export * from "./profiles/career.js";
 export * from "./profiles/software-project.js";
 export * from "./profiles/customer-support.js";
+export * from "./profiles/it-operations.js";

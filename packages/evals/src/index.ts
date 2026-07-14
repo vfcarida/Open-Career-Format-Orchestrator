@@ -171,6 +171,13 @@ async function main() {
 
   harness.generateReport(reportDir);
 
+  const akcpDistDir = path.resolve(__dirname, "../../dist/akcp");
+  if (!fs.existsSync(akcpDistDir)) {
+    fs.mkdirSync(akcpDistDir, { recursive: true });
+  }
+  const reportJSON = fs.readFileSync(path.join(reportDir, "benchmark-report.json"));
+  fs.writeFileSync(path.join(akcpDistDir, "eval-report.json"), reportJSON);
+
   // Assert regression thresholds on Treatment metrics
   const results = harness.getResults();
   let totalSuccess = 0;

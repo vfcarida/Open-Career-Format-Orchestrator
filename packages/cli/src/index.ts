@@ -121,6 +121,7 @@ program
         { encoding: "utf-8", stdio: "inherit" },
       );
     } catch (err: any) {
+      console.error(`[ERROR] Validation command failed:`, err.message);
       process.exit(1);
     }
   });
@@ -210,6 +211,7 @@ program
         McpResourcesManifestTarget,
         PolicyBundleTarget,
         EvalDatasetTarget,
+        DashboardMetadataTarget,
         ProvenanceManifestBuilder,
         hashConfig,
       } = await import("@akcp/core");
@@ -270,6 +272,12 @@ program
           level: report.conformanceLevel,
           checks: report.details,
         });
+        
+        const confOutDir = path.resolve(process.cwd(), "dist/akcp");
+        if (!fs.existsSync(confOutDir)) {
+          fs.mkdirSync(confOutDir, { recursive: true });
+        }
+        fs.writeFileSync(path.join(confOutDir, "conformance-report.json"), JSON.stringify(report, null, 2));
       } catch (err: any) {
         console.warn(`[WARN] Failed to run conformance: ${err.message}`);
       }
@@ -281,10 +289,11 @@ program
         "mcp-resources": new McpResourcesManifestTarget(),
         "policy-bundle": new PolicyBundleTarget(),
         "eval-dataset": new EvalDatasetTarget(),
+        "dashboard-metadata": new DashboardMetadataTarget(),
       };
 
       for (const targetConf of targetsToRun) {
-        if (["mcp-tools", "mcp-prompts", "dashboard-metadata"].includes(targetConf.type)) {
+        if (["mcp-tools", "mcp-prompts"].includes(targetConf.type)) {
           manifestBuilder.addWarning(`[WARN] Target type '${targetConf.type}' is experimental and currently unimplemented.`);
           console.warn(`[WARN] Target type '${targetConf.type}' is experimental and currently unimplemented.`);
           continue;

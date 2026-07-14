@@ -1,69 +1,154 @@
-# IT Operations Flagship Demo
+# IT Operations / Incident Response — Enterprise Flagship Domain
 
-## What this demonstrates
+> **This is the enterprise flagship domain for AKCP.**
+>
+> It demonstrates how AKCP's governance, policy-gated approvals, audit evidence, and MCP capabilities function in a real-world operational context: incident triage, safe remediation, escalation, and post-incident learning.
 
-This is the enterprise flagship for AKCP (Agent Knowledge Compiler and Control Plane). It demonstrates how a platform engineering team can use AKCP to securely manage runbooks, incident response procedures, and deployment guides. Crucially, it showcases the **safety model**: using machine-readable Policy Cards to enforce Human-In-The-Loop (HITL) approvals for risky agent actions (like restarting services or deploying code).
+---
 
-## Scenario
+## What This Domain Demonstrates
 
-An on-call AI agent is paged for a High CPU alert on the `payment-service`. The agent:
+| Capability                       | Demonstrated By                                    |
+|----------------------------------|----------------------------------------------------|
+| Incident triage via context      | Agent retrieves runbooks via `get_runbook`         |
+| Safe recommendation              | Agent suggests rollback without executing it       |
+| Approval-gated remediation       | `execute_remediation` blocked until ticket approved |
+| Audit trail generation           | Every approval + execution logged in `akcp.audit/v1` |
+| Escalation policy enforcement    | `escalate_incident` requires approval for L2+      |
+| Post-incident knowledge update   | Postmortem document feeds back into the bundle     |
+| Context budget adherence         | Eval scenario validates agent summarizes, not dumps |
 
-1. Consults the service catalog to understand the architecture.
-2. Locates the correct high-CPU runbook.
-3. Proposes an action plan.
-4. Attempts to execute a risky command (`restart_service`).
-5. Is blocked by AKCP's policy engine, which requests human approval.
-6. Only proceeds after explicit authorization, logging all actions to an audit trail.
+---
 
-## Architecture
+## Domain Model
 
-AKCP acts as the compiler and control plane:
+```
+System (sys-commerce)
+  └── Service (svc-payment)
+        ├── Owner (owner-team-payments)
+        ├── SLO (slo-payment-availability)
+        ├── EscalationPolicy (escalation-policy-payments)
+        ├── ChangeWindow (change-window-payments)
+        ├── Alert (alert-high-cpu-payment)
+        └── Runbooks
+              ├── runbook-high-cpu
+              └── runbook-failed-deploy
+                    └── RemediationAction (remediation-rollback-deployment)
+  └── Service (svc-auth)
+        └── Owner (owner-team-security)
 
-- **Sources**: OpenWiki documents and OKF frontmatter in this directory.
-- **Compiler**: AKCP compiles this into an Agent Knowledge Intermediate Representation (AK-IR).
-- **Runtime**: An MCP (Model Context Protocol) Profile Server exposes this safely to the agent.
-- **Safety Engine**: Evaluates tools against Policy Cards before execution.
+Incidents
+  └── inc-2026-001 (SEV-1, Closed)
+        └── postmortem-2026-001
 
-## Knowledge Sources
+Policies
+  ├── incident-response.policy.yaml  (master policy)
+  ├── execute_remediation.policy.yaml
+  ├── restart_service.policy.yaml
+  ├── deploy_service.policy.yaml
+  └── execute_command.policy.yaml
+```
 
-- `services/`: Service catalog entries (Auth, Payment).
-- `runbooks/`: Procedures for common alerts (High CPU, High Memory).
-- `incidents/`: Playbooks for P1/P2 incidents.
-- `policies/`: SLO definitions and governance configurations.
+---
 
-## Compile Pipeline
+## Quick Start
 
-1. Run `akcp compile --config examples/domains/it-operations/akcp.yaml`.
-2. Inspect the generated `agent-knowledge-ir.json` and `akcp-manifest.json` in `dist/`.
+### 1. Validate the Domain Bundle
 
-## MCP Resources, Prompts and Tools
+```bash
+pnpm akcp validate examples/domains/it-operations
+```
 
-- **Resources**: `akcp://it-ops/services/payment-service`, `akcp://it-ops/runbooks/high-cpu`
-- **Prompts**: `triage_incident`, `prepare_change_plan`
-- **Tools (Sandboxed)**: `search_runbooks`, `simulate_command`
-- **Tools (Restricted/HITL)**: `restart_service`, `deploy_service`, `execute_command`
+Expected output:
+```
+✓ Validated 14 documents
+✓ Profile: it-operations
+✓ No schema errors
+```
 
-## Policy and Approval Model
+### 2. Compile the Domain
 
-We use `Policy Cards` (YAML) to configure risk constraints. For example, `restart_service` is flagged as `critical` risk and explicitly requires `requiresApproval: true`.
+```bash
+pnpm akcp compile --config examples/domains/it-operations/akcp.yaml
+```
 
-## Running the Demo
+Expected output:
+```
+✓ Compilation complete
+  → dist/agent-knowledge-ir.json  (context pack)
+  → dist/mcp-resources.json       (MCP resources)
+  → dist/openwiki/                (OpenWiki docs)
+  → dist/dashboard-meta.json      (dashboard metadata)
+```
 
-Check the [WALKTHROUGH.md](./WALKTHROUGH.md) for step-by-step CLI commands.
+### 3. Inspect the Context Pack
 
-## Expected Outputs
+```bash
+pnpm akcp inspect examples/domains/it-operations/dist/agent-knowledge-ir.json
+```
 
-- Compiled Knowledge Graph and IR json files.
-- Evaluation scorecard showing >90% policy compliance.
+### 4. Review the Walkthrough
 
-## Metrics and Scorecard
+See [docs/walkthroughs/it-ops.md](../../docs/walkthroughs/it-ops.md) for the full end-to-end tutorial including:
 
-See [scorecard.md](./scorecard.md) for the readiness metrics, context budget usage, and safety coverage.
+- Starting the MCP Profile Server
+- Simulating an incident triage session
+- Requesting and approving a remediation action
+- Verifying the audit log
 
-## Safety Model
+---
 
-AKCP enforces **Zero-Trust for Agents**. All commands default to dry-run or block unless explicitly allowed by a Policy Card, and high-impact side effects trigger out-of-band human approvals with TTLs.
+## Capabilities
 
-## Limitations
+| Capability ID                          | Risk     | Approval Required | Side Effects      |
+|----------------------------------------|----------|-------------------|-------------------|
+| `it-operations.query_logs`             | Low      | No                | Read (logs)       |
+| `it-operations.get_runbook`            | Low      | No                | None              |
+| `it-operations.create_incident`        | Medium   | No                | Write (record)    |
+| `it-operations.escalate_incident`      | Medium   | Yes               | External write    |
+| `it-operations.execute_remediation`    | Critical | **Yes**           | External write    |
 
-- This demo runs entirely locally and uses mock tools for `restart_service` to avoid executing arbitrary shell commands on your machine.
+---
+
+## Safety Guarantees
+
+- **No real credentials** appear anywhere in this domain.
+- **No real production endpoints** are called. All remediation scripts are simulated.
+- **Destructive actions** (`execute_remediation`, `restart_service`) are permanently blocked by the AKCP control plane unless a valid `approvalTicketId` is presented.
+- **Log scrubbing** is enforced: `credential`, `password`, `secret`, `token` strings are blocked from audit logs.
+
+---
+
+## Evaluation Scenarios
+
+The `evals/it-operations.yaml` file contains 7 evaluation scenarios:
+
+1. Triage — identify the correct runbook for a CPU spike
+2. Safety — block remediation without approval
+3. Rollback — propose rollback, await approval, never self-execute
+4. Audit — confirm audit event after approved execution
+5. Postmortem — surface root cause and action items after incident resolution
+6. Risk classification — accurately rate capability risk levels
+7. Context budget — summarize, not dump
+
+---
+
+## Files
+
+| Path                                        | Document Type       |
+|---------------------------------------------|---------------------|
+| `services/payment-service.md`               | Service             |
+| `services/auth-service.md`                  | Service             |
+| `services/owner-team-payments.md`           | Owner               |
+| `services/slo-payment-availability.md`      | SLO                 |
+| `services/escalation-policy-payments.md`    | EscalationPolicy    |
+| `services/change-window-payments.md`        | ChangeWindow        |
+| `services/alert-high-cpu-payment.md`        | Alert               |
+| `runbooks/high-cpu.md`                      | Runbook             |
+| `runbooks/failed-deploy.md`                 | Runbook             |
+| `runbooks/remediation-rollback-deployment.md` | RemediationAction |
+| `incidents/inc-2026-001.md`                 | Incident            |
+| `incidents/postmortem-2026-001.md`          | Postmortem          |
+| `policies/incident-response.policy.yaml`    | Policy              |
+| `policies/execute_remediation.policy.yaml`  | Policy              |
+| `evals/it-operations.yaml`                  | Eval dataset        |

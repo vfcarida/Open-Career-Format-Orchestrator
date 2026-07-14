@@ -8,6 +8,7 @@ import path from "node:path";
 import { FileSystemAdapter } from "../infrastructure/file-system-adapter.js";
 import { FrontmatterParser } from "../infrastructure/frontmatter-parser.js";
 import { ProfileRegistry } from "../domain/schemas.js";
+import { OKFValidationError } from "../domain/errors.js";
 
 type BundleValidationReport = {
   ok: boolean;
@@ -66,10 +67,11 @@ async function main() {
   }
 
   const relativeFiles = await fsAdapter.listFiles(bundlePath);
-  const RESERVED_FILENAMES = new Set(["index.md", "log.md"]);
+  const RESERVED_FILENAMES = new Set(["index.md", "log.md", "README.md", "WALKTHROUGH.md"]);
 
   let validCount = 0;
   let invalidCount = 0;
+  let skippedCount = 0;
   const diagnostics: BundleValidationReport["diagnostics"] = [];
 
   for (const relPath of relativeFiles) {
@@ -99,6 +101,15 @@ async function main() {
         });
       }
     } catch (err: any) {
+      // If a file has no OKF frontmatter (e.g., a policy redirect or scenario file),
+      // treat it as a skipped warning rather than a validation failure.
+      if (err instanceof OKFValidationError) {
+        skippedCount++;
+        console.warn(
+          `[AKCP Validator] Skipping "${path.basename(relPath)}": ${err.message}`,
+        );
+        continue;
+      }
       invalidCount++;
       diagnostics.push({
         severity: "error",

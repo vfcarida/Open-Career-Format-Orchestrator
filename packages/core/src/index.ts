@@ -52,10 +52,12 @@ export { McpResourcesManifestTarget } from "./targets/mcp-resources-manifest.js"
 export { PolicyBundleTarget } from "./targets/policy-bundle.js";
 export { EvalDatasetTarget } from "./targets/eval-dataset.js";
 export { GraphJsonTarget } from "./targets/graph-json.js";
+export { DashboardMetadataTarget } from "./targets/dashboard-metadata.js";
 
 // Infrastructure
 export { FrontmatterParser } from "./infrastructure/frontmatter-parser.js";
 export { FileSystemAdapter } from "./infrastructure/file-system-adapter.js";
+export * from "./infrastructure/audit-log.js";
 
 // Repositories
 export { OKFFileRepository } from "./repositories/okf-file-repository.js";

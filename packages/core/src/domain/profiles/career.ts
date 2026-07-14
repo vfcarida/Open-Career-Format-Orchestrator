@@ -2,6 +2,7 @@ import { z } from "zod";
 import { OKFFrontmatterSchema } from "../okf.js";
 
 export const OKFDocumentType = {
+  Profile: "Profile",
   Skill: "Skill",
   Experience: "Experience",
   Education: "Education",
@@ -102,7 +103,16 @@ export const ApplicationFrontmatterSchema = OKFFrontmatterSchema.extend({
   location: z.string().optional(),
 });
 
+export const ProfileFrontmatterSchema = OKFFrontmatterSchema.extend({
+  type: z.literal(OKFDocumentType.Profile),
+  name: z.string().optional(),
+  title: z.string().optional(),
+  location: z.string().optional(),
+  email: z.string().email().optional(),
+});
+
 export const CareerFrontmatterSchema = z.discriminatedUnion("type", [
+  ProfileFrontmatterSchema,
   SkillFrontmatterSchema,
   ExperienceFrontmatterSchema,
   EducationFrontmatterSchema,

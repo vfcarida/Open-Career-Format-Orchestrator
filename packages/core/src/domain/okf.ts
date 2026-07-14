@@ -20,7 +20,9 @@ export const OKFFrontmatterSchema = z
     owner: z.string().optional(),
     lastReviewedAt: z.string().optional(),
     reviewCadenceDays: z.number().int().positive().optional(),
-    status: z.enum(["active", "stale", "deprecated", "archived"]).optional(),
+    // Domain profiles may override this with a stricter enum.
+    // Base schema accepts any string value so domain-specific statuses (e.g., "Closed", "Resolved") are valid.
+    status: z.string().optional(),
     successor: z.string().optional(),
   })
   .passthrough();

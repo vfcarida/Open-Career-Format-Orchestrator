@@ -45,7 +45,9 @@ export class ConformanceRunner {
           file.includes(path.sep + "dist" + path.sep) ||
           file.startsWith("dist" + path.sep) ||
           file.includes(path.sep + "scenarios" + path.sep) ||
-          file.startsWith("scenarios" + path.sep)
+          file.startsWith("scenarios" + path.sep) ||
+          file.includes(path.sep + "policies" + path.sep) ||
+          file.startsWith("policies" + path.sep)
         ) {
           continue;
         }

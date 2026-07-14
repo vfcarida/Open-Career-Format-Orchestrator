@@ -1,4 +1,6 @@
 compile:
+  profile: "it-operations"
+
   sources:
     - type: okf-directory
       path: ./services
@@ -14,15 +16,21 @@ compile:
       out: dist/agent-knowledge-ir.json
     - type: mcp-resources
       out: dist/mcp-resources.json
-    - type: eval-dataset
-      out: dist/eval-dataset.jsonl
-    - type: policy-bundle
-      out: dist/policies.json
+    - type: openwiki
+      out: dist/openwiki
+    - type: dashboard-metadata
+      out: dist/dashboard-meta.json
 
 controlPlane:
   policies:
     disableDangerousTools: true
     requireApprovalFor:
+      - execute_remediation
       - restart_service
       - deploy_service
       - execute_command
+    disableInLogs:
+      - "credential"
+      - "password"
+      - "secret"
+      - "token"

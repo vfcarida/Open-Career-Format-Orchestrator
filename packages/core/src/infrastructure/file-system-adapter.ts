@@ -86,7 +86,10 @@ export class FileSystemAdapter implements IFileSystemAdapter {
       const fullPath = path.join(currentDir, entry.name);
 
       if (entry.isDirectory()) {
-        await this.walkDirectory(fullPath, rootDir, extension, results);
+        const ignoreDirs = [".git", "node_modules", "dist"];
+        if (!ignoreDirs.includes(entry.name)) {
+          await this.walkDirectory(fullPath, rootDir, extension, results);
+        }
       } else if (entry.isFile() && entry.name.endsWith(extension)) {
         results.push(path.relative(rootDir, fullPath));
       }

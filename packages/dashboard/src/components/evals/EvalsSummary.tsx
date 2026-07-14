@@ -15,7 +15,7 @@ export function EvalsSummary() {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await fetch("/api/evals/report");
+        const res = await fetch("/data/eval-report.json");
         if (!res.ok) {
           throw new Error("Evals report not found or server error");
         }
@@ -47,12 +47,23 @@ export function EvalsSummary() {
           <h3 className="font-semibold text-red-300">Failed to load Evals</h3>
           <p className="text-sm mt-1">{error}</p>
           <p className="text-xs text-red-400/80 mt-2">
-            Hint: Run `pnpm run test` in packages/evals to generate a report.
+            Hint: Run `pnpm run evals` to generate a report, and ensure it is available at /data/eval-report.json.
           </p>
         </div>
       </div>
     );
   }
+
+  const results = report.results || [];
+  let totalSuccess = 0;
+  let totalUnsafe = 0;
+  results.forEach((r: any) => {
+    totalSuccess += r.treatment.taskSuccess;
+    totalUnsafe += r.treatment.unsafeActionRate;
+  });
+
+  const avgSuccess = results.length > 0 ? (totalSuccess / results.length) * 100 : 0;
+  const avgUnsafe = results.length > 0 ? (totalUnsafe / results.length) * 100 : 0;
 
   return (
     <div className="space-y-6">
@@ -63,7 +74,7 @@ export function EvalsSummary() {
             Evals Summary
           </h2>
           <p className="text-sm text-zinc-400 mt-1">
-            Tracking AKCP orchestration metrics and tool accuracy.
+            Tracking AKCP orchestration metrics and agent reliability.
           </p>
         </div>
         <div className="text-right">
@@ -82,13 +93,13 @@ export function EvalsSummary() {
             <CheckCircle className="w-24 h-24 text-emerald-500" />
           </div>
           <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-widest">
-            Win Rate
+            Task Success Rate
           </h3>
           <div className="text-4xl font-bold text-white mt-2">
-            {report.summary.passRate}%
+            {avgSuccess.toFixed(1)}%
           </div>
           <p className="text-xs text-zinc-400 mt-2">
-            {report.summary.passed} passed / {report.summary.total} total tests
+            Average across {results.length} scenarios
           </p>
         </div>
 
@@ -97,13 +108,13 @@ export function EvalsSummary() {
             <Cpu className="w-24 h-24 text-neon-indigo" />
           </div>
           <h3 className="text-xs font-semibold text-indigo-400 uppercase tracking-widest">
-            Capabilities Tested
+            Scenarios Evaluated
           </h3>
           <div className="text-4xl font-bold text-white mt-2">
-            {Object.keys(report.results).length}
+            {results.length}
           </div>
           <p className="text-xs text-zinc-400 mt-2">
-            MCP tools evaluated for constraints
+            Benchmarked against raw baselines
           </p>
         </div>
 
@@ -112,58 +123,64 @@ export function EvalsSummary() {
             <Flame className="w-24 h-24 text-orange-500" />
           </div>
           <h3 className="text-xs font-semibold text-orange-400 uppercase tracking-widest">
-            Hallucination Rate
+            Unsafe Action Rate
           </h3>
           <div className="text-4xl font-bold text-white mt-2">
-            {report.summary.failed > 0
-              ? ((report.summary.failed / report.summary.total) * 100).toFixed(
-                  1,
-                )
-              : "0"}
-            %
+            {avgUnsafe.toFixed(1)}%
           </div>
           <p className="text-xs text-zinc-400 mt-2">
-            Targeting 0% via strict descriptions
+            Targeting &lt; 15% via policy controls
           </p>
         </div>
       </div>
 
       <div className="mt-8">
         <h3 className="text-lg font-semibold text-zinc-200 mb-4">
-          Test Results
+          Scenario Results (Treatment vs Baseline)
         </h3>
         <div className="space-y-3">
-          {Object.entries(report.results).map(
-            ([testName, result]: [string, any]) => (
+          {results.map((r: any, idx: number) => {
+            const successDelta = r.treatment.taskSuccess - r.baseline.taskSuccess;
+            
+            return (
               <div
-                key={testName}
+                key={idx}
                 className="glass-panel p-4 rounded-xl flex items-center justify-between border border-dark-border"
               >
-                <div className="flex items-center gap-3">
-                  {result.passed ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-400" />
-                  ) : (
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
-                  )}
-                  <span className="font-medium text-zinc-200">{testName}</span>
+                <div className="flex flex-col gap-1 w-1/2">
+                  <div className="flex items-center gap-2">
+                    {r.treatment.taskSuccess > 0 ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-red-400" />
+                    )}
+                    <span className="font-medium text-zinc-200">{r.scenario}</span>
+                  </div>
+                  <span className="text-xs text-zinc-500 truncate">{r.description}</span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs font-mono bg-black/40 text-zinc-400 px-2 py-1 rounded">
-                    {result.durationMs}ms
-                  </span>
-                  <span
-                    className={`text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded ${
-                      result.passed
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "bg-red-500/10 text-red-400"
-                    }`}
-                  >
-                    {result.passed ? "Passed" : "Failed"}
-                  </span>
+                <div className="flex items-center gap-4 w-1/2 justify-end">
+                  <div className="text-right">
+                    <div className="text-xs text-zinc-400">Success</div>
+                    <div className="text-sm font-semibold text-zinc-200">
+                      {r.treatment.taskSuccess} <span className="text-zinc-500">vs {r.baseline.taskSuccess}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-zinc-400">Latency</div>
+                    <div className="text-sm font-semibold text-zinc-200">
+                      {r.treatment.latencyMs.toFixed(0)}ms <span className="text-zinc-500">vs {r.baseline.latencyMs.toFixed(0)}ms</span>
+                    </div>
+                  </div>
+                  <div className="text-right pl-4 border-l border-dark-border">
+                    <div className="text-xs text-zinc-400">Delta</div>
+                    <div className={`text-sm font-semibold ${successDelta >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      {successDelta > 0 ? "+" : ""}{(successDelta * 100).toFixed(0)}%
+                    </div>
+                  </div>
                 </div>
               </div>
-            ),
-          )}
+            );
+          })}
         </div>
       </div>
     </div>
