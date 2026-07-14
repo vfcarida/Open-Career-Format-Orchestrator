@@ -239,6 +239,23 @@ export async function buildKnowledgeIR(
     }
   });
 
+  let validatedCapabilities: any[] = [];
+  if (options.capabilities && options.capabilities.length > 0) {
+    try {
+      const { z } = await import("zod");
+      const { CapabilitySchema } = await import("./schema.js");
+      validatedCapabilities = z.array(CapabilitySchema).parse(options.capabilities);
+    } catch (err: any) {
+      console.error(`[ERROR] Invalid capabilities schema detected in bundle:`);
+      if (err.errors) {
+        err.errors.forEach((e: any) => console.error(`  - ${e.path.join(".")}: ${e.message}`));
+      } else {
+        console.error(err.message);
+      }
+      throw new Error(`[VALIDATION_ERROR] Failed to compile due to invalid capabilities.`);
+    }
+  }
+
   const ir: AgentKnowledgeIR = {
     irVersion: "1.0.0",
     okfVersion: "0.1.0",
@@ -248,11 +265,13 @@ export async function buildKnowledgeIR(
     concepts,
     links,
     policies: options.policies,
-    capabilities: options.capabilities || [],
+    capabilities: validatedCapabilities,
     targets: options.targets || ["mcp-profile-server", "mcp-automation-server"],
     sourceHashes,
   };
 
   LifecycleValidator.validate(ir);
+  const { CapabilityValidator } = await import("../validation/capability-rules.js");
+  CapabilityValidator.validate(ir.capabilities as any);
   return ir;
 }

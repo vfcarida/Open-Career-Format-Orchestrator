@@ -23,6 +23,8 @@ export * from "./context/context-plan.js";
 export * from "./lifecycle/types.js";
 export * from "./lifecycle/freshness.js";
 export * from "./lifecycle/deprecation.js";
+export * from "./validation/lifecycle-rules.js";
+export * from "./validation/capability-rules.js";
 export * from "./domain/errors.js";
 export * from "./domain/schemas.js";
 export * from "./domain/capabilities.js";

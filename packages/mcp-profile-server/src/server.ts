@@ -55,6 +55,11 @@ export class AKCPProfileServer {
     }
 
     for (const concept of this.ir.concepts) {
+      if (concept.conceptId.includes("..")) {
+        console.warn(`[SECURITY] Skipping resource with invalid path traversal in ID: ${concept.conceptId}`);
+        continue;
+      }
+
       const uri = `knowledge://${this.ir.bundleId}/${concept.conceptId}`;
       const name = concept.conceptId.replace(/\//g, "-");
       
