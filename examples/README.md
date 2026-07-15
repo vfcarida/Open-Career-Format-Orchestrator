@@ -8,9 +8,9 @@ AKCP proves its domain-agnostic architecture through three flagship domains. You
 
 | Domain | Directory | Maturity Status | What it demonstrates |
 |--------|-----------|-----------------|----------------------|
-| **Career** | `domains/career` | **Stable (Demo)** | A low-friction starter domain for personal knowledge compilation. |
-| **IT Operations** | `domains/it-operations` | **Alpha** | The enterprise flagship. Demonstrates runbooks, incidents, system architectures, approvals, and immutable audit trails. |
-| **Customer Support** | `domains/customer-support` | **Experimental / Prepared** | Demonstrates policy-aware, privacy-preserving support knowledge compilation (tickets, macros, policies, PII redaction). |
+| **Career** | `domains/career` | **Stable** | A low-friction starter domain for personal knowledge compilation. |
+| **IT Operations** | `domains/it-operations` | **Beta** | The enterprise flagship. Demonstrates runbooks, incidents, system architectures, approvals, and immutable audit trails. |
+| **Customer Support** | `domains/customer-support` | **Experimental** | Demonstrates policy-aware, privacy-preserving support knowledge compilation (tickets, macros, policies, PII redaction). |
 
 ## How to use an example
 

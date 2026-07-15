@@ -9,6 +9,11 @@ For detailed information on our deprecation and backwards compatibility policies
 
 ## [Unreleased]
 
+### Changed
+
+- **Maturity Standardization**: Formalized project maturity model (Stable, Beta, Experimental, Planned, Deprecated).
+- **Placeholder Commands**: CLI commands that are not fully implemented (`diff`, `serve dashboard`, `control-plane`) now throw explicit `NOT_IMPLEMENTED` errors instead of returning misleading success statuses.
+
 ## [0.1.0] - Initial Enterprise Blueprint Release
 
 ### Added

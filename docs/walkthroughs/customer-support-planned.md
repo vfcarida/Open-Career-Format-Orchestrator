@@ -1,7 +1,7 @@
 # Customer Support (Planned Flagship)
 
 > **Status:** Planned
-> **Note:** This domain is currently in the design phase. It serves as a readiness placeholder to demonstrate the future capabilities of AKCP. It is not yet fully implemented.
+> **Note:** This domain is currently in the design phase. It serves as a readiness placeholder to demonstrate the future capabilities of AKCP. It is not yet entirely implemented.
 
 ## What it will demonstrate
 

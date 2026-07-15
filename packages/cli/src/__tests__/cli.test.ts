@@ -23,7 +23,7 @@ describe("CLI Smoke Tests", () => {
       execSync(`node ${cliPath} ${args}`, { encoding: "utf-8", stdio: "pipe", cwd: workspaceRoot });
       throw new Error("Expected command to fail");
     } catch (e: any) {
-      return e.stderr || e.stdout;
+      return (e.stderr || "") + (e.stdout || "") + (e.message || "");
     }
   };
 
@@ -177,5 +177,27 @@ describe("CLI Smoke Tests", () => {
   it("should output help for privacy command", () => {
     const output = runCli("privacy --help");
     expect(output).toContain("privacy [options] [command]");
+  });
+
+  describe("Placeholder Commands (Prompt 05)", () => {
+    it("should fail diff command with NOT_IMPLEMENTED", () => {
+      const output = runCliError("diff");
+      expect(output).toContain("NOT_IMPLEMENTED: The diff command is a planned feature");
+    });
+
+    it("should fail serve dashboard command with NOT_IMPLEMENTED", () => {
+      const output = runCliError("serve dashboard");
+      expect(output).toContain("NOT_IMPLEMENTED: The dashboard is a planned feature");
+    });
+
+    it("should fail control-plane inspect command with NOT_IMPLEMENTED", () => {
+      const output = runCliError("control-plane inspect");
+      expect(output).toContain("NOT_IMPLEMENTED: The control-plane inspect command");
+    });
+
+    it("should fail control-plane policies command with NOT_IMPLEMENTED", () => {
+      const output = runCliError("control-plane policies");
+      expect(output).toContain("NOT_IMPLEMENTED: The control-plane policies command");
+    });
   });
 });

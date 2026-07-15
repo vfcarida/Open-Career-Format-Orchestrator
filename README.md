@@ -70,11 +70,11 @@ To prove its domain-agnostic architecture, AKCP implements distinct flagship sce
 | AKCP CLI compile | Beta | tests + examples | no npm release yet | global CLI distribution |
 | AK-IR | Beta | spec + fixtures | requires manual tuning | automatic normalization |
 | MCP servers | Beta | contract tests | local-only | secure remote hosting |
-| Control Plane (Automation) | Alpha | safety tests | missing dashboard | real e2e integrations |
+| Control Plane (Automation) | Experimental | safety tests | missing dashboard | real e2e integrations |
 | Dashboard UI | Experimental | package stubbed | no react UI | build MVP |
-| Career flagship | Stable (Demo) | walkthrough | limited tool scope | expansion |
-| IT Ops flagship | Alpha | architecture | mocked infrastructure | real cloud integrations |
-| Customer Support | Flagship | design doc | experimental | integration |
+| Career flagship | Stable | walkthrough | limited tool scope | expansion |
+| IT Ops flagship | Beta | architecture | mocked infrastructure | real cloud integrations |
+| Customer Support | Experimental | design doc | experimental | integration |
 | AKCP Legacy CLI (`akcp`) | Deprecated | CI check logic | legacy usage | removal in v1.0 |
 
 For formal definitions, see the [Maturity and Status Guide](docs/status.md).

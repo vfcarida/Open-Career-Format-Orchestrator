@@ -426,11 +426,11 @@ program
 // COMMAND: diff (Skeleton)
 program
   .command("diff")
-  .description("[Stub] Show semantic context changes since last build")
+  .description("[Planned] Show semantic context changes since last build")
   .argument("[directory]", "Path to the OKF bundle directory")
-  .action((directory) => {
-    console.log(`[INFO] Calculating diff for ${directory}`);
-    console.log(`[OK] No semantic changes detected.`);
+  .action((_directory) => {
+    console.error(`[ERROR] NOT_IMPLEMENTED: The diff command is a planned feature and is not yet implemented.`);
+    process.exit(1);
   });
 
 // COMMAND: import
@@ -538,10 +538,10 @@ serveCmd
 
 serveCmd
   .command("dashboard")
-  .description("[Experimental] Launch the Dashboard locally")
+  .description("[Planned] Launch the Dashboard locally")
   .action(async () => {
-    console.log(`[INFO] Dashboard is currently experimental.`);
-    console.log(`[INFO] Stay tuned for the next major release.`);
+    console.error(`[ERROR] NOT_IMPLEMENTED: The dashboard is a planned feature and is not yet implemented.`);
+    process.exit(1);
   });
 
 // COMMAND: control-plane
@@ -551,31 +551,34 @@ const controlPlaneCmd = program
 
 controlPlaneCmd
   .command("inspect")
-  .description("Inspect the desired state model for agents")
+  .description("[Planned] Inspect the desired state model for agents")
   .action(() => {
-    console.log("[INFO] Inspecting desired state model...");
-    console.log("Agents loaded: 0 (placeholder)");
+    console.error("[ERROR] NOT_IMPLEMENTED: The control-plane inspect command is not yet implemented.");
+    process.exit(1);
   });
 
 controlPlaneCmd
   .command("policies")
-  .description("List registered policy cards")
+  .description("[Planned] List registered policy cards")
   .action(() => {
-    console.log("[INFO] Listing policy cards...");
+    console.error("[ERROR] NOT_IMPLEMENTED: The control-plane policies command is not yet implemented.");
+    process.exit(1);
   });
 
 controlPlaneCmd
   .command("approvals")
-  .description("List pending approvals")
+  .description("[Planned] List pending approvals")
   .action(() => {
-    console.log("[INFO] Listing pending approvals...");
+    console.error("[ERROR] NOT_IMPLEMENTED: The control-plane approvals command is not yet implemented.");
+    process.exit(1);
   });
 
 controlPlaneCmd
   .command("audit")
-  .description("Tail the audit event log")
+  .description("[Planned] Tail the audit event log")
   .action(() => {
-    console.log("[INFO] Tailing audit logs...");
+    console.error("[ERROR] NOT_IMPLEMENTED: The control-plane audit command is not yet implemented.");
+    process.exit(1);
   });
 
 // COMMAND: evals
@@ -619,8 +622,12 @@ docsCmd
   .description("Run structural checks on docs")
   .action(() => {
     console.log(`[INFO] Running docs doctor...`);
-    // Alias to pnpm check:docs internally or just stub
-    console.log(`[OK] All documentation checks passed.`);
+    try {
+      execSync("pnpm check:docs", { encoding: "utf-8", stdio: "inherit" });
+    } catch (err: any) {
+      console.error(`[ERROR] Docs checks failed.`);
+      process.exit(1);
+    }
   });
 
 // COMMAND: doctor
