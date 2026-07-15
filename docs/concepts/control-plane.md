@@ -1,158 +1,124 @@
-# Agent-Oriented Architecture: Unifying Knowledge and Execution via OKF & MCP
-
-This document establishes the official architectural specification and engineering guidelines for the **Agent Knowledge Compiler and Control Plane (AKCP)**. It describes the integration of Google Cloud's **Open Knowledge Format (OKF)** for structured career memory and Anthropic's **Model Context Protocol (MCP)** for secure, automated execution.
-
----
-
-## 💡 1. Executive Vision: Organizing Knowledge for AI Agents
-
-Maximizing the ROI of Artificial Intelligence within enterprise software and personal agents depends on how knowledge is structured. Historically, corporate and personal data resides in fragmented silos: department wikis, legacy databases, untracked logs, and loose comments. Unstructured data forces developers to write complex, ad-hoc integrations for every new LLM or tool.
-
-To bypass this integration debt, AKCP integrates two core industry standards:
-
-1.  **Open Knowledge Format (OKF)**: A vendor-neutral standard initiated by Google Cloud. It structures knowledge concepts inside standard directories using Markdown files and structured YAML frontmatter, making data readable by both humans and LLMs without heavy SDK dependencies.
-2.  **Model Context Protocol (MCP)**: An open standard created by Anthropic that defines how AI clients securely connect to local or remote data sources, filesystem contexts, and external automation tools using a unified client-server interface.
-
-### 1.1 The Practical Materialization: Agent Knowledge Compiler and Control Plane (AKCP)
-
 # The Control Plane
 
-The Control Plane intercepts all agent actions before they hit the underlying systems, enforcing policies, acquiring human approvals, and logging evidence.
+The **Control Plane** is the runtime governance layer of AKCP. It intercepts all agent actions before they reach underlying systems, enforcing policies, acquiring human approvals, and logging evidence. While the [Compiler Pipeline](compiler.md) is a build-time concern, the Control Plane is a runtime concern.
 
 ```mermaid
 flowchart LR
-    A[Agent] -->|Requests Tool| B[MCP Gateway]
-    B --> C{Policy Evaluator}
-    C -->|Blocked| D[Reject]
-    C -->|Requires HITL| E[Approval Store]
-    C -->|Allowed| F[Execute Capability]
-    F --> G[Audit Log]
+    Agent["🤖 AI Agent"] -->|"request tool call"| GW[MCP Gateway]
+    GW --> PE{Policy Evaluator}
+    PE -->|"blocked by policy"| RJ[Reject]
+    PE -->|"requires HITL"| AP[Approval Store]
+    AP -->|"pending human approval"| HumanOp["👤 Human Operator"]
+    HumanOp -->|"grant token"| AP
+    AP -->|"approved"| EX[Execute Capability]
+    PE -->|"allowed"| EX
+    EX --> AL[Audit Log / Evidence Store]
 ```
 
-While the combined pattern of OKF and MCP is vertical-agnostic, the **Agent Knowledge Compiler and Control Plane (AKCP)** serves as the reference implementation. AKCP compiles organizational knowledge into governed artifacts, allowing autonomous agents to act on that knowledge safely.
+---
+
+## Core Components
+
+### 1. Capability Registry
+
+The Capability Registry is the authoritative index of everything an agent is permitted to do within a domain. Each capability declares:
+
+- A unique `capabilityId`
+- A `riskLevel` (`low`, `medium`, `high`, `critical`)
+- A `sideEffects` classification (`none`, `idempotent`, `destructive`)
+- Whether it `requiresApproval`
+- Its input/output schema (JSON Schema or Zod)
+
+See [Capability Registry](../security/capability-registry.md) for the full schema.
+
+### 2. Policy Cards
+
+A Policy Card is a machine-readable governance document attached to a domain. It specifies:
+
+- Which capabilities are available in this domain
+- The minimum autonomy level required to invoke each capability
+- Data handling rules (e.g., PII redaction, tenant isolation)
+- Audit requirements (e.g., log all tool inputs)
+
+See [Policy Cards Specification](../specs/policy-cards.md).
+
+### 3. Approval Store (HITL)
+
+The Approval Store provides Human-in-the-Loop (HITL) gating. When a capability is marked `requiresApproval: true`, the MCP automation server issues an approval request and pauses execution until a human operator grants a time-limited token.
+
+- Approvals are stored in a SQLite-backed store (`better-sqlite3`)
+- Tokens are time-limited (TTL) and single-use
+- All approval events are recorded in the Evidence Store
+
+See [HITL Documentation](../security/hitl.md).
+
+### 4. Evidence Store (Audit Log)
+
+The Evidence Store is an immutable, append-only audit log. Every MCP tool call, capability invocation, approval event, and policy decision is recorded. OpenTelemetry spans provide structured telemetry for observability.
 
 ---
 
-## 2. Core Pillars of the Control Plane: Model Context Protocol (MCP)
+## MCP Integration
 
-MCP shifts integration responsibilities away from the core orchestrator application into modular, independent server instances.
+AKCP wraps the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) with the governance components above. Two server types are provided:
 
-```mermaid
-graph TD
-    Client[AI Agent / Claude Desktop] <-->|MCP Transport: stdio or SSE| Server[MCP Server]
-    Server <-->|Local Read/Write| Filesystem[OKF Directory .okf/]
-    Server <-->|Playwright Driver| Web[Web Platforms: LinkedIn/Gupy/Indeed]
-```
+| Server | Package | Purpose |
+|--------|---------|---------|
+| **Profile Server** | `@akcp/mcp-profile-server` | Exposes read-only resources and prompts — compiled context packs, domain knowledge, agent instructions |
+| **Automation Server** | `@akcp/mcp-automation-server` | Exposes side-effect tools (e.g., browser automation, API calls) with HITL and risk-level enforcement |
 
-### 2.1 Transport Topologies
+### Transport Topologies
 
-1.  **Local Transport (stdio)**: The MCP server is spawned as a child process of the client IDE or host desktop, communicating via standard input/output streams. This is the recommended practice for local workflows requiring low latency and high security (e.g., local filesytem parsing and browser driver automation).
-2.  **Remote Transport (HTTP with SSE)**: The server operates as an external network endpoint. Calls are sent via standard HTTP POST requests, and server updates are streamed back using Server-Sent Events (SSE). This is ideal for cloud database connectors, shared RAG indexes, and third-party APIs.
-
-### 2.2 Core Architectural Primitives
-
-A compliant MCP server segregates capabilities into three primary abstractions:
-
-- **Resources**: Static, read-only data nodes exposed to the LLM (e.g., the raw contents of the candidate's `.md` profile files).
-- **Prompts**: Standardized, optimized instructions or system-level templates to guide LLMs through structured actions.
-- **Tools**: Executable functions that perform side-effects on the external environment (e.g., triggering a Playwright workflow to apply for a job). Tools must validate inputs against rigid JSON schemas (Zod).
-
-### 2.3 Integration Best Practices
-
-- **Domain Decoupling**: Avoid monolithic MCP servers. Segregate responsibilities (e.g., run a dedicated `okf-file-mcp` for filesystem operations, and a separate `browser-automation-mcp` for Playwright tasks).
-- **Human-in-the-Loop (HITL)**: Any executable tool modifying state or making external commitments (e.g., submitting a job application form) must be intercepted, requiring manual approval before sending the final network payload.
-- **Semantic Error Propagation**: Servers must handle exceptions internally. Crashes are prohibited. Instead, the server must format errors cleanly and pass descriptions back to the LLM, enabling autonomous self-correction cycles.
+1. **Local Transport (`stdio`)**: The MCP server is spawned as a child process, communicating via standard input/output. Recommended for local workflows requiring low latency and strong isolation.
+2. **Remote Transport (`HTTP/SSE`)**: The server operates as an external network endpoint. Calls are sent via HTTP POST; server events are streamed via Server-Sent Events (SSE). Used for shared cloud deployments.
 
 ---
 
-## 📝 3. Technical Deep Dive: Open Knowledge Format (OKF)
+## MCP Primitive Types
 
-OKF avoids vendor lock-in by relying on simple filesystems. A career bundle contains directories of Markdown concepts with strict YAML headers.
+A compliant MCP server exposes three categories of primitives:
 
-```
-.okf/
-├── skills/
-│   ├── typescript.md
-│   └── index.md
-├── experiences/
-│   ├── senior-developer.md
-│   └── index.md
-├── education/
-│   ├── computer-science-usp.md
-│   └── index.md
-├── certificates/
-│   ├── aws-solutions-architect.md
-│   └── index.md
-├── projects/
-│   ├── Agent-Knowledge-Compiler-and-Control-Plane.md
-│   └── index.md
-├── preferences/
-│   └── job-search.md
-├── applications/
-│   ├── 2026-07-01-acme.md
-│   └── index.md
-├── index.md
-└── log.md
-```
+| Primitive | Description | AKCP Usage |
+|-----------|-------------|------------|
+| **Resources** | Read-only data nodes exposed to the LLM | Compiled context packs, domain concepts, policy summaries |
+| **Prompts** | Structured system-level templates | Agent instruction sets, task-specific context |
+| **Tools** | Executable functions with side effects | Browser automation, API calls, approval workflows |
 
-### 3.1 Structural Standards
-
-- **YAML Frontmatter & Types**: Every markdown concept must start with a `---` block containing a required `type` property (e.g. `type: Skill`, `type: Experience`, `type: Application`).
-- **Progressive Disclosure**: Directories contain an `index.md` catalog listing the folder's files. The LLM reads the index first to discover files, then requests the content of specific files, optimizing context window usage.
-- **System Auditability**: Changes are recorded chronologically in a shared `log.md` table, creating an immediate, human-readable audit trail.
-
-### 3.2 Token Optimization Strategy (Pxpipe Analog)
-
-To reduce context costs when consuming large amounts of text, developers can adopt an optical compression proxy (pxpipe):
-
-- **Image Compression**: Converts text paragraphs into high-density PNG matrices. Vision models process pixels based on geometry, reducing costs compared to processing raw text tokens.
-- **Lossy OCR Mitigation**: Since optical characters can suffer from OCR loss, critical identifiers (primary keys, UUIDs, hex hashes, config JSON strings, and URIs) must bypass compression and remain in standard text format.
+All tools must validate inputs against strict JSON schemas and return structured `ToolSuccess<T>` or `ToolFailure` responses. See [MCP Tool Contracts](../specs/mcp-tool-contracts.md).
 
 ---
 
-## 📐 4. Spec-Driven Development (SDD)
+## Spec-Driven Development
 
-AKCP relies on Spec-Driven Development. Specifications and architectural plans serve as the primary source of truth, minimizing cognitive debt.
+AKCP follows Spec-Driven Development (SDD). Specifications serve as the primary source of truth before any implementation begins:
 
-### 4.1 Spec-Anchored Lifecycle
+1. **Specify**: Define functional scope via RFC or ADR.
+2. **Plan**: Map requirements to concrete components.
+3. **Implement**: Build against the spec with strict TypeScript validation.
+4. **Validate**: Automated tests verify compiler safety and protocol rules.
+5. **Conform**: Conformance rules check spec adherence at build time.
 
-1.  **Specify**: Functional scope defined without implementation details.
-2.  **Plan**: Map requirements to technical libraries (e.g., Playwright, TypeScript, D3).
-3.  **Tasks**: Decompose plans into atomic, actionable task blocks in `task.md`.
-4.  **Implement**: Build clean, domain-separated code with strict TS validation.
-5.  **Validate**: Automated test suites verifying compiler safety and protocol rules.
-
----
-
-## 🛡️ 5. Quality Assurance & Testing
-
-Given the probabilistic nature of LLMs, standard unit assertions are supplemented with resilient sandbox tests:
-
-- **Deterministic Validation**: Parsers must check YAML syntax against schema boundaries, throwing fatal validation errors on missing fields (like a missing `type` attribute).
-- **MCP Fault Injection**: Mock servers mimic network latency, rate limits (HTTP 429), and malformed payloads to verify orchestrator retry rules.
-- **Playwright Isolation**: Automations are tested against local static HTML sandboxes to verify selectors and HITL gates before executing in production environments.
+See [Spec Governance](../governance/spec-governance.md) and [Conformance Specification](../specs/conformance.md).
 
 ---
 
-## 🗺️ 6. Evolution Roadmap
+## Quality Assurance
 
-### Phase 1: Core Engine & Spec Compliance
+| Layer | Approach |
+|---|---|
+| **Deterministic Validation** | Parsers check YAML syntax against schema boundaries; missing required fields cause fatal errors |
+| **MCP Fault Injection** | Mock servers test retry behavior under rate limits and malformed payloads |
+| **Contract Tests** | `ToolSuccess<T>` / `ToolFailure` response contracts are tested against every exposed tool |
+| **Security Tests** | Prompt injection, path traversal, and output validation are tested in isolation |
 
-- Establish workspace guidelines and pnpm monorepo structure.
-- Build OKF I/O adapters, parsers, and local directory index generators.
-- Expose basic MCP file read/write tools.
-- Configure CI/CD linting and determinism tests.
+See [Testing Guide](../guides/testing.md).
 
-### Phase 2: Automation & Visual Clients
+---
 
-- Implement Playwright Human-in-the-Loop workflows.
-- Enforce Sandbox and Approval policies for safety.
-- Build the React + Vite dashboard utilizing Tailwind CSS v4.
-- Implement the interactive D3.js force connection graph client-side.
+## Related Docs
 
-### Phase 3: Ecosystem & Scale
-
-- Publish modular core packages on NPM.
-- Enhance security controls for remote SSE MCP connections.
-- Support local Ollama runtime configs for offline, air-gapped operations.
-- Expand platform adapters to support additional applicant tracking systems.
+- [Architecture Overview](../architecture/README.md)
+- [MCP Security](../security/mcp-security.md)
+- [Autonomy Levels](../governance/autonomy-levels.md)
+- [HITL Documentation](../security/hitl.md)
+- [Policy Cards](../specs/policy-cards.md)

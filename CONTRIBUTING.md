@@ -59,7 +59,7 @@ npx pnpm -r run build
 npx pnpm -r run test -- --run
 
 # Validate an example OKF bundle
-npx akcp validate examples/domains/software-project
+npx akcp validate examples/domains/career --profile career
 ```
 
 ---
@@ -68,7 +68,7 @@ npx akcp validate examples/domains/software-project
 
 Look for issues labelled `good first issue`. The easiest entry points are:
 
-- **Add a new domain example** (`examples/` workstream) — see the [examples/domains/software-project](examples/domains/software-project) as a reference.
+- **Add a new domain example** (`examples/` workstream) — see the [examples/domains/](examples/) directory and the [Career domain](examples/domains/career) as a reference.
 - **Add an eval scenario** (`evals` workstream) — add a JSONL fixture in `packages/evals/fixtures/`.
 - **Improve a spec example** (`docs` workstream) — add a concrete JSON example to any spec doc in `spec/`.
 

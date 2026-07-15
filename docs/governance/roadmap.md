@@ -48,6 +48,6 @@ These are speculative research directions. No implementation is planned yet.
 
 1. **Vote on existing issues** using 👍 reactions.
 2. **Open a new issue** using the appropriate template (RFC, feature request, connector).
-3. **Join the discussion** on open RFCs in [docs/rfcs/](../governance/rfc-process.md).
+3. **Join the discussion** on open RFCs in [the RFC Process](rfc-process.md).
 
 The roadmap is reviewed quarterly by the maintainer team.

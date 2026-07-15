@@ -2,6 +2,8 @@
 
 Agent Knowledge Compiler and Control Plane (AKCP) is an open-source system for compiling organizational knowledge into governed, versioned, testable, cost-aware, agent-consumable artifacts, and for controlling how agents discover, retrieve, use, and act on that knowledge through MCP-compatible capabilities.
 
+📖 **[Full Documentation →](docs/README.md)** | [Quickstart](docs/getting-started/quickstart.md) | [Architecture](docs/architecture/README.md) | [Glossary](docs/glossary.md)
+
 ## What AKCP is
 
 AKCP explicitly separates the lifecycle of agent knowledge into two operational planes:

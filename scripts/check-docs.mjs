@@ -7,10 +7,15 @@ const __dirname = path.dirname(__filename);
 const workspaceRoot = path.resolve(__dirname, "..");
 
 const REQUIRED_DOCS = [
+  'docs/README.md',
+  'docs/glossary.md',
+  'docs/architecture/README.md',
+  'docs/status.md',
   'docs/getting-started/quickstart.md',
   'docs/concepts/compiler.md',
   'docs/concepts/control-plane.md',
   'docs/concepts/ak-ir.md',
+  'docs/concepts/okf.md',
   'docs/specs/akcp-build-spec.md',
   'docs/specs/conformance.md',
   'docs/guides/create-domain-adapter.md',
@@ -30,7 +35,12 @@ const ALLOWED_DIRECTORIES = [
   'walkthroughs',
   'governance',
   'reference',
-  'adrs'
+  'adrs',
+  'migrations',
+  'project',
+  'rfcs',
+  'architecture',
+  'cli'
 ];
 
 let hasMissingDocs = false;
