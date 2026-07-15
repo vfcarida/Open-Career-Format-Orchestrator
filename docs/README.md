@@ -138,6 +138,7 @@ Welcome to the **Agent Knowledge Compiler and Control Plane (AKCP)** documentati
 | Page | Description |
 |------|-------------|
 | [Contributing Guide](../CONTRIBUTING.md) | How to contribute code, docs, and domain profiles |
+| [Release Process](release/release-process.md) | Pre-release checklist and post-release artifact verification |
 | [Spec Governance](governance/spec-governance.md) | How AKCP specifications are proposed and ratified |
 | [RFC Process](governance/rfc-process.md) | Request for Comments process |
 | [RFC Template](rfcs/template.md) | Template for submitting new RFCs |

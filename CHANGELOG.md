@@ -13,6 +13,10 @@ For detailed information on our deprecation and backwards compatibility policies
 
 - **Maturity Standardization**: Formalized project maturity model (Stable, Beta, Experimental, Planned, Deprecated).
 - **Placeholder Commands**: CLI commands that are not fully implemented (`diff`, `serve dashboard`, `control-plane`) now throw explicit `NOT_IMPLEMENTED` errors instead of returning misleading success statuses.
+- **Supply Chain**: SBOM generation (`anchore/sbom-action@v0.24.0`), build provenance attestation (`actions/attest-build-provenance@v4.1.1`), SBOM attestation, and npm `--provenance` publish now implemented in the release workflow.
+- **Action Pins**: All GitHub Actions in `release.yml` and `ci.yml` are now pinned to exact commit SHAs.
+- **Documentation**: Added `docs/release/release-process.md` with full pre/post-release checklist and `gh attestation verify` instructions.
+- **Supply Chain Docs**: `docs/security/supply-chain.md` updated from roadmap framing to implemented-controls description with consumer verification commands and honest SLSA L1 posture statement.
 
 ## [0.1.0] - Initial Enterprise Blueprint Release
 

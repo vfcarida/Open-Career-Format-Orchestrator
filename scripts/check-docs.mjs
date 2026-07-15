@@ -11,6 +11,7 @@ const REQUIRED_DOCS = [
   'docs/glossary.md',
   'docs/architecture/README.md',
   'docs/status.md',
+  'docs/release/release-process.md',
   'docs/getting-started/quickstart.md',
   'docs/concepts/compiler.md',
   'docs/concepts/control-plane.md',
@@ -40,7 +41,8 @@ const ALLOWED_DIRECTORIES = [
   'project',
   'rfcs',
   'architecture',
-  'cli'
+  'cli',
+  'release'
 ];
 
 let hasMissingDocs = false;
