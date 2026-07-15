@@ -426,8 +426,8 @@ program
 // COMMAND: diff (Skeleton)
 program
   .command("diff")
-  .description("Show semantic context changes since last build")
-  .argument("[directory]", "Directory to diff", ".")
+  .description("[Stub] Show semantic context changes since last build")
+  .argument("[directory]", "Path to the OKF bundle directory")
   .action((directory) => {
     console.log(`[INFO] Calculating diff for ${directory}`);
     console.log(`[OK] No semantic changes detected.`);
@@ -436,8 +436,8 @@ program
 // COMMAND: import
 program
   .command("import")
-  .description("Import from external systems into a Context Pack")
-  .argument("<source>", "Source system (e.g., openwiki)")
+  .description("[Experimental] Import from external systems into a Context Pack")
+  .argument("<source>", "Source URL or path to import")
   .option("-i, --input <dir>", "Input directory", "openwiki")
   .option("-o, --output <dir>", "Output directory for context pack", ".okf")
   .option("--dry-run", "Do not write files, just show what would be generated")
@@ -496,11 +496,11 @@ program
 // COMMAND: serve
 const serveCmd = program
   .command("serve")
-  .description("Locally serve AKCP capabilities");
+  .description("[Experimental] Locally serve AKCP capabilities");
 
 serveCmd
   .command("mcp")
-  .description("Locally boot the MCP Profile Server for this context")
+  .description("[Experimental] Locally boot the MCP Profile Server for this context")
   .option("-p, --profile <profile>", "Profile context to serve", "career")
   .option(
     "--ir <path>",
@@ -538,8 +538,8 @@ serveCmd
 
 serveCmd
   .command("dashboard")
-  .description("Launch the Dashboard locally")
-  .action(() => {
+  .description("[Experimental] Launch the Dashboard locally")
+  .action(async () => {
     console.log(`[INFO] Dashboard is currently experimental.`);
     console.log(`[INFO] Stay tuned for the next major release.`);
   });
@@ -547,7 +547,7 @@ serveCmd
 // COMMAND: control-plane
 const controlPlaneCmd = program
   .command("control-plane")
-  .description("Manage runtime governance, policies, and HITL approvals");
+  .description("[Experimental] Manage runtime governance, policies, and HITL approvals");
 
 controlPlaneCmd
   .command("inspect")
@@ -1402,7 +1402,7 @@ _akcp_completion() {
   COMPREPLY=()
   cur="\${COMP_WORDS[COMP_CWORD]}"
   prev="\${COMP_WORDS[COMP_CWORD-1]}"
-  opts="init validate scan compile inspect-artifact verify diff import serve:mcp doctor agents config policy plan reconcile graph context lifecycle conformance scorecard plugin privacy"
+  opts="init validate scan compile inspect-artifact verify diff import serve doctor agents config policy plan reconcile graph context lifecycle conformance scorecard plugin privacy"
   
   if [[ \${COMP_CWORD} -eq 1 ]] ; then
     COMPREPLY=( \$(compgen -W "\${opts}" -- \${cur}) )
@@ -1425,7 +1425,7 @@ _akcp() {
     'verify:Verify the cryptographic provenance and integrity of a compiled bundle'
     'diff:Show semantic context changes since last build'
     'import:Import from external systems into a Context Pack'
-    'serve:mcp:Locally boot the MCP Profile Server for this context'
+    'serve:Locally serve AKCP capabilities'
     'doctor:Diagnose environment configuration and readiness'
     'agents:Manage agent instruction files (sync)'
     'config:Manage AKCP configuration (validate)'

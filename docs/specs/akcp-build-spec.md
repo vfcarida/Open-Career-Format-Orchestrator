@@ -60,7 +60,7 @@ Performs a strict, offline schema validation.
 
 Displays semantic context changes since the last `compile`. Useful for determining if a Context Pack update requires re-triggering Evals.
 
-### `serve:mcp [directory]`
+### `serve mcp [directory]`
 
 Locally boots the MCP Profile Server mapping the targeted context bundle.
 
@@ -90,5 +90,5 @@ pnpm akcp validate ./my-project/.agent-context
 pnpm akcp compile --bundle ./my-project/.agent-context
 
 # 5. Serve directly to your agent IDE
-pnpm akcp serve:mcp ./my-project/.agent-context
+pnpm akcp serve mcp ./my-project/.agent-context
 ```

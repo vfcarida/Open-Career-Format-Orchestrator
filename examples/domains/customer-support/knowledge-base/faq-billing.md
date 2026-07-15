@@ -1,13 +1,14 @@
 ---
-title: Billing FAQ
-type: knowledge-base
-version: 1.0.0
-id: faq-billing
-description: Frequently asked questions about billing and subscriptions.
-labels: [faq, billing]
+type: SupportArticle
+schemaVersion: "0.1"
+articleId: "faq-billing-01"
+title: "Billing and Invoicing FAQ"
+category: billing
+audience: customer
+tags: [billing, invoice, payment, refund]
 ---
 
-# Billing FAQ
+# Billing and Invoicing FAQ
 
 ## How do I update my payment method?
 Customers can update their payment method by logging into the portal and navigating to **Settings -> Billing**. As a support agent, you **cannot** update payment methods on their behalf for PCI compliance reasons. Always direct them to the self-service portal.

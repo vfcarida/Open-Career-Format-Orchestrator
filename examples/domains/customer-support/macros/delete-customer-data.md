@@ -1,10 +1,9 @@
 ---
-title: Delete Customer Data Macro
-type: macro
-version: 1.0.0
-id: macro-delete-customer
-description: The official macro for executing a GDPR or CCPA data deletion request.
-labels: [privacy, macro]
+type: SupportMacro
+schemaVersion: "0.1"
+macroId: "macro-delete-customer"
+title: "Delete Customer Data Macro"
+channel: "any"
 ---
 
 # Delete Customer Data

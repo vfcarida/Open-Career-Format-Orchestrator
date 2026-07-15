@@ -16,7 +16,7 @@ As per the OKF specification:
 A valid AKCP bundle should specify the following in its configurations or root index:
 
 ```yaml
-schemaVersion: "ocf.profile/v1"
+schemaVersion: "akcp.profile/v1"
 bundleVersion: "1.0.0"
 okfVersion: "0.1"
 bundleType: "career"

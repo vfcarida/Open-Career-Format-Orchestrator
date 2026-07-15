@@ -1,10 +1,9 @@
 ---
-title: Refund Policy
-type: policy
-version: 1.0.0
-id: policy-refund
-description: Standard operating procedure for issuing refunds.
-labels: [billing, refunds]
+type: SupportPolicy
+schemaVersion: "0.1"
+policyId: "policy-refund"
+title: "Refund Policy"
+category: refunds
 ---
 
 # Refund Policy

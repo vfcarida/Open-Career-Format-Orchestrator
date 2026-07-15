@@ -7,7 +7,7 @@ To enforce runtime governance constraints safely and reliably, `akcp` supports m
 Policy Cards are defined as YAML files.
 
 ```yaml
-apiVersion: policy.ocf.dev/v1alpha1
+apiVersion: policy.akcp.dev/v1alpha1
 kind: PolicyCard
 metadata:
   name: Strict Enterprise Governance

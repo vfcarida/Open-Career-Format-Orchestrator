@@ -1,3 +1,7 @@
+---
+type: System
+---
+
 # IT Operations Flagship Audit
 
 This document tracks the gaps between the baseline state of the IT Operations domain example and the required Enterprise Flagship capabilities as defined in Prompt 05.

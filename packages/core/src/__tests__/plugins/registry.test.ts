@@ -4,7 +4,7 @@ import * as path from "path";
 
 describe("PluginRegistry", () => {
   it("discovers the example plugin", () => {
-    const pluginsDir = path.resolve(__dirname, "../../../../../plugins");
+    const pluginsDir = path.resolve(__dirname, "../__fixtures__/plugins");
     const discovered = PluginRegistry.discoverLocalPlugins(pluginsDir);
 
     expect(discovered.length).toBeGreaterThan(0);

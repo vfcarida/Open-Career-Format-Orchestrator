@@ -49,7 +49,7 @@ _Expected Output_: `[OK] Policy is structurally valid and well-formed.`
 Launch the local MCP Profile Server, mounting the compiled IT Operations context.
 
 ```bash
-pnpm akcp serve:mcp examples/domains/it-operations --ir examples/domains/it-operations/dist/agent-knowledge-ir.json
+pnpm akcp serve mcp examples/domains/it-operations --ir examples/domains/it-operations/dist/agent-knowledge-ir.json
 ```
 
 _Expected Behavior_: The MCP server starts and listens on standard input/output (stdio), ready to connect to Claude Desktop or any MCP-compatible agent client.

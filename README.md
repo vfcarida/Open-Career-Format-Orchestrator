@@ -61,7 +61,7 @@ To prove its domain-agnostic architecture, AKCP implements distinct flagship sce
 |---|---|---|
 | Career | low-friction starter domain | personal knowledge compilation |
 | IT Operations | enterprise flagship | runbooks, incidents, approvals, audit |
-| Customer Support | future enterprise flagship for policy-aware, privacy-preserving support knowledge compilation | showing how AKCP handles tickets, macros, policies, customer history, PII redaction, escalation, and quality evaluation |
+| Customer Support | third flagship enterprise use case for policy-aware, privacy-preserving support knowledge compilation | showing how AKCP handles tickets, macros, policies, customer history, PII redaction, escalation, and quality evaluation |
 
 ## Current Maturity Status
 
@@ -74,16 +74,16 @@ To prove its domain-agnostic architecture, AKCP implements distinct flagship sce
 | Dashboard UI | Experimental | package stubbed | no react UI | build MVP |
 | Career flagship | Stable (Demo) | walkthrough | limited tool scope | expansion |
 | IT Ops flagship | Alpha | architecture | mocked infrastructure | real cloud integrations |
-| Customer Support | Planned | design doc | not implemented | implementation |
-| OCF Legacy CLI (`ocf`) | Deprecated | CI check logic | legacy usage | removal in v1.0 |
+| Customer Support | Flagship | design doc | experimental | integration |
+| AKCP Legacy CLI (`akcp`) | Deprecated | CI check logic | legacy usage | removal in v1.0 |
 
 For formal definitions, see the [Maturity and Status Guide](docs/status.md).
 
 ## Quickstart
 
-### Local workspace flow (Recommended)
+### Local workspace flow
 
-As AKCP is not yet published to npm, you must run it directly from source.
+As AKCP is not yet published to npm, you must run it directly from source. For a complete step-by-step walkthrough, see the [Getting Started Guide](docs/getting-started/quickstart.md).
 
 ```bash
 # 1. Clone the repository
@@ -95,10 +95,12 @@ corepack enable
 pnpm install --frozen-lockfile
 pnpm build
 
-# 3. Validate your environment
-pnpm akcp --help
-pnpm akcp validate --bundle examples/career
-pnpm akcp compile --config examples/career/akcp.yaml
+# 3. Validate and compile the Career example domain
+pnpm akcp validate --bundle examples/domains/career --profile career
+pnpm akcp compile --config examples/domains/career/akcp.yaml
+
+# 4. View generated artifacts in the cache
+# (Look inside examples/domains/career/.akcp/cache/build-state.json)
 ```
 
 ## CLI Examples
@@ -172,13 +174,13 @@ To get started, please read [CONTRIBUTING.md](CONTRIBUTING.md) and review our [G
 
 ## Backwards Compatibility & Migration
 
-The repository was previously known as Open Career Format (OCF), ContextOps, and Agent-ready Knowledge Reference Architecture. Legacy CLI commands (`ocf`, `agent-ready`) continue to route to the main `akcp` binary while emitting a deprecation warning.
+The repository was previously known as AKCP (AKCP), Agent Knowledge Compiler and Control Plane (AKCP), and Agent Knowledge Compiler and Control Plane (AKCP). Legacy CLI commands (`akcp`, `agent-ready`) continue to route to the main `akcp` binary while emitting a deprecation warning.
 
 | Legacy Concept | Canonical AKCP Concept | Migration Status |
 | --- | --- | --- |
-| `Open Career Format (OCF)` | Agent Knowledge Compiler and Control Plane (AKCP) | Identity updated. Internal references are deprecated. |
-| `ContextOps` | AKCP Control Plane | Identity updated. |
-| `ocf` CLI command | `akcp` | Supported with deprecation warning. |
+| `AKCP (AKCP)` | Agent Knowledge Compiler and Control Plane (AKCP) | Identity updated. Internal references are deprecated. |
+| `Agent Knowledge Compiler and Control Plane (AKCP)` | AKCP Control Plane | Identity updated. |
+| `akcp` CLI command | `akcp` | Supported with deprecation warning. |
 | `agent-ready` CLI command | `akcp` | Supported with deprecation warning. |
 
 ---

@@ -72,4 +72,110 @@ describe("CLI Smoke Tests", () => {
     expect(output).toContain("Configuration validation failed");
     expect(output).toContain("Invalid enum value");
   });
+
+  // Adding smoke tests for remaining commands
+  it("should output help for scan command", () => {
+    const output = runCli("scan --help");
+    expect(output).toContain("Analyze repository");
+  });
+
+  it("should output help for verify command", () => {
+    const output = runCli("verify --help");
+    expect(output).toContain("Verify the cryptographic provenance");
+  });
+
+  it("should output help for diff command", () => {
+    const output = runCli("diff --help");
+    expect(output).toContain("diff [options] [directory]");
+  });
+
+  it("should output help for import command", () => {
+    const output = runCli("import --help");
+    expect(output).toContain("import [options] <source>");
+  });
+
+  it("should output help for serve mcp command", () => {
+    const output = runCli("serve mcp --help");
+    expect(output).toContain("serve mcp [options]");
+  });
+
+  it("should output help for control-plane command", () => {
+    const output = runCli("control-plane --help");
+    expect(output).toContain("control-plane [options] [command]");
+  });
+
+  it("should output help for evals command", () => {
+    const output = runCli("evals --help");
+    expect(output).toContain("evals [options] [command]");
+  });
+
+  it("should output help for docs command", () => {
+    const output = runCli("docs --help");
+    expect(output).toContain("docs [options] [command]");
+  });
+
+  it("should output help for doctor command", () => {
+    const output = runCli("doctor --help");
+    expect(output).toContain("doctor [options]");
+  });
+
+  it("should output help for agents command", () => {
+    const output = runCli("agents --help");
+    expect(output).toContain("agents [options] [command]");
+  });
+
+  it("should output help for config command", () => {
+    const output = runCli("config --help");
+    expect(output).toContain("config [options] [command]");
+  });
+
+  it("should output help for policy command", () => {
+    const output = runCli("policy --help");
+    expect(output).toContain("policy [options] [command]");
+  });
+
+  it("should output help for plan command", () => {
+    const output = runCli("plan --help");
+    expect(output).toContain("plan [options]");
+  });
+
+  it("should output help for reconcile command", () => {
+    const output = runCli("reconcile --help");
+    expect(output).toContain("reconcile [options]");
+  });
+
+  it("should output help for graph command", () => {
+    const output = runCli("graph --help");
+    expect(output).toContain("graph [options] [command]");
+  });
+
+  it("should output help for context command", () => {
+    const output = runCli("context --help");
+    expect(output).toContain("context [options] [command]");
+  });
+
+  it("should output help for lifecycle command", () => {
+    const output = runCli("lifecycle --help");
+    expect(output).toContain("lifecycle [options] [command]");
+  });
+
+  it("should output help for conformance command", () => {
+    const output = runCli("conformance --help");
+    expect(output).toContain("conformance [options] [command]");
+  });
+
+  it("should output help for scorecard command", () => {
+    const output = runCli("scorecard --help");
+    expect(output).toContain("scorecard [options]");
+  });
+
+  it("should output help for plugin command", () => {
+    const output = runCli("plugin --help");
+    expect(output).toContain("plugin [options] [command]");
+  });
+
+  it("should output help for privacy command", () => {
+    const output = runCli("privacy --help");
+    expect(output).toContain("privacy [options] [command]");
+  });
 });

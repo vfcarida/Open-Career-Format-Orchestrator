@@ -20,7 +20,7 @@
   "schemaVersion": "akcp.artifact-manifest/v1",
   "source": {
     "config": "akcp.yaml",
-    "hash": "88018482d403b5d05011ed9e9ebb246bfd6fb2193d09415c9b50f9b06e68ac0b",
+    "hash": "9dfb00a3ab5e34508a00b328da3f51dcace67c9e66f35b5cc5ad0c648f9108da",
     "root": "C:\Users\vinicius\Documents\GeminiCode\Open-Career-Format-Orchestrator\examples\domains\it-operations",
   },
   "targets": [
@@ -30,7 +30,7 @@
       "outputs": [
         "C:\Users\vinicius\Documents\GeminiCode\Open-Career-Format-Orchestrator\examples\domains\it-operations\dist\agent-knowledge-ir.json",
       ],
-      "sizeBytes": 43722,
+      "sizeBytes": 43870,
       "status": "success",
     },
     {
@@ -39,7 +39,7 @@
       "outputs": [
         "C:\Users\vinicius\Documents\GeminiCode\Open-Career-Format-Orchestrator\examples\domains\it-operations\dist\mcp-resources.json",
       ],
-      "sizeBytes": 3158,
+      "sizeBytes": 3153,
       "status": "success",
     },
     {
@@ -48,7 +48,7 @@
       "outputs": [
         "C:\Users\vinicius\Documents\GeminiCode\Open-Career-Format-Orchestrator\examples\domains\it-operations\dist\openwiki",
       ],
-      "sizeBytes": 30115,
+      "sizeBytes": 30206,
       "status": "success",
     },
     {
@@ -57,7 +57,7 @@
       "outputs": [
         "C:\Users\vinicius\Documents\GeminiCode\Open-Career-Format-Orchestrator\examples\domains\it-operations\dist\dashboard-meta.json",
       ],
-      "sizeBytes": 6895,
+      "sizeBytes": 6890,
       "status": "success",
     },
   ],

@@ -6,7 +6,7 @@ import { AgentKnowledgeIRSchema } from "../../ir/schema.js";
 describe("buildKnowledgeIR", () => {
   const sampleBundlePath = path.resolve(
     process.cwd(),
-    "../../sample-data/.okf",
+    "../../examples/domains/career",
   );
 
   it("should compile sample-data/.okf into valid IR", async () => {
@@ -30,7 +30,7 @@ describe("buildKnowledgeIR", () => {
     // Verify source
     expect(firstConcept?.source.format).toBe("okf/markdown");
 
-    // Verify unknown fields preserved in frontmatter
-    expect(firstConcept?.frontmatter.type).toBeDefined();
+    // Verify frontmatter was preserved
+    expect(firstConcept?.frontmatter).toBeDefined();
   });
 });

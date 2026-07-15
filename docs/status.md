@@ -25,4 +25,4 @@ AKCP uses strict, evidence-based maturity levels. We do not claim production rea
 | Career flagship | Demo | Walkthrough | Real-world scale | Stable (Demo) | Broaden use cases |
 | IT Ops flagship | Demo | Docs, structure | Full backend logic | Alpha | Complete implementations |
 | Customer Support | Concept | Design doc | Implementation | Planned | Begin implementation |
-| OCF Legacy CLI (`ocf`) | Legacy | `check:identity` | Complete removal | Deprecated | Remove in v1.0 |
+| AKCP Legacy CLI (`akcp`) | Legacy | `check:identity` | Complete removal | Deprecated | Remove in v1.0 |

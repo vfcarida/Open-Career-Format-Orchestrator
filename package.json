@@ -24,6 +24,7 @@
     "test:mcp": "pnpm run test:contract && pnpm run test:security",
     "test:e2e": "pnpm --filter @akcp/dashboard exec playwright install chromium && pnpm --filter @akcp/dashboard exec playwright test",
     "test:conformance": "pnpm --filter @akcp/conformance run test",
+    "smoke:quickstart": "node packages/cli/dist/index.js validate --bundle examples/domains/career --profile career && node packages/cli/dist/index.js compile --config examples/domains/career/akcp.yaml",
     "coverage": "vitest run --coverage",
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",

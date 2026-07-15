@@ -1,4 +1,8 @@
-# IT Operations Readiness Scorecard
+---
+type: System
+---
+
+# Agent Knowledge Readiness Scorecard
 
 This scorecard evaluates the quality, safety, and readiness of the IT Operations Agent Knowledge Pack compiled by AKCP.
 

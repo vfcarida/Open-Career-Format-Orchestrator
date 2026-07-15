@@ -22,5 +22,5 @@ pnpm akcp compile --bundle examples/integrations/openwiki-to-akcp --target all -
 pnpm akcp inspect-artifact examples/integrations/openwiki-to-akcp/dist/akcp-manifest.json
 
 # 4. Serve via MCP
-pnpm akcp serve:mcp examples/integrations/openwiki-to-akcp
+pnpm akcp serve mcp examples/integrations/openwiki-to-akcp
 ```

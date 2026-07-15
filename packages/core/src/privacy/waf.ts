@@ -35,7 +35,7 @@ export class LakeraGateway implements ISecurityGateway {
         throw new Error(`Lakera API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as any;
       
       // Lakera typically returns a "flagged" boolean or "results[0].flagged" depending on the version.
       // Assuming a generic schema where `flagged: true` indicates malicious intent.

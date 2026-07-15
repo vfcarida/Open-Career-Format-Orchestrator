@@ -12,7 +12,7 @@ The base OKF specification is minimalist. We need domain-specific constraints fo
 
 ## Decision
 
-We establish the `ocf.profile/v1` schema running strictly over standard OKF directories. All extensions use standard YAML Frontmatter, leaving unknown keys intact.
+We establish the `akcp.profile/v1` schema running strictly over standard OKF directories. All extensions use standard YAML Frontmatter, leaving unknown keys intact.
 
 ## Consequences
 

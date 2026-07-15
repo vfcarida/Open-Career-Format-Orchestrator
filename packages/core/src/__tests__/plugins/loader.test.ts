@@ -19,7 +19,7 @@ describe("PluginLoader", () => {
     // but not network:outbound
     const exampleDir = path.resolve(
       __dirname,
-      "../../../../../plugins/example-markdown-connector",
+      "../__fixtures__/plugins/example-markdown-connector",
     );
 
     // Test passes if the directory exists (which it should in the workspace)
@@ -35,7 +35,7 @@ describe("PluginLoader", () => {
   it("loads successfully if permissions match", async () => {
     const exampleDir = path.resolve(
       __dirname,
-      "../../../../../plugins/example-markdown-connector",
+      "../__fixtures__/plugins/example-markdown-connector",
     );
 
     try {

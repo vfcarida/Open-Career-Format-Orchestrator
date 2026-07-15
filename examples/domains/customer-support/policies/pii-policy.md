@@ -1,10 +1,9 @@
 ---
-title: Data Retention and PII Policy
-type: policy
-version: 1.0.0
-id: policy-pii
-description: Handling of customer PII in support tickets.
-labels: [privacy, compliance]
+type: SupportPolicy
+schemaVersion: "0.1"
+policyId: "policy-pii"
+title: "Data Retention and PII Policy"
+category: privacy
 ---
 
 # PII and Data Retention
