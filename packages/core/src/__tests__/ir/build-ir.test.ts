@@ -15,7 +15,7 @@ describe("buildKnowledgeIR", () => {
     "../../../../../examples/domains/career",
   );
 
-  it("should compile sample-data/.okf into valid IR", async () => {
+  it("should compile career domain into valid IR", async () => {
     const ir = await buildKnowledgeIR(sampleBundlePath, {
       bundleId: "test-bundle",
     });

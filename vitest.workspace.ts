@@ -6,4 +6,5 @@ export default defineWorkspace([
   "packages/conformance",
   "packages/mcp-profile-server",
   "packages/mcp-automation-server",
+  "packages/evals",
 ]);

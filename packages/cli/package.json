@@ -1,13 +1,10 @@
 {
   "name": "@akcp/cli",
   "version": "0.1.0",
-  "private": true,
   "description": "AKCP CLI: Generate, validate, update, and publish akcp context packs.",
   "type": "module",
   "bin": {
-    "akcp": "./dist/index.js",
-    "agent-ready": "./dist/legacy-bin.js",
-    "ocf": "./dist/legacy-ocf-bin.js"
+    "akcp": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -31,10 +28,27 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git"
+    "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git",
+    "directory": "packages/cli"
   },
   "homepage": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane#readme",
   "bugs": {
     "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane/issues"
-  }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ai-agents",
+    "knowledge-management",
+    "mcp",
+    "governance",
+    "compilation"
+  ]
 }

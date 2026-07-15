@@ -1,7 +1,6 @@
 {
   "name": "@akcp/core",
   "version": "0.1.0",
-  "private": true,
   "description": "Agent Knowledge Compiler and Control Plane (AKCP) Core Engine. Handles bundle parsing, schema validation, and profile compliance.",
   "type": "module",
   "main": "./dist/index.js",
@@ -38,10 +37,27 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git"
+    "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git",
+    "directory": "packages/core"
   },
   "homepage": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane#readme",
   "bugs": {
     "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane/issues"
-  }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ai-agents",
+    "knowledge-management",
+    "mcp",
+    "governance",
+    "compilation"
+  ]
 }

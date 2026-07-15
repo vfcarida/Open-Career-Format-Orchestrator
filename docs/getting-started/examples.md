@@ -15,3 +15,13 @@ Connect to the Automation Server and prompt:
 The LLM will return a token. You must then say:
 
 > "I approve. Confirm application submission using token X."
+
+## Flagship Domains
+
+To prove its domain-agnostic architecture, AKCP implements distinct flagship scenarios:
+
+| Domain | Why it exists | What it demonstrates |
+|---|---|---|
+| Career | low-friction starter domain | personal knowledge compilation |
+| IT Operations | enterprise flagship | runbooks, incidents, approvals, audit |
+| Customer Support | third flagship enterprise use case for policy-aware, privacy-preserving support knowledge compilation | showing how AKCP handles tickets, macros, policies, customer history, PII redaction, escalation, and quality evaluation |

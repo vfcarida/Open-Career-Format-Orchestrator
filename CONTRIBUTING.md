@@ -89,3 +89,12 @@ For release policies, SemVer, and compatibility, see the [Release Policy](docs/g
 ## Community Standards
 
 All contributors must follow our [Code of Conduct](CODE_OF_CONDUCT.md). We are committed to building an inclusive, respectful community. We strictly adhere to NIST AI RMF and OWASP LLM Top 10 guidelines in all technical decisions.
+
+## Repository Structure
+
+- `packages/core/`: The OKF parser, compiler, and AK-IR normalization engine.
+- `packages/cli/`: The `akcp` command-line interface.
+- `packages/mcp-profile-server/`: Exposes context via MCP.
+- `packages/mcp-automation-server/`: Controls agentic side-effects via Playwright/HITL.
+- `packages/conformance/`: Test suite for OKF and AKCP compatibility.
+- `examples/domains/`: Working demo architectures for the flagship domains.

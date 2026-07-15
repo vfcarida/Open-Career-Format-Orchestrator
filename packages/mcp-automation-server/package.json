@@ -1,7 +1,6 @@
 {
   "name": "@akcp/mcp-automation-server",
   "version": "0.1.0",
-  "private": true,
   "description": "AKCP MCP Automation Server. Executes policy-governed, human-in-the-loop workflows across domains.",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,10 +29,27 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git"
+    "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane.git",
+    "directory": "packages/mcp-automation-server"
   },
   "homepage": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane#readme",
   "bugs": {
     "url": "https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane/issues"
-  }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ai-agents",
+    "knowledge-management",
+    "mcp",
+    "governance",
+    "compilation"
+  ]
 }

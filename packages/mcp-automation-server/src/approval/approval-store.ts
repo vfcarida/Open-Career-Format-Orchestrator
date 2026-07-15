@@ -11,7 +11,7 @@ export class ApprovalStore implements IApprovalStore {
 
   constructor() {
     const defaultDbDir = path.resolve(
-      process.env["AKCP_BUNDLE_PATH"] || "./sample-data/.okf",
+      process.env["AKCP_BUNDLE_PATH"] || "./packages/test-fixtures/sample-data/.okf",
     );
     if (!fs.existsSync(defaultDbDir)) {
       fs.mkdirSync(defaultDbDir, { recursive: true });
