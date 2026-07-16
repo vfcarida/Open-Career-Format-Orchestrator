@@ -3,6 +3,8 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import type { CompileTarget, TargetConfig, TargetOutput } from "./types.js";
 import type { AgentKnowledgeIR } from "../ir/types.js";
+import { buildSemanticGraph } from "../graph/build-graph.js";
+import { computeImpactMap } from "../graph/impact-analysis.js";
 
 export class GraphJsonTarget implements CompileTarget {
   public readonly targetType = "graph-json";
@@ -15,9 +17,6 @@ export class GraphJsonTarget implements CompileTarget {
     const outDir = path.dirname(outPath);
 
     await fs.mkdir(outDir, { recursive: true });
-
-    const { buildSemanticGraph } = await import("../graph/build-graph.js");
-    const { computeImpactMap } = await import("../graph/impact-analysis.js");
 
     const graph = buildSemanticGraph(ir);
     const impactMap = computeImpactMap(graph.edges);

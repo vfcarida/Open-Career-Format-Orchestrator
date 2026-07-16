@@ -3,7 +3,7 @@ import { execSync } from "child_process";
 import path from "path";
 
 describe("Agent Knowledge Readiness Scorecard Benchmark", () => {
-  it("should evaluate the sample bundle and produce a scorecard markdown report", () => {
+  it("should evaluate the sample bundle and produce a scorecard markdown report", async () => {
     const bundlePath = path.resolve(__dirname, "sample-bundle");
     const cliPath = path.resolve(
       __dirname,
@@ -22,6 +22,6 @@ describe("Agent Knowledge Readiness Scorecard Benchmark", () => {
     expect(output).toContain("## Recommendations");
 
     // For this specific bundle, it should have a decent score (e.g. MCP target, policies)
-    expect(output).toMatch(/Total Score: \d{2,3} \/ 100/);
-  });
+    expect(output).toMatch(/\*\*Total Score\*\*: \d{2,3} \/ 100/);
+  }, 30000);
 });

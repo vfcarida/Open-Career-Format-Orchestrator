@@ -16,14 +16,16 @@ AKCP uses strict, evidence-based maturity levels. We do not claim production rea
 
 ## Current Feature Inventory
 
-| Feature | Status | Evidence | Limitation | Next milestone |
-|---|---|---|---|---|
-| AKCP CLI compile | Beta | Unit tests, examples | No npm release yet | Global CLI distribution |
-| AK-IR Normalization | Beta | Schema tests | Edge cases | Expand AST testing |
-| MCP Profile Server | Beta | Contract/Security tests | Local-only | Add auth flows |
-| MCP Automation Server | Experimental | Safety tests | Missing dashboard | Build dashboard integration |
-| Dashboard UI | Experimental | Package scaffolded | No React UI | Build MVP |
-| Career flagship | Stable | Walkthrough | Limited tool scope | Broaden use cases |
-| IT Ops flagship | Beta | Docs, structure | Mocked infrastructure | Complete implementations |
-| Customer Support | Experimental | Design doc | Experimental | Begin integration |
-| AKCP Legacy CLI (`akcp`) | Deprecated | `check:identity` | Legacy usage | Remove in v1.0 |
+| Area | Status | Evidence | Next milestone |
+|------|--------|----------|----------------|
+| AKCP CLI | Beta | tests, examples, init command | npm publish |
+| AK-IR Compiler | Beta | spec, fixtures, pipeline stages | auto-normalization |
+| MCP Profile Server | Beta | contract tests, SSE transport | remote hosting |
+| MCP Automation Server | Alpha | safety tests, browser automation | real cloud integrations |
+| Control Plane (Gateway) | Beta | auth, rate limit, HITL, PII, WAF | distributed deployment |
+| Dashboard UI | Alpha | React app, e2e tests, Express server | feature completion |
+| IT Operations (flagship) | Beta | policies, evals, expected-output | real infrastructure |
+| Career (starter) | Stable | full walkthrough, golden outputs | |
+| Customer Support | Alpha | sources, 8 policies, capabilities, evals | full implementation |
+| VSCode Extension | Experimental | syntax highlighting | validation, autocomplete |
+| Legacy CLI | Deprecated | deprecation warnings | removal in v1.0 |

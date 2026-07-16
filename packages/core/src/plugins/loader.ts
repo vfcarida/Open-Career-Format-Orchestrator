@@ -68,6 +68,7 @@ export class PluginLoader {
     try {
       // In a real isolated environment, this would be a secure sandbox or VM.
       // For build-time plugins we dynamically import, trusting the local workspace (with explicit permission checks as a guardrail).
+      // Lazy: Plugin loader dynamically imports user-provided paths
       const pluginExports = await import(pathToFileURL(entrypointPath).href);
       return { manifest, exports: pluginExports };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

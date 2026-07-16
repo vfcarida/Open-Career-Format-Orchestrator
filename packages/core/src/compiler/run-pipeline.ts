@@ -1,5 +1,5 @@
 import type { PipelineContext, PipelineStage } from "./pipeline.js";
-import type { AgentKnowledgeIR } from "../ir/types.js";
+import type { AgentKnowledgeIR, Capability } from "../ir/types.js";
 import type { BuildOptions } from "../ir/build-ir.js";
 import { basename } from "path";
 import { randomUUID } from "crypto";
@@ -56,8 +56,7 @@ export async function runCompilerPipeline(
 
   LifecycleValidator.validate(ir);
   if (ir.capabilities && ir.capabilities.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    CapabilityValidator.validate(ir.capabilities as any);
+    CapabilityValidator.validate(ir.capabilities as Capability[]);
   }
 
   return ir;

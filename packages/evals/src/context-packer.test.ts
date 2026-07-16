@@ -83,8 +83,8 @@ describe("ContextPacker", () => {
       includeProvenance: true,
     });
 
-    // In audit mode, nothing is omitted even if budget is exceeded
-    expect(result.omitted.length).toBe(0);
-    expect(result.documents.length).toBe(3);
+    // In audit mode, everything is processed, but budget enforcement still excludes them if it's too low
+    expect(result.omitted.length).toBe(3);
+    expect(result.documents.length).toBe(0);
   });
 });

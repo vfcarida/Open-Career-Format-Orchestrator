@@ -24,7 +24,7 @@ export default tseslint.config(
     rules: {
       // TODO: Tighten these rules incrementally
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", ignoreRestSiblings: true }],
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-empty-object-type": "off",
       "no-console": ["warn", { allow: ["warn", "error"] }],

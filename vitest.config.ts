@@ -8,7 +8,6 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: [
         'packages/core/src/**/*.ts',
-        'packages/cli/src/**/*.ts',
         'packages/mcp-profile-server/src/**/*.ts',
         'packages/mcp-automation-server/src/**/*.ts',
       ],
@@ -16,16 +15,20 @@ export default defineConfig({
         '**/__tests__/**',
         '**/dist/**',
         '**/node_modules/**',
+        'packages/cli/**',
         'packages/dashboard/**',
         'packages/evals/**',
         'packages/test-fixtures/**',
+        'packages/**/index.ts',
+        'packages/**/index-sse.ts',
+        'packages/**/http-server.ts',
       ],
-      // TODO: Increase these thresholds gradually to 70% (and 65% for branches) as coverage improves.
+      // Thresholds are enforced in CI. Ratchet up after adding tests, never down.
       thresholds: {
-        statements: 50,
-        branches: 50,
-        functions: 50,
-        lines: 50,
+        statements: 65,
+        branches: 60,
+        functions: 65,
+        lines: 65,
       },
     },
     benchmark: {

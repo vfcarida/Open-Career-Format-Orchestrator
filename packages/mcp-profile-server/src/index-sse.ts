@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { AKCPProfileServer } from "./server.js";
+import { jwtVerify, createRemoteJWKSet } from "jose";
 
 
 
@@ -27,8 +28,18 @@ const mcp = profileServer.getServerInstance();
 const app = express();
 app.use(cors());
 
-// Mock JWT Auth Middleware from Phase 5 (Enterprise Gateway Security)
-const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+// JWT Auth Middleware
+const requireAuth = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const jwtSecret = process.env["AKCP_JWT_SECRET"];
+  const jwksUri = process.env["AKCP_JWKS_URI"];
+
+  if (!jwtSecret && !jwksUri) {
+    // If no token verification is configured, allow anonymous access
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (req as any).user = { identity: "anonymous-agent" };
+    return next();
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({ error: "Missing or invalid Authorization Bearer token" });
@@ -36,17 +47,32 @@ const requireAuth = (req: express.Request, res: express.Response, next: express.
   }
 
   const token = authHeader.substring(7);
-  // For MVP: Accept admin@corp.com directly as the token payload.
-  // In production, this would verify a real JWT signature against an IdP (e.g., Auth0).
-  if (token !== "admin@corp.com" && !token.includes("@")) {
-    res.status(403).json({ error: "Unauthorized Identity" });
+  if (!token) {
+    res.status(401).json({ error: "Missing or invalid Authorization Bearer token" });
     return;
   }
-
-  // We consider them authenticated
+  
+  try {
+    let payload;
+    if (jwksUri) {
+      const JWKS = createRemoteJWKSet(new URL(jwksUri));
+      const result = await jwtVerify(token, JWKS);
+      payload = result.payload;
+    } else if (jwtSecret) {
+      const secret = new TextEncoder().encode(jwtSecret);
+      const result = await jwtVerify(token, secret);
+      payload = result.payload;
+    }
+    
+    // Use sub or email as identity
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (req as any).user = { identity: payload?.sub || payload?.email || "authenticated-agent" };
+    next();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (req as any).user = { identity: token };
-  next();
+  } catch (err: any) {
+    res.status(401).json({ error: `Unauthorized: Invalid token (${err.message})` });
+    return;
+  }
 };
 
 let globalTransport: SSEServerTransport | null = null;
@@ -89,5 +115,9 @@ app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`[AKCP Profile Server - SSE] Endpoint: http://localhost:${PORT}/sse`);
   // eslint-disable-next-line no-console
-  console.log(`[AKCP Profile Server - SSE] Identity Authorization Required (Bearer Token)`);
+  if (process.env["AKCP_JWT_SECRET"] || process.env["AKCP_JWKS_URI"]) {
+    console.log(`[AKCP Profile Server - SSE] Enterprise Auth enabled (JWT Validation active).`);
+  } else {
+    console.warn(`[AKCP Profile Server - SSE] WARNING: No AKCP_JWT_SECRET or AKCP_JWKS_URI set. Running without authentication.`);
+  }
 });

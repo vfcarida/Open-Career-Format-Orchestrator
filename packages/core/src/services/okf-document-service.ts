@@ -15,6 +15,7 @@ import type {
   ILogService,
   IOKFRepository,
 } from "../domain/interfaces.js";
+import { OKFFileNotFoundError } from "../domain/errors.js";
 import type {
   CareerContext,
   OKFDocument,
@@ -159,8 +160,6 @@ export class OKFDocumentService {
     const existing = await this.repository.findById(conceptId);
 
     if (!existing) {
-      // Import dynamically to avoid circular issues (the error is lightweight)
-      const { OKFFileNotFoundError } = await import("../domain/errors.js");
       const filePath = path.join(this.bundleRoot, `${conceptId}.md`);
       throw new OKFFileNotFoundError(filePath);
     }

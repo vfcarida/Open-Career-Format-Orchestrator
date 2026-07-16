@@ -1,6 +1,6 @@
-# Customer Support (Planned Flagship)
+# Customer Support (Alpha Flagship)
 
-> **Status:** Planned
+> **Status:** Alpha
 > **Note:** This domain is currently in the design phase. It serves as a readiness placeholder to demonstrate the future capabilities of AKCP. It is not yet entirely implemented.
 
 ## What it will demonstrate

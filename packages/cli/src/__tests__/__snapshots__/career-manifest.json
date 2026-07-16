@@ -5,15 +5,8 @@
     "version": "0.1.0",
   },
   "conformance": {
-    "checks": [
-      {
-        "file": "walkthrough.md",
-        "message": "OKF Parse Error: OKF Validation Error: Frontmatter validation failed: type: Required. Ensure the document has valid YAML frontmatter with at least a "type" field. See OKF v0.1 spec §4.1 for required fields.",
-        "ruleId": "OKF-V0.1-3.2",
-        "type": "error",
-      },
-    ],
-    "level": "none",
+    "checks": [],
+    "level": "AKCP-control-plane-compatible",
   },
   "createdAt": "2026-01-01T00:00:00.000Z",
   "diagnostics": [],
@@ -30,7 +23,7 @@
       "outputs": [
         "C:\Users\vinicius\Documents\GeminiCode\Open-Career-Format-Orchestrator\examples\domains\career\dist\context-pack.json",
       ],
-      "sizeBytes": 5616,
+      "sizeBytes": 6901,
       "status": "success",
     },
     {
@@ -57,7 +50,7 @@
       "outputs": [
         "C:\Users\vinicius\Documents\GeminiCode\Open-Career-Format-Orchestrator\examples\domains\career\dist\dashboard-meta.json",
       ],
-      "sizeBytes": 604,
+      "sizeBytes": 1889,
       "status": "success",
     },
   ],

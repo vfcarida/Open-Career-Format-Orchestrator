@@ -41,3 +41,11 @@ docker/data/
 
 # Documentation
 docs/api/
+
+# Generated artifacts (never commit)
+lint-results.json
+debug-*.ts
+*.1147000961
+
+# Reports (generated)
+reports/

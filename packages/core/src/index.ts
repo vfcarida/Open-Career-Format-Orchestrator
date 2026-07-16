@@ -113,7 +113,6 @@ export { LogService } from "./services/log-service.js";
 export { OKFDocumentFactory } from "./factories/okf-document-factory.js";
 
 // Context Budgeting
-export * from "./domain/context-pack.js";
 /**
  * Assembles and compresses context packs based on relevance scores and budget constraints.
  */
@@ -160,7 +159,6 @@ export {
   type AuthConfig,
   type AuthResult,
 } from "./capabilities/auth.js";
-export * from "./capabilities/gateway.js";
 
 // Migrations
 export { migrateBundle } from "./migrations/migrate-bundle.js";

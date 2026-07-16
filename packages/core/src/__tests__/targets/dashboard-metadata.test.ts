@@ -9,21 +9,11 @@ describe("DashboardMetadataTarget", () => {
   const testFile = path.join(testDir, "dashboard-metadata.json");
 
   beforeEach(() => {
-    if (fs.existsSync(testFile)) {
-      fs.unlinkSync(testFile);
-    }
-    if (fs.existsSync(testDir)) {
-      fs.rmdirSync(testDir);
-    }
+    fs.rmSync(testDir, { recursive: true, force: true });
   });
 
   afterEach(() => {
-    if (fs.existsSync(testFile)) {
-      fs.unlinkSync(testFile);
-    }
-    if (fs.existsSync(testDir)) {
-      fs.rmdirSync(testDir);
-    }
+    fs.rmSync(testDir, { recursive: true, force: true });
   });
 
   it("should generate dashboard metadata from IR", async () => {

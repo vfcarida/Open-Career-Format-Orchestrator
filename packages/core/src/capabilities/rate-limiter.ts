@@ -1,7 +1,7 @@
 export interface RateLimiterConfig {
-  maxTokens: number;       // máximo de tokens no bucket
-  refillRate: number;      // tokens adicionados por segundo
-  refillInterval?: number; // intervalo de refill em ms (default: 1000)
+  maxTokens: number;       // Maximum tokens in the bucket
+  refillRate: number;      // Tokens added per second
+  refillInterval?: number; // Refill interval in ms (default: 1000)
 }
 
 interface Bucket {

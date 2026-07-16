@@ -1,22 +1,12 @@
 import { describe, it, expect } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
 import { CapabilityManifestSchema } from "@akcp/core";
+import { profileServerCapabilities } from "@akcp/mcp-profile-server/dist/capabilities.js";
+import { automationServerCapabilities } from "@akcp/mcp-automation-server/dist/capabilities.js";
 
 describe("Capability Registry", () => {
-  const rootDir = path.resolve(__dirname, "../../../");
-  const capabilitiesDir = path.join(rootDir, "capabilities");
-
-  const readRegistry = (filename: string) => {
-    const filePath = path.join(capabilitiesDir, filename);
-    if (!fs.existsSync(filePath)) {
-      throw new Error(`Registry file not found: ${filePath}`);
-    }
-    return JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  };
 
   it("profile-server registry is valid", () => {
-    const registry = readRegistry("profile-server.json");
+    const registry = profileServerCapabilities;
     expect(Array.isArray(registry)).toBe(true);
 
     for (const cap of registry) {
@@ -45,7 +35,7 @@ describe("Capability Registry", () => {
   });
 
   it("automation-server registry is valid", () => {
-    const registry = readRegistry("automation-server.json");
+    const registry = automationServerCapabilities;
     expect(Array.isArray(registry)).toBe(true);
 
     for (const cap of registry) {

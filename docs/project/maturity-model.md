@@ -4,13 +4,11 @@ The Agent Knowledge Compiler and Control Plane (AKCP) explicitly labels all comm
 
 ## Maturity Levels
 
-| Label | Definition | Criteria |
-|---|---|---|
-| **Stable** | Ready for production use. | Documented, entirely implemented, robust test coverage (unit + integration), CI-covered, supported with backward compatibility guarantees. |
-| **Beta** | Implemented and largely functional. | Documented, tested, but the API/interface may still undergo minor changes before full stabilization. |
-| **Experimental** | Available for preview but incomplete. | Not production-ready. May lack full tests, docs, or feature parity. APIs can break without notice. |
-| **Planned** | On the roadmap. | Documented intent or design, but not yet implemented. Placeholders exist only in documentation (not as misleading CLI success states). |
-| **Deprecated** | Supported temporarily but slated for removal. | Active migration path is provided. Will be removed in a future major version. |
+- **Experimental**: Concept proven, minimal tests, API may change without notice
+- **Alpha**: Functional, has tests, API semi-stable, not production-recommended
+- **Beta**: Well-tested, API stable, suitable for non-critical production use
+- **Stable**: Production-ready, full test coverage, SemVer guarantees
+- **Deprecated**: Scheduled for removal, emits warnings
 
 ## Standards Enforcement
 

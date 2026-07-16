@@ -18,7 +18,7 @@ export const profileServerCapabilities: CapabilityManifest[] = [
     kind: "tool",
     version: "1.0.0",
     description:
-      "Reads the contents and frontmatter of a specific document. Accepts optional pagination parameters `offset` (line number to start from) and `limit` (max lines to return), and `summaryOnly` (boolean to return only frontmatter without body). When to use: To inspect specific knowledge, especially for large documents. When not to use: Without a known conceptId. Side effects: none (local-read). Returns the OKFDocument payload.",
+      "Reads a document. Accepts optional pagination parameters `offset`, `limit` and `summaryOnly`. When to use: To inspect specific knowledge. When not to use: Without a known conceptId. Side effects: none (local-read). Returns the OKFDocument.",
     riskLevel: "low",
     sideEffectLevel: "local-read",
     requiredApproval: false,

@@ -1,6 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { AkcpConfig } from "../config/akcp-config-schema.js";
+import { buildKnowledgeIR } from "../ir/build-ir.js";
+import { IrJsonTarget } from "../targets/ir-json.js";
+import { OkfBundleTarget } from "../targets/okf-bundle.js";
+import { OpenWikiDocsTarget } from "../targets/openwiki-docs.js";
+import { AgentsMdTarget } from "../targets/agents-md.js";
+import { McpResourcesManifestTarget } from "../targets/mcp-resources-manifest.js";
+import { PolicyBundleTarget } from "../targets/policy-bundle.js";
+import { EvalDatasetTarget } from "../targets/eval-dataset.js";
+import { GraphJsonTarget } from "../targets/graph-json.js";
+import { ProvenanceManifestBuilder } from "../provenance/build-manifest.js";
 
 export interface ReconcileOptions {
   dryRun: boolean;
@@ -89,19 +99,6 @@ export async function reconcile(
 
   // Compile missing targets
   if (missingTargets.length > 0) {
-    const { buildKnowledgeIR } = await import("../ir/build-ir.js");
-    const { IrJsonTarget } = await import("../targets/ir-json.js");
-    const { OkfBundleTarget } = await import("../targets/okf-bundle.js");
-    const { OpenWikiDocsTarget } = await import("../targets/openwiki-docs.js");
-    const { AgentsMdTarget } = await import("../targets/agents-md.js");
-    const { McpResourcesManifestTarget } =
-      await import("../targets/mcp-resources-manifest.js");
-    const { PolicyBundleTarget } = await import("../targets/policy-bundle.js");
-    const { EvalDatasetTarget } = await import("../targets/eval-dataset.js");
-    const { GraphJsonTarget } = await import("../targets/graph-json.js");
-    const { ProvenanceManifestBuilder } =
-      await import("../provenance/build-manifest.js");
-
     const bundleRoot = path.resolve(".");
     const ir = await buildKnowledgeIR(bundleRoot, {
       sources: config.compile?.sources,

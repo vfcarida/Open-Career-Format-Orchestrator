@@ -32,10 +32,13 @@ jobs:
         run: pnpm build
 
       - name: Test
-        run: pnpm test -- --run
+        run: pnpm test
 
       - name: Generate API Docs
         run: pnpm docs:api
+
+      - name: Validate publishable packages
+        run: pnpm -r publish --dry-run --no-git-checks
 
       - name: Publish packages
         run: pnpm -r publish --no-git-checks

@@ -7,4 +7,5 @@ export interface CapabilityRequest {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
   apiKey?: string;
+  sourceId?: string;
 }

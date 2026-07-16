@@ -1,5 +1,15 @@
 #!/usr/bin/env node
 
+// Static imports converted from lazy loading
+import { scanWorkspace, writeScanSuggestions, loadAkcpConfig, buildKnowledgeIR, IrJsonTarget, OpenWikiDocsTarget, AgentsMdTarget, McpResourcesManifestTarget, PolicyBundleTarget, EvalDatasetTarget, DashboardMetadataTarget, ProvenanceManifestBuilder, hashConfig, verifyManifest, importSource, syncAgentInstructions, loadPolicy, explainPolicy, generateBuildPlan, printBuildPlan, reconcile, GraphJsonTarget, OKFFileRepository, ContextPlanner, FileSystemAdapter, FrontmatterParser, Freshness, calculateScorecard, PluginRegistry, PluginLoader, PiiRedactor } from "@akcp/core";
+import { ConformanceRunner } from "@akcp/conformance";
+import { spawn } from "child_process";
+import { EvalsHarness } from "@akcp/evals";
+import { runScenarios } from "@akcp/evals/dist/scenarios.js";
+import { formatScorecardMarkdown } from "./formatters/markdown.js";
+import * as crypto from "crypto";
+
+
 import { Command } from "commander";
 import fs from "fs";
 import path from "path";
@@ -28,29 +38,41 @@ program
     "-p, --profile <profile>",
     "Context profile (deprecated, use --template)",
   )
+  .option(
+    "-o, --output <dir>",
+    "Output directory for the bundle (overrides positional directory)",
+  )
   .action((directory, options) => {
-    const targetDir = path.resolve(process.cwd(), directory);
-    const contextDir = path.join(targetDir, ".agent-context");
+    const outDir = options.output || directory;
+    const targetDir = path.resolve(process.cwd(), outDir);
 
-    if (!fs.existsSync(contextDir)) {
-      fs.mkdirSync(contextDir, { recursive: true });
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
     }
 
     // Attempt to copy from Domain Adapter templates if available
     try {
       const cliDir = path.dirname(fileURLToPath(import.meta.url));
-      const templateDir = path.resolve(
-        cliDir,
-        "../../../examples",
-        options.template || options.profile || "career",
-      );
+      const profile = options.template || options.profile || "career";
+      
+      let templateDir = path.resolve(cliDir, "../templates", profile);
+      if (!fs.existsSync(templateDir)) {
+        templateDir = path.resolve(cliDir, "../../../examples/domains", profile);
+      }
 
       if (fs.existsSync(templateDir)) {
-        fs.cpSync(templateDir, contextDir, { recursive: true });
-        console.log(`[INFO] Copied template: ${options.template || options.profile}`);
+        fs.cpSync(templateDir, targetDir, { recursive: true });
+        
+        // Ensure .akcp/cache is not copied over if it existed in the source
+        const cacheDir = path.join(targetDir, ".akcp", "cache");
+        if (fs.existsSync(cacheDir)) {
+          fs.rmSync(cacheDir, { recursive: true, force: true });
+        }
+        
+        console.log(`[INFO] Copied template: ${profile}`);
       } else {
         console.warn(
-          `[WARN] Domain template '${options.template || options.profile}' not found in examples/. Initializing empty profile.`,
+          `[WARN] Domain template '${profile}' not found. Initializing empty profile.`,
         );
       }
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
@@ -71,18 +93,20 @@ version: 1.0.0
 This directory contains akcp knowledge bundles.
 `;
     // Only write index if it doesn't already exist from the template
-    if (!fs.existsSync(path.join(contextDir, "index.md"))) {
-      fs.writeFileSync(path.join(contextDir, "index.md"), indexContent);
+    if (!fs.existsSync(path.join(targetDir, "index.md")) && !fs.existsSync(path.join(targetDir, "akcp.yaml"))) {
+      fs.writeFileSync(path.join(targetDir, "index.md"), indexContent);
     }
 
     // Bootstrap AGENTS.md injection hint
     const agentsMdContent = `# Agent Instructions
-Always load the local \`.agent-context\` pack before answering questions related to the domain '${options.template || options.profile || "career"}'.
+Always load the local context pack before answering questions related to the domain '${options.template || options.profile || "career"}'.
 `;
-    fs.writeFileSync(path.join(targetDir, "AGENTS.md"), agentsMdContent);
+    if (!fs.existsSync(path.join(targetDir, "AGENTS.md"))) {
+      fs.writeFileSync(path.join(targetDir, "AGENTS.md"), agentsMdContent);
+    }
 
     console.log(
-      `[OK] Context Pack initialized at ${contextDir} using template '${options.template || options.profile}'`,
+      `[OK] Context Pack initialized at ${targetDir} using template '${options.template || options.profile || "career"}'`,
     );
   });
 
@@ -144,7 +168,7 @@ program
     console.log(`[INFO] Scanning directory ${targetDir}...`);
 
     try {
-      const { scanWorkspace, writeScanSuggestions } = await import("@akcp/core");
+      
       const result = scanWorkspace(targetDir);
 
       console.log(`\n=== Scan Results ===`);
@@ -205,20 +229,8 @@ program
       `[INFO] Compiling context pack from ${configInput} (target: ${options.target})`,
     );
     try {
-      const {
-        loadAkcpConfig,
-        buildKnowledgeIR,
-        IrJsonTarget,
-        OpenWikiDocsTarget,
-        AgentsMdTarget,
-        McpResourcesManifestTarget,
-        PolicyBundleTarget,
-        EvalDatasetTarget,
-        DashboardMetadataTarget,
-        ProvenanceManifestBuilder,
-        hashConfig,
-      } = await import("@akcp/core");
-      const { ConformanceRunner } = await import("@akcp/conformance");
+      
+      
 
       let targetDir = path.resolve(process.cwd(), configInput);
       let configPath = path.join(targetDir, "akcp.yaml");
@@ -254,7 +266,7 @@ program
       });
       const configHashStr = options.provenance ? hashConfig(config) : "none";
 
-      const crypto = await import("crypto");
+      
       const irSourceHashesStr = JSON.stringify(ir.sourceHashes || {});
       const compileRunHash = crypto.createHash("sha256").update(configHashStr + "_" + irSourceHashesStr).digest("hex");
 
@@ -408,7 +420,7 @@ program
   .argument("<manifest>", "Path to akcp-manifest.json")
   .action(async (manifestPath) => {
     try {
-      const { verifyManifest } = await import("@akcp/core");
+      
       console.log(`[INFO] Verifying manifest at ${manifestPath}...`);
 
       const report = await verifyManifest(manifestPath);
@@ -477,7 +489,7 @@ program
       `[INFO] Importing from ${source} (${options.input}) to ${options.output}...`,
     );
     try {
-      const { importSource } = await import("@akcp/core");
+      
 
       const report = await importSource(
         source.toLowerCase() as "openwiki" | "okf",
@@ -534,7 +546,7 @@ serveCmd
     try {
       const require = createRequire(import.meta.url);
       const serverPath = require.resolve("@akcp/mcp-profile-server");
-      const { spawn } = await import("child_process");
+      
 
       const child = spawn("node", [serverPath], {
         stdio: "inherit",
@@ -612,13 +624,13 @@ evalsCmd
   .action(async (options) => {
     console.log(`[INFO] Starting Evals Pipeline for bundle: ${options.bundle}`);
     try {
-      const { EvalsHarness } = await import("@akcp/evals");
-      const { runScenarios } = await import("@akcp/evals/dist/scenarios.js");
+      
+      
       const harness = new EvalsHarness();
       await runScenarios(harness);
       
-      const path = await import("path");
-      const fs = await import("fs");
+      
+      
       const reportDir = path.resolve(process.cwd(), "reports");
       if (!fs.existsSync(reportDir)) {
         fs.mkdirSync(reportDir, { recursive: true });
@@ -682,7 +694,7 @@ program
   .action(async () => {
     console.log(`[INFO] Synchronizing agent instructions...`);
     try {
-      const { syncAgentInstructions } = await import("@akcp/core");
+      
       const targetDir = process.cwd();
 
       const filesToSync = [
@@ -731,7 +743,7 @@ program
   .action(async (options) => {
     console.log(`[INFO] Validating config file: ${options.file}`);
     try {
-      const { loadAkcpConfig } = await import("@akcp/core");
+      
       const configPath = path.resolve(process.cwd(), options.file);
       loadAkcpConfig(configPath);
       console.log(`[OK] Configuration is valid.`);
@@ -753,8 +765,8 @@ policyCmd
   .argument("<file>", "Path to the .policy.yaml file")
   .action(async (file) => {
     try {
-      const { loadPolicy } = await import("@akcp/core");
-      const path = await import("path");
+      
+      
       const fullPath = path.resolve(process.cwd(), file);
       loadPolicy(fullPath);
       console.log(`[OK] Policy is structurally valid and well-formed.`);
@@ -771,8 +783,8 @@ policyCmd
   .argument("<file>", "Path to the .policy.yaml file")
   .action(async (file) => {
     try {
-      const { loadPolicy, explainPolicy } = await import("@akcp/core");
-      const path = await import("path");
+      
+      
       const fullPath = path.resolve(process.cwd(), file);
       const policy = loadPolicy(fullPath);
       console.log(explainPolicy(policy));
@@ -790,8 +802,7 @@ program
   .option("-f, --file <path>", "Path to akcp.yaml", "akcp.yaml")
   .action(async (options) => {
     try {
-      const { loadAkcpConfig, generateBuildPlan, printBuildPlan } =
-        await import("@akcp/core");
+      
       const configPath = path.resolve(process.cwd(), options.file);
       const config = loadAkcpConfig(configPath);
       const plan = generateBuildPlan(config);
@@ -815,7 +826,7 @@ program
       `[INFO] Reconciling state (${isDryRun ? "dry-run" : "active"}) using ${options.file}...`,
     );
     try {
-      const { loadAkcpConfig, reconcile } = await import("@akcp/core");
+      
       const configPath = path.resolve(process.cwd(), options.file);
       const config = loadAkcpConfig(configPath);
 
@@ -849,8 +860,7 @@ graphCmd
   .action(async (options) => {
     // Equivalent to akcp compile --target graph-json
     try {
-      const { loadAkcpConfig, buildKnowledgeIR, GraphJsonTarget } =
-        await import("@akcp/core");
+      
       const targetDir = path.resolve(process.cwd(), options.bundle);
 
       let config;
@@ -992,14 +1002,8 @@ contextCmd
   .option("-p, --profile <profile>", "Profile schema to load", "career")
   .action(async (options) => {
     try {
-      const {
-        OKFFileRepository,
-        ContextPlanner,
-        loadAkcpConfig,
-        FileSystemAdapter,
-        FrontmatterParser,
-      } = await import("@akcp/core");
-      const path = await import("path");
+      
+      
 
       const configPath = path.resolve(process.cwd(), "akcp.yaml");
       const config = loadAkcpConfig(configPath);
@@ -1085,9 +1089,8 @@ lifecycleCmd
   .description("Generate a lifecycle report (active, stale, deprecated)")
   .action(async () => {
     try {
-      const { OKFFileRepository, Freshness, loadAkcpConfig } =
-        await import("@akcp/core");
-      const path = await import("path");
+      
+      
 
       const configPath = path.resolve(process.cwd(), "akcp.yaml");
       const config = loadAkcpConfig(configPath);
@@ -1105,8 +1108,7 @@ lifecycleCmd
         process.exit(1);
       }
 
-      const { FileSystemAdapter, FrontmatterParser } =
-        await import("@akcp/core");
+      
       const repo = new OKFFileRepository(
         new FileSystemAdapter(),
         new FrontmatterParser(),
@@ -1178,8 +1180,8 @@ conformanceCmd
   .option("-f, --format <format>", "Output format (text or json)", "text")
   .action(async (options) => {
     try {
-      const { ConformanceRunner } = await import("@akcp/conformance");
-      const path = await import("path");
+      
+      
       const bundlePath = path.resolve(process.cwd(), options.bundle);
 
       const runner = new ConformanceRunner(bundlePath, options.profile);
@@ -1279,12 +1281,10 @@ program
   )
   .action(async (options) => {
     try {
-      const { loadAkcpConfig, buildKnowledgeIR, calculateScorecard } =
-        await import("@akcp/core");
-      const { formatScorecardMarkdown } =
-        await import("./formatters/markdown.js");
-      const fs = await import("fs");
-      const path = await import("path");
+      
+      
+      
+      
 
       const targetDir = path.resolve(process.cwd(), options.bundle);
 
@@ -1304,7 +1304,7 @@ program
       });
 
       // Collect raw files to pass to scorecard calculation
-      const { FileSystemAdapter } = await import("@akcp/core");
+      
       const fsAdapter = new FileSystemAdapter();
       const rawPaths = await fsAdapter.listFiles(targetDir, "");
       const rawFiles = await Promise.all(
@@ -1345,8 +1345,8 @@ pluginCmd
   .option("-d, --dir <directory>", "Directory containing plugins", "./plugins")
   .action(async (options) => {
     try {
-      const { PluginRegistry } = await import("@akcp/core");
-      const path = await import("path");
+      
+      
       const pluginsDir = path.resolve(process.cwd(), options.dir);
 
       console.log(`[INFO] Scanning for plugins in ${pluginsDir}...`);
@@ -1386,8 +1386,8 @@ pluginCmd
   .argument("<directory>", "Path to the plugin directory")
   .action(async (directory) => {
     try {
-      const { PluginLoader } = await import("@akcp/core");
-      const path = await import("path");
+      
+      
       const pluginDir = path.resolve(process.cwd(), directory);
 
       console.log(`[INFO] Validating plugin at ${pluginDir}...`);
@@ -1419,7 +1419,7 @@ privacyCmd
   .option("-m, --mode <mode>", "Redaction mode (redact, tokenize, detect-only)", "redact")
   .action(async (options) => {
     try {
-      const { PiiRedactor } = await import("@akcp/core");
+      
       const redactor = new PiiRedactor();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await redactor.redact(options.text, { mode: options.mode as any });

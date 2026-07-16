@@ -3,6 +3,7 @@
   "displayName": "AKCP Orchestrator",
   "description": "Agent Knowledge Compiler and Control Plane VSCode Extension",
   "version": "0.1.0",
+  "private": true,
   "publisher": "akcp",
   "engines": {
     "vscode": "^1.80.0"

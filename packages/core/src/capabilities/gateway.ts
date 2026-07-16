@@ -4,24 +4,22 @@ import { evaluatePolicy } from "../policy/evaluate.js";
 import type { IApprovalStore } from "./approval-store.js";
 import { authenticate, type AuthConfig } from "./auth.js";
 import { createPiiDetector } from "../privacy/create-detector.js";
-import type { PiiDetector } from "../privacy/pii-detector.js";
+import type { PiiDetector, PiiMatch } from "../privacy/pii-detector.js";
 import { TokenBucketRateLimiter, type RateLimiterConfig } from "./rate-limiter.js";
+import type { IAuditLogService } from "../infrastructure/audit-log.js";
+import crypto from "crypto";
 
 export class MCPGatewayError extends Error {
   constructor(
-    message: string,
-    // eslint-disable-next-line no-unused-vars
+    public readonly message: string,
     public readonly code: string,
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public readonly data?: any,
   ) {
     super(message);
     this.name = "MCPGatewayError";
   }
 }
-
-import type { IAuditLogService } from "../infrastructure/audit-log.js";
-import crypto from "crypto";
 
 export interface GatewayConfig {
   policies: Record<string, PolicyCard>; // Map of agentId -> PolicyCard
@@ -70,7 +68,9 @@ export class MCPGateway {
 
     // Authentication check
     if (this.config.auth) {
-      const authResult = authenticate(request.apiKey, this.config.auth);
+      const authResult = authenticate(request.apiKey, this.config.auth, {
+        sourceId: request.sourceId || request.agentId || "unknown",
+      });
 
       if (!authResult.authenticated) {
         if (this.config.auditLogService) {
@@ -273,11 +273,11 @@ export class MCPGateway {
 
       // Post-execution sanitization
       if (evalResult.requirements?.piiHandling === "redact") {
-        return this.sanitizeOutput(result);
+        return await this.sanitizeOutput(result);
       }
 
       if (evalResult.requirements?.piiHandling === "deny") {
-        if (this.containsPII(result)) {
+        if (await this.containsPII(result)) {
           throw new MCPGatewayError(
             `[LLM06: Sensitive Information] Policy Violation: PII detected in output for tool '${request.toolName}' while policy dictates 'deny'.`,
             "POLICY_VIOLATION",
@@ -286,11 +286,10 @@ export class MCPGateway {
       }
 
       return result;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof MCPGatewayError) throw err;
       throw new MCPGatewayError(
-        `Execution Failed: ${err.message}`,
+        `Execution Failed: ${err instanceof Error ? err.message : String(err)}`,
         "EXECUTION_ERROR",
       );
     }
@@ -307,19 +306,11 @@ export class MCPGateway {
     return this.config.piiDetector || createPiiDetector();
   }
 
-  private sanitizeOutput<T>(output: T): T {
+  private async sanitizeOutput<T>(output: T): Promise<T> {
     let str = JSON.stringify(output);
-    const matches = this.detector.detect(str);
+    const matches: PiiMatch[] = await this.detector.detect(str);
     
-    // We can assume detect returns an array or a promise since we typed it. 
-    // Wait, detect is returning an array of matches now. We need to await if it returns a promise just in case it's the HttpSecurityGateway, but MCPGateway might be synchronous? 
-    // Wait, sanitizeOutput is called inside execute which is async. But sanitizeOutput is not async. 
-    // The previous sanitizeOutput wasn't async. Let's make it sync since RegexPiiDetector is sync.
-    // However, if someone passes an async detector, this will fail. Let's just assume PiiMatch[] for now as the user's snippet did.
-    
-    // Actually the user's snippet explicitly provides sanitizeOutput as synchronous.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sorted = [...(matches as any[])].sort((a, b) => b.start - a.start);
+    const sorted = [...matches].sort((a, b) => b.start - a.start);
     for (const match of sorted) {
       str = str.slice(0, match.start) + `[REDACTED_${match.type.toUpperCase()}]` + str.slice(match.end);
     }
@@ -327,11 +318,9 @@ export class MCPGateway {
     return JSON.parse(str) as T;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private containsPII(output: any): boolean {
+  private async containsPII(output: unknown): Promise<boolean> {
     const str = JSON.stringify(output);
-    const matches = this.detector.detect(str);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (matches as any[]).some((m) => m.confidence === "high");
+    const matches: PiiMatch[] = await this.detector.detect(str);
+    return matches.some((m) => m.confidence === "high");
   }
 }

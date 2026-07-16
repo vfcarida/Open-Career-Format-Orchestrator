@@ -14,9 +14,12 @@ async function main() {
     // Start telemetry NodeSDK
     startTelemetry();
 
-    const contextPackEnv = process.env["AKCP_CONTEXT_PACK_PATH"];
+    const contextPackEnv = process.env["AKCP_IR_PATH"] || process.env["OCF_IR_PATH"];
+    if (process.env["OCF_IR_PATH"] && !process.env["AKCP_IR_PATH"]) {
+      console.warn("[DEPRECATED] OCF_IR_PATH is deprecated. Use AKCP_IR_PATH instead.");
+    }
     if (!contextPackEnv) {
-      throw new Error("[AKCP Profile Server] AKCP_CONTEXT_PACK_PATH environment variable is required.");
+      throw new Error("[AKCP Profile Server] AKCP_IR_PATH environment variable is required.");
     }
     
     const contextPackPath = path.resolve(contextPackEnv);

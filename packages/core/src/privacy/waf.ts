@@ -1,3 +1,19 @@
+/**
+ * WAF (Web Application Firewall) for prompt injection detection.
+ *
+ * Strategy:
+ * 1. If LAKERA_API_KEY is set, use Lakera AI API (production-grade ML detection)
+ * 2. Otherwise, fall back to local regex heuristics (development/offline mode)
+ *
+ * The regex fallback prioritizes low false-positive rate over catch-all detection.
+ * It targets KNOWN injection patterns with sufficient context to avoid flagging
+ * legitimate technical text. For production use, always configure Lakera.
+ *
+ * References:
+ * - OWASP LLM01: Prompt Injection
+ * - https://www.lakera.ai/
+ */
+
 export interface WAFResult {
   flagged: boolean;
   reason?: string;
@@ -56,21 +72,40 @@ export class LakeraGateway implements ISecurityGateway {
   }
 
   private regexFallback(prompt: string): WAFResult {
-    // Basic heuristics for SQLi / Prompt Injection / System prompt leaking
-    const injectionPatterns = [
-      /ignore all previous instructions/i,
-      /you are now a/i,
-      /system prompt/i,
-      /drop table/i,
-      /bypass/i
+    const injectionPatterns: Array<{ pattern: RegExp; description: string }> = [
+      // Direct instruction override attempts
+      { pattern: /ignore\s+(all\s+)?(previous|prior|above)\s+(instructions|rules|guidelines)/i, description: "instruction override" },
+      { pattern: /disregard\s+(all\s+)?(previous|prior)\s+(instructions|context)/i, description: "instruction disregard" },
+
+      // Role hijacking
+      { pattern: /you\s+are\s+now\s+(a|an|acting\s+as)\s+/i, description: "role hijacking" },
+      { pattern: /pretend\s+(you\s+are|to\s+be)\s+/i, description: "role pretend" },
+      { pattern: /act\s+as\s+(a|an|if)\s+/i, description: "role reassignment" },
+
+      // System prompt extraction
+      { pattern: /(?:reveal|show|display|print|output)\s+(?:your\s+)?system\s+prompt/i, description: "system prompt extraction" },
+      { pattern: /what\s+(?:are|is)\s+your\s+(?:system\s+)?(?:instructions|prompt|rules)/i, description: "instruction probing" },
+
+      // SQL injection (in context of tool params)
+      { pattern: /(?:;\s*)?drop\s+table\b/i, description: "SQL injection" },
+      { pattern: /(?:;\s*)?(?:union\s+select|insert\s+into|delete\s+from)\b/i, description: "SQL injection" },
+      { pattern: /'\s*(?:or|and)\s+['"]?\d+['"]?\s*=\s*['"]?\d+/i, description: "SQL injection" },
+
+      // Delimiter injection
+      { pattern: /\[SYSTEM\]/i, description: "delimiter injection" },
+      { pattern: /<<SYS>>/i, description: "delimiter injection" },
+      { pattern: /```system/i, description: "code block injection" },
+
+      // Encoding bypass attempts
+      { pattern: /base64\s*decode|eval\s*\(/i, description: "encoding bypass" },
     ];
 
-    for (const pattern of injectionPatterns) {
+    for (const { pattern, description } of injectionPatterns) {
       if (pattern.test(prompt)) {
         return {
           flagged: true,
-          reason: `Regex heuristics matched injection pattern: ${pattern}`,
-          provider: "regex-fallback"
+          reason: `Regex heuristics matched: ${description} (${pattern})`,
+          provider: "regex-fallback",
         };
       }
     }

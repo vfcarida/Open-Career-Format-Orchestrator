@@ -21,13 +21,13 @@ Commands:
 ### Examples
 
 ```bash
-akcp init --template career
-akcp validate --bundle examples/career
-akcp compile --config examples/career/akcp.yaml
+akcp init --template it-operations
+akcp validate --bundle examples/domains/it-operations --profile it-operations
+akcp compile --config examples/domains/it-operations/akcp.yaml
 akcp inspect --artifact dist/akcp/artifact-manifest.json
-akcp serve mcp --profile career
+akcp serve mcp --profile it-operations
 akcp serve control-plane
-akcp evals run --suite career
+akcp evals run --suite it-operations
 akcp conformance run
 akcp docs doctor
 ```

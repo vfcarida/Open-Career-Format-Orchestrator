@@ -44,11 +44,17 @@ async function startMCPClients() {
       "../../mcp-automation-server/dist/index.js",
     );
 
+    const env = {
+      ...process.env,
+      AKCP_IR_PATH: process.env.AKCP_IR_PATH || path.resolve(__dirname, "../../../dist/knowledge-ir.json"),
+      AKCP_BUNDLE_PATH: process.env.AKCP_BUNDLE_PATH || path.resolve(__dirname, "../../../.okf")
+    };
+
     console.log(`[BFF] Starting Profile Server: ${profileScript}`);
     const profileTransport = new StdioClientTransport({
       command: "node",
       args: [profileScript],
-      env: process.env,
+      env,
     });
 
     profileClient = new Client(
@@ -62,7 +68,7 @@ async function startMCPClients() {
     const automationTransport = new StdioClientTransport({
       command: "node",
       args: [automationScript],
-      env: process.env,
+      env,
     });
 
     automationClient = new Client(

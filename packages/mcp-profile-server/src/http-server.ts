@@ -10,14 +10,18 @@ import fs from "node:fs";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { startTelemetry, type AgentKnowledgeIR } from "@akcp/core";
 import { AKCPProfileServer } from "./server.js";
+import { jwtVerify, createRemoteJWKSet } from "jose";
 
 async function main() {
   try {
     startTelemetry();
 
-    const contextPackEnv = process.env["AKCP_CONTEXT_PACK_PATH"];
+    const contextPackEnv = process.env["AKCP_IR_PATH"] || process.env["OCF_IR_PATH"];
+    if (process.env["OCF_IR_PATH"] && !process.env["AKCP_IR_PATH"]) {
+      console.warn("[DEPRECATED] OCF_IR_PATH is deprecated. Use AKCP_IR_PATH instead.");
+    }
     if (!contextPackEnv) {
-      throw new Error("[AKCP Profile Server] AKCP_CONTEXT_PACK_PATH environment variable is required.");
+      throw new Error("[AKCP Profile Server] AKCP_IR_PATH environment variable is required.");
     }
     
     const contextPackPath = path.resolve(contextPackEnv);
@@ -31,32 +35,58 @@ async function main() {
     const app = express();
     app.use(cors());
 
-    // Basic Auth Middleware
-    const expectedToken = process.env["AKCP_AUTH_TOKEN"];
-    app.use((req, res, next) => {
-      if (!expectedToken) {
-        // If no token is configured, allow (or you could reject, but for MVP we allow if not set)
+    // JWT Auth Middleware
+    const jwtSecret = process.env["AKCP_JWT_SECRET"];
+    const jwksUri = process.env["AKCP_JWKS_URI"];
+    
+    app.use(async (req, res, next) => {
+      if (!jwtSecret && !jwksUri) {
+        // If no token verification is configured, allow anonymous access for MVP backwards-compatibility
+        (req as any).agentIdentity = "anonymous-agent";
         return next();
       }
+      
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Unauthorized: Missing or invalid Bearer token" });
+        res.status(401).json({ error: "Unauthorized: Missing or invalid Bearer token" });
+        return;
       }
+      
       const token = authHeader.split(" ")[1];
-      if (token !== expectedToken) {
-        return res.status(401).json({ error: "Unauthorized: Invalid token" });
+      if (!token) {
+        res.status(401).json({ error: "Unauthorized: Missing Bearer token" });
+        return;
       }
-      next();
+      
+      try {
+        let payload;
+        if (jwksUri) {
+          const JWKS = createRemoteJWKSet(new URL(jwksUri));
+          const result = await jwtVerify(token, JWKS);
+          payload = result.payload;
+        } else if (jwtSecret) {
+          const secret = new TextEncoder().encode(jwtSecret);
+          const result = await jwtVerify(token, secret);
+          payload = result.payload;
+        }
+        
+        // Use sub or email as identity
+        (req as any).agentIdentity = payload?.sub || payload?.email || "authenticated-agent";
+        next();
+      } catch (err: any) {
+        res.status(401).json({ error: `Unauthorized: Invalid token (${err.message})` });
+        return;
+      }
     });
 
     let transport: SSEServerTransport | null = null;
 
-    app.get("/mcp/sse", async (_req, res) => {
+    app.get("/mcp/sse", async (req, res) => {
       // eslint-disable-next-line no-console
       console.log("[AKCP Profile Server] New SSE connection established");
       transport = new SSEServerTransport("/mcp/messages", res);
       
-      const agentIdentity = expectedToken ? "authenticated-agent" : "anonymous-agent";
+      const agentIdentity = (req as any).agentIdentity || "anonymous-agent";
       
       const mcpProfileServer = new AKCPProfileServer(ir, { policies: ir.policies || {} }, agentIdentity);
       await mcpProfileServer.getServerInstance().connect(transport);
@@ -74,11 +104,11 @@ async function main() {
     app.listen(PORT, () => {
       // eslint-disable-next-line no-console
       console.log(`[AKCP Profile Server] HTTP/SSE Server listening on port ${PORT}`);
-      if (expectedToken) {
+      if (jwtSecret || jwksUri) {
         // eslint-disable-next-line no-console
-        console.log(`[AKCP Profile Server] Auth enabled. Requires Bearer token.`);
+        console.log(`[AKCP Profile Server] Enterprise Auth enabled (JWT Validation active).`);
       } else {
-        console.warn(`[AKCP Profile Server] WARNING: No AKCP_AUTH_TOKEN set. Running without authentication.`);
+        console.warn(`[AKCP Profile Server] WARNING: No AKCP_JWT_SECRET or AKCP_JWKS_URI set. Running without authentication.`);
       }
     });
 

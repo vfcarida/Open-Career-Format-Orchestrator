@@ -6,6 +6,7 @@ import type {
   KnowledgeSourceConnector,
   RawKnowledgeItem,
 } from "./types.js";
+import yaml from "yaml";
 
 /**
  * Experimental connector for ingesting OpenAPI specs as knowledge artifacts.
@@ -40,7 +41,6 @@ export class OpenApiConnector implements KnowledgeSourceConnector {
     let spec: any;
     try {
       if (sourceFile.endsWith(".yaml") || sourceFile.endsWith(".yml")) {
-        const yaml = await import("yaml");
         spec = yaml.parse(content);
       } else {
         spec = JSON.parse(content);

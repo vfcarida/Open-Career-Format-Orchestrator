@@ -85,17 +85,19 @@ pnpm akcp compile --config examples/domains/it-operations/akcp.yaml
 
 ## Current Maturity Status
 
-| Area                               | Status       | Evidence         | Limitation             | Next milestone          |
-| ---------------------------------- | ------------ | ---------------- | ---------------------- | ----------------------- |
-| AKCP CLI compile                   | Beta         | tests + examples | no npm release yet     | global CLI distribution |
-| AK-IR                              | Beta         | spec + fixtures  | requires manual tuning | automatic normalization |
-| MCP servers                        | Beta         | contract tests   | local-only             | secure remote hosting   |
-| Control Plane (Automation)         | Experimental | safety tests     | missing dashboard      | real e2e integrations   |
-| Dashboard UI                       | Experimental | package stubbed  | no react UI            | build MVP               |
-| Career flagship                    | Stable       | walkthrough      | limited tool scope     | expansion               |
-| IT Ops flagship                    | Beta         | architecture     | mocked infrastructure  | real cloud integrations |
-| Customer Support                   | Experimental | design doc       | experimental           | integration             |
-| Legacy CLI (`ocf` / `agent-ready`) | Deprecated   | CI check logic   | legacy usage           | removal in v1.0         |
+| Area | Status | Evidence | Next milestone |
+|------|--------|----------|----------------|
+| AKCP CLI | Beta | tests, examples, init command | npm publish |
+| AK-IR Compiler | Beta | spec, fixtures, pipeline stages | auto-normalization |
+| MCP Profile Server | Beta | contract tests, SSE transport | remote hosting |
+| MCP Automation Server | Alpha | safety tests, browser automation | real cloud integrations |
+| Control Plane (Gateway) | Beta | auth, rate limit, HITL, PII, WAF | distributed deployment |
+| Dashboard UI | Alpha | React app, e2e tests, Express server | feature completion |
+| IT Operations (flagship) | Beta | policies, evals, expected-output | real infrastructure |
+| Career (starter) | Stable | full walkthrough, golden outputs | |
+| Customer Support | Alpha | sources, 8 policies, capabilities, evals | full implementation |
+| VSCode Extension | Experimental | syntax highlighting | validation, autocomplete |
+| Legacy CLI | Deprecated | deprecation warnings | removal in v1.0 |
 
 For formal definitions, see the [Maturity and Status Guide](docs/status.md).
 

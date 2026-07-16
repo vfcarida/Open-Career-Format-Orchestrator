@@ -9,7 +9,7 @@ describe("Domain Adapters Integration", () => {
     const evalsDir = path.dirname(fileURLToPath(import.meta.url));
     const sampleFilePath = path.resolve(
       evalsDir,
-      "../../../examples/domains/software-project/sample-data/adr-001.okf.md",
+      "../../../examples/domains/career/sources/experience-acmecorp.md",
     );
 
     expect(fs.existsSync(sampleFilePath)).toBe(true);
@@ -21,15 +21,14 @@ describe("Domain Adapters Integration", () => {
       sampleFilePath,
       path.resolve(
         evalsDir,
-        "../../../examples/domains/software-project/sample-data",
+        "../../../examples/domains/career/sources",
       ),
     );
 
     expect(doc).toBeDefined();
-    expect(doc.frontmatter["type"]).toBe("ArchitectureDecisionRecord");
-    expect(doc.frontmatter["id"]).toBe("ADR-001");
-    expect(doc.frontmatter["status"]).toBe("accepted");
-    expect(doc.conceptId).toBe("adr-001.okf");
-    expect(doc.body).toContain("We will use the Open Knowledge Format (OKF)");
+    expect(doc.frontmatter["type"]).toBe("Experience");
+    expect(doc.frontmatter["organization"]).toBe("Acme Corp");
+    expect(doc.conceptId).toBe("experience-acmecorp");
+    expect(doc.body).toContain("Led a team");
   });
 });

@@ -11,9 +11,10 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "test": "echo 'no tests'",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
     "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('*.tsbuildinfo', {force:true})\"",
-    "evals": "node dist/index.js"
+    "evals": "vitest run --reporter=json --outputFile=../../reports/evals-report.json"
   },
   "dependencies": {
     "@akcp/core": "workspace:*",
@@ -22,7 +23,8 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
   },
   "license": "MIT",
   "repository": {
