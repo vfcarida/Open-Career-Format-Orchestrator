@@ -34,39 +34,51 @@ export class LakeraGateway implements ISecurityGateway {
 
   async checkPrompt(prompt: string): Promise<WAFResult> {
     if (!this.apiKey) {
-      console.warn("[WAF] LAKERA_API_KEY not set. Falling back to local Regex heuristic.");
+      console.warn(
+        "[WAF] LAKERA_API_KEY not set. Falling back to local Regex heuristic.",
+      );
       return this.regexFallback(prompt);
     }
 
     try {
-      const response = await fetch("https://api.lakera.ai/v1/prompt_injection", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
+      const response = await fetch(
+        "https://api.lakera.ai/v1/prompt_injection",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ input: prompt }),
         },
-        body: JSON.stringify({ input: prompt })
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Lakera API error: ${response.statusText}`);
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = (await response.json()) as any;
-      
+      const data = (await response.json()) as {
+        flagged?: boolean;
+        results?: Array<{ flagged?: boolean }>;
+      };
+
       // Lakera typically returns a "flagged" boolean or "results[0].flagged" depending on the version.
       // Assuming a generic schema where `flagged: true` indicates malicious intent.
-      const isFlagged = data.flagged || (data.results && data.results[0]?.flagged);
-      
+      const isFlagged =
+        data.flagged || (data.results && data.results[0]?.flagged);
+
       return {
         flagged: !!isFlagged,
-        reason: isFlagged ? "Lakera AI detected potential prompt injection" : undefined,
-        provider: "lakera"
+        reason: isFlagged
+          ? "Lakera AI detected potential prompt injection"
+          : undefined,
+        provider: "lakera",
       };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error(`[WAF] Lakera API call failed (${err.message}). Falling back to local Regex.`);
+      console.error(
+        `[WAF] Lakera API call failed (${err.message}). Falling back to local Regex.`,
+      );
       return this.regexFallback(prompt);
     }
   }
@@ -74,22 +86,50 @@ export class LakeraGateway implements ISecurityGateway {
   private regexFallback(prompt: string): WAFResult {
     const injectionPatterns: Array<{ pattern: RegExp; description: string }> = [
       // Direct instruction override attempts
-      { pattern: /ignore\s+(all\s+)?(previous|prior|above)\s+(instructions|rules|guidelines)/i, description: "instruction override" },
-      { pattern: /disregard\s+(all\s+)?(previous|prior)\s+(instructions|context)/i, description: "instruction disregard" },
+      {
+        pattern:
+          /ignore\s+(all\s+)?(previous|prior|above)\s+(instructions|rules|guidelines)/i,
+        description: "instruction override",
+      },
+      {
+        pattern:
+          /disregard\s+(all\s+)?(previous|prior)\s+(instructions|context)/i,
+        description: "instruction disregard",
+      },
 
       // Role hijacking
-      { pattern: /you\s+are\s+now\s+(a|an|acting\s+as)\s+/i, description: "role hijacking" },
-      { pattern: /pretend\s+(you\s+are|to\s+be)\s+/i, description: "role pretend" },
+      {
+        pattern: /you\s+are\s+now\s+(a|an|acting\s+as)\s+/i,
+        description: "role hijacking",
+      },
+      {
+        pattern: /pretend\s+(you\s+are|to\s+be)\s+/i,
+        description: "role pretend",
+      },
       { pattern: /act\s+as\s+(a|an|if)\s+/i, description: "role reassignment" },
 
       // System prompt extraction
-      { pattern: /(?:reveal|show|display|print|output)\s+(?:your\s+)?system\s+prompt/i, description: "system prompt extraction" },
-      { pattern: /what\s+(?:are|is)\s+your\s+(?:system\s+)?(?:instructions|prompt|rules)/i, description: "instruction probing" },
+      {
+        pattern:
+          /(?:reveal|show|display|print|output)\s+(?:your\s+)?system\s+prompt/i,
+        description: "system prompt extraction",
+      },
+      {
+        pattern:
+          /what\s+(?:are|is)\s+your\s+(?:system\s+)?(?:instructions|prompt|rules)/i,
+        description: "instruction probing",
+      },
 
       // SQL injection (in context of tool params)
       { pattern: /(?:;\s*)?drop\s+table\b/i, description: "SQL injection" },
-      { pattern: /(?:;\s*)?(?:union\s+select|insert\s+into|delete\s+from)\b/i, description: "SQL injection" },
-      { pattern: /'\s*(?:or|and)\s+['"]?\d+['"]?\s*=\s*['"]?\d+/i, description: "SQL injection" },
+      {
+        pattern: /(?:;\s*)?(?:union\s+select|insert\s+into|delete\s+from)\b/i,
+        description: "SQL injection",
+      },
+      {
+        pattern: /'\s*(?:or|and)\s+['"]?\d+['"]?\s*=\s*['"]?\d+/i,
+        description: "SQL injection",
+      },
 
       // Delimiter injection
       { pattern: /\[SYSTEM\]/i, description: "delimiter injection" },
@@ -112,7 +152,7 @@ export class LakeraGateway implements ISecurityGateway {
 
     return {
       flagged: false,
-      provider: "regex-fallback"
+      provider: "regex-fallback",
     };
   }
 }

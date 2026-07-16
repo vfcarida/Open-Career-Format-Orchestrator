@@ -42,8 +42,7 @@ async function main() {
     if (currentArg === "--bundle" && i + 1 < args.length) {
       bundlePathEnv = args[i + 1]!;
     } else if (currentArg === "--format" && i + 1 < args.length) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      format = args[i + 1] as any;
+      format = args[i + 1] as unknown as "json" | "markdown";
     } else if (currentArg === "--profile" && i + 1 < args.length) {
       profileName = args[i + 1]!;
     } else if (
@@ -68,7 +67,12 @@ async function main() {
   }
 
   const relativeFiles = await fsAdapter.listFiles(bundlePath);
-  const RESERVED_FILENAMES = new Set(["index.md", "log.md", "README.md", "WALKTHROUGH.md"]);
+  const RESERVED_FILENAMES = new Set([
+    "index.md",
+    "log.md",
+    "README.md",
+    "WALKTHROUGH.md",
+  ]);
 
   let validCount = 0;
   let invalidCount = 0;
@@ -101,7 +105,7 @@ async function main() {
           message: validation.error.message,
         });
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       // If a file has no OKF frontmatter (e.g., a policy redirect or scenario file),
       // treat it as a skipped warning rather than a validation failure.

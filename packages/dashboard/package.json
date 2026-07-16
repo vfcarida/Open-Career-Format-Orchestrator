@@ -11,7 +11,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "playwright test",
-    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('*.tsbuildinfo', {force:true})\""
+    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('tsconfig.tsbuildinfo', {force:true})\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",

@@ -5,15 +5,21 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./dist/scenarios.js": "./dist/scenarios.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./dist/scenarios.js": {
+      "types": "./dist/scenarios.d.ts",
+      "import": "./dist/scenarios.js"
+    }
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('*.tsbuildinfo', {force:true})\"",
+    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('tsconfig.tsbuildinfo', {force:true})\"",
     "evals": "vitest run --reporter=json --outputFile=../../reports/evals-report.json"
   },
   "dependencies": {

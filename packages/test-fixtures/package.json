@@ -8,7 +8,7 @@
     "build": "echo 'no build needed'",
     "typecheck": "tsc --noEmit",
     "test": "echo 'no tests'",
-    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('*.tsbuildinfo', {force:true})\""
+    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('tsconfig.tsbuildinfo', {force:true})\""
   },
   "dependencies": {
     "express": "^4.21.2"

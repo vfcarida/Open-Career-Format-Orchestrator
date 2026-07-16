@@ -28,11 +28,15 @@ export class OpenWikiDocsTarget implements CompileTarget {
       const filePath = path.join(outDir, fileName);
 
       // Restore frontmatter to ensure OpenWiki interoperability
-      const frontmatter = concept.frontmatter || { type: concept.type || "Document" };
+      const frontmatter = concept.frontmatter || {
+        type: concept.type || "Document",
+      };
       const bodyWithHeading = `# ${concept.conceptId}\n\n${concept.body}`;
-      
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const content = parser.serialize(frontmatter as any, bodyWithHeading);
+
+      const content = parser.serialize(
+        frontmatter as import("../domain/types.js").OKFFrontmatter,
+        bodyWithHeading,
+      );
 
       await fs.writeFile(filePath, content, "utf-8");
 
@@ -53,7 +57,7 @@ export class OpenWikiDocsTarget implements CompileTarget {
       targetType: this.targetType,
       bundleId: ir.bundleId,
       sourceHashes: ir.sourceHashes || {},
-      compilerVersion: "AKCP-v1"
+      compilerVersion: "AKCP-v1",
     };
 
     const metadataPath = path.join(outDir, ".akcp-openwiki-metadata.json");

@@ -28,8 +28,9 @@ export function startTelemetry(): void {
 
   sdk = new NodeSDK({
     traceExporter,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metricReader: metricReader as any, // NodeSDK API cast
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    metricReader: metricReader,
     instrumentations: [getNodeAutoInstrumentations()],
   });
 
@@ -167,7 +168,7 @@ export async function withToolTracing<T>(
       span.setAttribute("tool.duration_ms", durationMs);
       span.setStatus({ code: api.SpanStatusCode.OK });
       return { data, durationMs };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const end = performance.now();
       const durationMs = end - start;

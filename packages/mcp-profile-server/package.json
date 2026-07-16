@@ -5,6 +5,16 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./dist/capabilities.js": {
+      "types": "./dist/capabilities.d.ts",
+      "import": "./dist/capabilities.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
@@ -14,7 +24,7 @@
     "dev": "tsx src/index.ts",
     "dev:http": "tsx src/http-server.ts",
     "dev:sse": "tsx src/index-sse.ts",
-    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('*.tsbuildinfo', {force:true})\""
+    "clean": "node -e \"fs.rmSync('dist', {recursive:true,force:true}); fs.rmSync('tsconfig.tsbuildinfo', {force:true})\""
   },
   "dependencies": {
     "@akcp/core": "workspace:*",

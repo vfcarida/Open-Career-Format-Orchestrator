@@ -45,7 +45,7 @@ export class OpenApiConnector implements KnowledgeSourceConnector {
       } else {
         spec = JSON.parse(content);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       throw new Error(`Failed to parse OpenAPI file: ${e.message}`);
     }
@@ -58,7 +58,9 @@ export class OpenApiConnector implements KnowledgeSourceConnector {
     for (const [apiPath, pathItem] of Object.entries(spec.paths)) {
       if (typeof pathItem !== "object" || !pathItem) continue;
 
-      for (const [method, operation] of Object.entries(pathItem)) {
+      for (const [method, operation] of Object.entries(
+        pathItem as Record<string, unknown>,
+      )) {
         if (typeof operation !== "object" || !operation) continue;
 
         // Skip non-http methods
@@ -76,8 +78,11 @@ export class OpenApiConnector implements KnowledgeSourceConnector {
           continue;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const op = operation as any;
+        const op = operation as {
+          operationId?: string;
+          summary?: string;
+          description?: string;
+        };
         const conceptId =
           op.operationId ||
           `${method}-${apiPath}`
@@ -88,7 +93,7 @@ export class OpenApiConnector implements KnowledgeSourceConnector {
         const rawContent = `
 # ${op.summary || conceptId}
 
-Method: ${method.toUpperCase()}
+${op.description || "No description provided."}
 Path: ${apiPath}
 
 ${op.description || ""}

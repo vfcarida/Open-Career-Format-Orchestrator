@@ -8,7 +8,10 @@ ERRORS=0
 
 # 1. Clean build
 echo "[1/8] Clean build..."
-rm -rf packages/*/dist
+if ! pnpm run clean; then
+  echo "FAIL: Clean failed"
+  ERRORS=$((ERRORS + 1))
+fi
 if ! pnpm build; then
   echo "FAIL: Build failed"
   ERRORS=$((ERRORS + 1))
