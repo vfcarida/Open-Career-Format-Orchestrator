@@ -20,7 +20,7 @@ The project is organized into the following workstreams. Pick the one that match
 
 ## Before You Start
 
-1. **Read the spec**: All contributions touching the compiler or control plane should be grounded in the `spec/` documents.
+1. **Read the spec**: All contributions touching the compiler or control plane should be grounded in the `docs/specs/` documents.
 2. **Run pre-checks**: Ensure the repository is healthy before making changes.
    ```bash
    pnpm install --frozen-lockfile
@@ -46,7 +46,7 @@ The project is organized into the following workstreams. Pick the one that match
 
 - **Small, iterative PRs.** A single PR should do one thing. Large monolithic PRs will be rejected.
 - **Tests are mandatory.** All changes to `packages/core` or `packages/cli` require corresponding unit tests. Coverage must not decrease.
-- **Spec changes require an RFC.** Any normative change to `spec/` requires a formal RFC. See [docs/rfcs/README.md](docs/governance/rfc-process.md).
+- **Spec changes require an RFC.** Any normative change to `docs/specs/` requires a formal RFC. See [docs/rfcs/README.md](docs/governance/rfc-process.md).
 - **Conventional Commits.** PR titles and commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/). Examples: `feat: add eval-dataset target`, `fix: correct policy deny logic`, `docs: improve IR spec examples`.
 - **Do not credit AI in commits.** Commit messages must read as standard developer-authored notes.
 
@@ -81,7 +81,7 @@ Look for issues labelled `good first issue`. The easiest entry points are:
 
 - **Add a new domain example** (`examples/` workstream) — see the [examples/domains/](examples/) directory and the [Career domain](examples/domains/career) as a reference.
 - **Add an eval scenario** (`evals` workstream) — add a JSONL fixture in `packages/evals/fixtures/`.
-- **Improve a spec example** (`docs` workstream) — add a concrete JSON example to any spec doc in `spec/`.
+- **Improve a spec example** (`docs` workstream) — add a concrete JSON example to any spec doc in `docs/specs/`.
 
 ---
 

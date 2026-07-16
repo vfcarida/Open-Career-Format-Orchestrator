@@ -45,7 +45,6 @@ Welcome to the **Agent Knowledge Compiler and Control Plane (AKCP)** documentati
 | Page                              | Description                                    |
 | --------------------------------- | ---------------------------------------------- |
 | [CLI Reference](reference/cli.md) | All `akcp` commands, flags, and usage examples |
-| [CLI Usage Guide](cli/usage.md)   | Detailed walkthrough of common CLI workflows   |
 
 ---
 

@@ -10,7 +10,7 @@ The AKCP repository is transitioning from a single-implementation TypeScript pro
 
 ## Decision
 
-We will separate the spec (`spec/`) from the implementation (`packages/`) and govern them with different processes:
+We will separate the spec (`docs/specs/`) from the implementation (`packages/`) and govern them with different processes:
 
 1. **Spec changes require an RFC** with a minimum 7-day review period.
 2. **Implementation changes** follow standard pull request review (2 approvers minimum).
@@ -27,9 +27,9 @@ This decision is motivated by the following observations:
 
 ## Consequences
 
-- A `spec/README.md` index is maintained, tracking the status and version of each spec document.
+- A `docs/specs/README.md` index is maintained, tracking the status and version of each spec document.
 - The conformance test suite (`packages/conformance`) MUST reference spec section identifiers (e.g., `IR-1`, `BUILD-1`) in test descriptions.
-- Any PR touching `spec/` MUST reference the corresponding RFC (once the project has active external implementors; the RFC requirement is waived for the initial population of the spec while in DRAFT status).
+- Any PR touching `docs/specs/` MUST reference the corresponding RFC (once the project has active external implementors; the RFC requirement is waived for the initial population of the spec while in DRAFT status).
 
 ## Alternatives Considered
 

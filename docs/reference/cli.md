@@ -38,5 +38,5 @@ This document maps the currently implemented commands in `packages/cli/src/index
 ## Action Items for Coherence
 
 - Rename references of `build` to `compile` in documentation to match code.
-- Add missing commands to a new `docs/cli/usage.md` file.
+
 - Ensure the `README.md` reflects this exact status.

@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         A **Policy Pack** is an AKCP plugin (`policy-pack` type) that distributes a reusable, standardized `.policy.yaml` for a specific governance domain (e.g., GDPR compliance, HIPAA, internal security baselines).
-        See [spec/policy-cards.md](../../spec/policy-cards.md) for the Policy Card schema.
+        See [docs/specs/policy-cards.md](docs/specs/policy-cards.md) for the Policy Card schema.
 
   - type: input
     id: policy-name
