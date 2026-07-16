@@ -2,7 +2,8 @@ packages:
   - "packages/*"
 
 allowBuilds:
-  - better-sqlite3
+  '0': better-sqlite3
+  esbuild: set this to true or false
 
 catalog:
   "@modelcontextprotocol/sdk": ^1.29.0

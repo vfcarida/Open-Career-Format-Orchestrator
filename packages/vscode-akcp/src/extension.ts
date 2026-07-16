@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { parseExtensionConfig, buildValidateCommand } from './utils/config.js';
 
 export function activate(context: vscode.ExtensionContext) {
   // eslint-disable-next-line no-console
@@ -11,9 +12,13 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
+    const rawConfig = vscode.workspace.getConfiguration('akcp');
+    const config = parseExtensionConfig(rawConfig);
+    const command = buildValidateCommand(config);
+
     const terminal = vscode.window.createTerminal('AKCP Validation');
     terminal.show();
-    terminal.sendText('npx akcp validate');
+    terminal.sendText(command);
   });
 
   context.subscriptions.push(disposable);
