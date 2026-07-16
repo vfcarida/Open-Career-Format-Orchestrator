@@ -32,38 +32,32 @@ pnpm release:check
 
 ---
 
-## Tagging the Release
+## Publishing a Release
+
+1. Ensure all tests pass: `pnpm release:check`
+2. Update version: `pnpm -r exec -- npm version <major|minor|patch>`
+3. Update CHANGELOG.md
+4. Commit: `git commit -am "chore: release vX.Y.Z"`
+5. Tag: `git tag vX.Y.Z`
+6. Push: `git push && git push --tags`
+
+The release workflow will automatically:
+- Build and test
+- Publish to npm with provenance attestation
+- Create a GitHub Release with auto-generated notes
+
+## Verifying Provenance
+
+Users can verify package provenance:
 
 ```bash
-# Ensure you are on main and up-to-date
-git checkout main
-git pull origin main
-
-# Create an annotated, signed tag (GPG or SSH signing recommended)
-git tag -a v0.2.0 -m "Release v0.2.0"
-git push origin v0.2.0
+npm audit signatures @akcp/core
 ```
 
-> [!IMPORTANT]
-> Pushing the `v*` tag triggers the release workflow automatically. Do **not** manually create the GitHub Release — let the workflow do it.
-
----
-
-## Release Workflow Execution
-
-The `.github/workflows/release.yml` workflow performs:
-
-1. ✅ Install dependencies (`--frozen-lockfile --ignore-scripts`)
-2. ✅ Build all packages (`pnpm run build`)
-3. ✅ Generate SBOM (`anchore/sbom-action` → `sbom.spdx.json`)
-4. ✅ Attest build artifacts (`actions/attest-build-provenance`)
-5. ✅ Attest SBOM (`actions/attest-build-provenance`)
-6. ✅ Publish to npm with `--provenance`
-7. ✅ Create GitHub Release with auto-generated notes and `sbom.spdx.json` attached
-
-Monitor the [Actions tab](https://github.com/vfcarida/Agent-Knowledge-Compiler-and-Control-Plane/actions) for workflow status.
-
----
+### Security Model
+- Publishing uses OIDC trusted publishing (no long-lived tokens when configured)
+- All packages include SLSA provenance attestations
+- GitHub Release is created with SHA-locked assets
 
 ## Post-Release Verification
 
