@@ -24,7 +24,17 @@ export const CustomerSupportPolicySchema = z.object({
   schemaVersion: z.string(),
   title: z.string(),
   policyId: z.string(),
-  category: z.enum(["refunds", "returns", "cancellation", "billing", "account", "privacy", "warranty", "shipping", "escalation"]),
+  category: z.enum([
+    "refunds",
+    "returns",
+    "cancellation",
+    "billing",
+    "account",
+    "privacy",
+    "warranty",
+    "shipping",
+    "escalation",
+  ]),
   appliesTo: z.array(z.string()).optional(),
   allowedActions: z.array(z.string()).optional(),
   forbiddenActions: z.array(z.string()).optional(),
@@ -48,7 +58,9 @@ export const CustomerSupportMacroSchema = z.object({
   requiresPersonalization: z.boolean().optional(),
   requiresCitation: z.boolean().optional(),
   forbiddenWhen: z.array(z.string()).optional(),
-  piiHandling: z.enum(["redact", "summarize", "allow-minimal", "deny"]).optional(),
+  piiHandling: z
+    .enum(["redact", "summarize", "allow-minimal", "deny"])
+    .optional(),
 });
 
 export const CustomerSupportTicketSchema = z.object({
@@ -57,7 +69,7 @@ export const CustomerSupportTicketSchema = z.object({
   ticketId: z.string(),
   channel: z.enum(["email", "chat", "voice", "social"]),
   status: z.enum(["open", "pending", "solved", "escalated", "closed"]),
-  priority: z.enum(["low", "normal", "high", "urgent"]),
+  priority: z.enum(["low", "medium", "high", "critical"]),
   customerRef: z.string(),
   productIds: z.array(z.string()).optional(),
   orderRefs: z.array(z.string()).optional(),
@@ -68,7 +80,9 @@ export const CustomerSupportTicketSchema = z.object({
   resolvedAt: z.string().optional(),
   containsPii: z.boolean().optional(),
   piiClasses: z.array(z.string()).optional(),
-  redactionStatus: z.enum(["not_scanned", "clean", "redacted", "blocked"]).optional(),
+  redactionStatus: z
+    .enum(["not_scanned", "clean", "redacted", "blocked"])
+    .optional(),
   resolutionSummary: z.string().optional(),
   rootCause: z.string().optional(),
 });
@@ -77,7 +91,9 @@ export const CustomerProfileSchema = z.object({
   type: z.literal("CustomerProfile"),
   schemaVersion: z.string(),
   customerId: z.string(),
-  customerSegment: z.enum(["trial", "standard", "premium", "enterprise"]).optional(),
+  customerSegment: z
+    .enum(["trial", "standard", "premium", "enterprise"])
+    .optional(),
   locale: z.string().optional(),
   region: z.string().optional(),
   accountAgeDays: z.number().optional(),
@@ -92,11 +108,21 @@ export const OrderRecordSchema = z.object({
   schemaVersion: z.string(),
   orderId: z.string(),
   customerRef: z.string(),
-  status: z.enum(["created", "paid", "shipped", "delivered", "returned", "cancelled", "refunded"]),
+  status: z.enum([
+    "created",
+    "paid",
+    "shipped",
+    "delivered",
+    "returned",
+    "cancelled",
+    "refunded",
+  ]),
   items: z.array(z.string()).optional(),
   totalAmount: z.number().optional(),
   currency: z.string().optional(),
-  shippingStatus: z.enum(["pending", "in_transit", "delivered", "delayed", "lost"]).optional(),
+  shippingStatus: z
+    .enum(["pending", "in_transit", "delivered", "delayed", "lost"])
+    .optional(),
   eligibleActions: z.array(z.string()).optional(),
   policyRefs: z.array(z.string()).optional(),
 });
@@ -145,7 +171,17 @@ export const EscalationRuleSchema = z.object({
   title: z.string(),
   trigger: z.string().optional(),
   riskLevel: z.enum(["medium", "high", "critical"]).optional(),
-  routeTo: z.enum(["billing", "technical", "fraud", "privacy", "legal", "human_agent", "manager"]).optional(),
+  routeTo: z
+    .enum([
+      "billing",
+      "technical",
+      "fraud",
+      "privacy",
+      "legal",
+      "human_agent",
+      "manager",
+    ])
+    .optional(),
   requiresHumanApproval: z.boolean().optional(),
 });
 
@@ -157,7 +193,15 @@ export const SupportEvalScenarioSchema = z.object({
   inputConversationRef: z.string(),
   expectedIntentIds: z.array(z.string()).optional(),
   expectedPolicyRefs: z.array(z.string()).optional(),
-  expectedAction: z.enum(["answer", "ask_clarifying_question", "escalate", "preview_action", "deny"]).optional(),
+  expectedAction: z
+    .enum([
+      "answer",
+      "ask_clarifying_question",
+      "escalate",
+      "preview_action",
+      "deny",
+    ])
+    .optional(),
   mustRedactPii: z.boolean().optional(),
   mustCiteSources: z.boolean().optional(),
   forbiddenBehaviors: z.array(z.string()).optional(),
@@ -177,4 +221,6 @@ export const CustomerSupportDomainSchema = z.union([
   SupportEvalScenarioSchema,
 ]);
 
-export type CustomerSupportDomainData = z.infer<typeof CustomerSupportDomainSchema>;
+export type CustomerSupportDomainData = z.infer<
+  typeof CustomerSupportDomainSchema
+>;
