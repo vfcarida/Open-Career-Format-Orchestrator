@@ -20,7 +20,7 @@ compile:
     - type: openapi
       path: ./api-spec.json
   target:
-    out: ./dist/knowledge-ir.json
+    out: ./dist/agent-knowledge-ir.json
 ```
 
 ## Como funciona a Ingestão

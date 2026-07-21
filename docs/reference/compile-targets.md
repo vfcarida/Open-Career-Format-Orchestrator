@@ -13,7 +13,7 @@ compile:
       path: ./sample-data/.okf
   targets:
     - type: ir-json
-      out: dist/knowledge-ir.json
+      out: dist/agent-knowledge-ir.json
     - type: openwiki-docs
       out: dist/openwiki
     - type: agents-md

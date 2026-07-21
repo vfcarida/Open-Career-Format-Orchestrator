@@ -23,7 +23,7 @@ examples/domains/it-operations/policies/execute_remediation.policy.yaml
 pnpm akcp compile --config examples/domains/it-operations/akcp.yaml
 
 # Output:
-# → dist/knowledge-ir.json        (normalized runbook IR)
+# → dist/agent-knowledge-ir.json        (normalized runbook IR)
 # → dist/mcp-resources.json       (MCP tools: diagnose, remediate, escalate)
 # → dist/policy-bundle.json       (HITL requirements, side-effect rules)
 # → dist/eval-dataset.json        (incident response scenarios)

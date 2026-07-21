@@ -24,14 +24,14 @@ compile:
         - "**/drafts/**"
   target:
     format: "ir/json"
-    out: "./dist/knowledge-ir.json"
+    out: "./dist/agent-knowledge-ir.json"
   budgets:
     maxTokens: 500000
     maxDocuments: 1000
 ```
 
 - **`sources`**: Array of source paths containing the OKF Markdown documents. Supports `exclude` patterns.
-- **`target`**: Where to output the compiled knowledge-ir.json.
+- **`target`**: Where to output the compiled agent-knowledge-ir.json.
 - **`budgets`**: Prevents runaway context sizes. If the compilation exceeds `maxTokens` or `maxDocuments`, the build will fail.
 
 ### 2. `controlPlane`
@@ -49,7 +49,7 @@ controlPlane:
   mcp:
     profileServer:
       enabled: true
-      exportIR: "./dist/knowledge-ir.json"
+      exportIR: "./dist/agent-knowledge-ir.json"
     automationServer:
       enabled: false
   evalGates:

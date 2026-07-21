@@ -46,7 +46,7 @@ async function startMCPClients() {
 
     const env = {
       ...process.env,
-      AKCP_IR_PATH: process.env.AKCP_IR_PATH || path.resolve(__dirname, "../../../dist/knowledge-ir.json"),
+      AKCP_IR_PATH: process.env.AKCP_IR_PATH || path.resolve(__dirname, "../../../dist/agent-knowledge-ir.json"),
       AKCP_BUNDLE_PATH: process.env.AKCP_BUNDLE_PATH || path.resolve(__dirname, "../../../.okf")
     };
 

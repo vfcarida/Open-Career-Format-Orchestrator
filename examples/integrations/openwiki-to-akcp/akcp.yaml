@@ -5,7 +5,7 @@ compile:
 
   targets:
     - type: ir-json
-      out: dist/knowledge-ir.json
+      out: dist/agent-knowledge-ir.json
     - type: mcp-resources-manifest
       out: dist/mcp-resources.json
     - type: okf-bundle

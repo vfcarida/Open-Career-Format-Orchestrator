@@ -14,7 +14,7 @@ compile:
   # Compilation target for the intermediate representation (IR)
   target:
     format: "ir/json"
-    out: "./dist/knowledge-ir.json"
+    out: "./dist/agent-knowledge-ir.json"
 
   # Optional limits on the compiled bundle
   budgets:
@@ -35,7 +35,7 @@ controlPlane:
   mcp:
     profileServer:
       enabled: true
-      exportIR: "./dist/knowledge-ir.json"
+      exportIR: "./dist/agent-knowledge-ir.json"
     automationServer:
       enabled: false # Default disabled for safety
 

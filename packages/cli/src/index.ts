@@ -535,7 +535,7 @@ serveCmd
   .option(
     "--ir <path>",
     "Path to compiled Knowledge IR json",
-    "dist/knowledge-ir.json",
+    "dist/agent-knowledge-ir.json",
   )
   .action(async (options) => {
     const targetDir = process.cwd(); // Assume we are in the bundle directory

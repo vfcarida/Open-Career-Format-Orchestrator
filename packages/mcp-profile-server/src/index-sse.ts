@@ -11,7 +11,7 @@ import { jwtVerify, createRemoteJWKSet } from "jose";
 
 
 // Read the previously compiled AgentKnowledgeIR
-const irPath = path.resolve(process.cwd(), "dist/knowledge-ir.json");
+const irPath = path.resolve(process.cwd(), "dist/agent-knowledge-ir.json");
 if (!fs.existsSync(irPath)) {
   console.error(`[AKCP Profile Server - SSE] Missing compiled IR at ${irPath}.`);
   console.error(`Run 'akcp compile' first to generate the knowledge graph.`);

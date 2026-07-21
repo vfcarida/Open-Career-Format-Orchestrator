@@ -13,7 +13,7 @@ export class NormalizeStage implements PipelineStage {
 
     let previousIr: AgentKnowledgeIR | null = null;
     try {
-      const prevIrPath = path.resolve(process.cwd(), "dist/knowledge-ir.json");
+      const prevIrPath = path.resolve(process.cwd(), "dist/agent-knowledge-ir.json");
       if (fs.existsSync(prevIrPath)) {
         previousIr = JSON.parse(fs.readFileSync(prevIrPath, "utf-8"));
       }

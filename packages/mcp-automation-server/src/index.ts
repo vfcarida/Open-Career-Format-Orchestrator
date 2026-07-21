@@ -38,7 +38,7 @@ async function main() {
         "[WARNING] AKCP_IR_PATH is deprecated. Please use AKCP_IR_PATH.",
       );
     }
-    const irPath = path.resolve(irPathEnv || "./dist/knowledge-ir.json");
+    const irPath = path.resolve(irPathEnv || "./dist/agent-knowledge-ir.json");
 
     console.error(
       `[AKCP Automation Server] Initializing bundle at: ${bundleRoot}`,
