@@ -23,22 +23,12 @@ async function main() {
     // Start telemetry NodeSDK
     startTelemetry();
 
-    const bundleRootEnv =
-      process.env["AKCP_BUNDLE_PATH"] || process.env["AKCP_BUNDLE_PATH"];
-    if (process.env["AKCP_BUNDLE_PATH"] && !process.env["AKCP_BUNDLE_PATH"]) {
-      console.warn(
-        "[WARNING] AKCP_BUNDLE_PATH is deprecated. Please use AKCP_BUNDLE_PATH.",
-      );
-    }
-    const bundleRoot = path.resolve(bundleRootEnv || "./.okf");
-
-    const irPathEnv = process.env["AKCP_IR_PATH"] || process.env["AKCP_IR_PATH"];
-    if (process.env["AKCP_IR_PATH"] && !process.env["AKCP_IR_PATH"]) {
-      console.warn(
-        "[WARNING] AKCP_IR_PATH is deprecated. Please use AKCP_IR_PATH.",
-      );
-    }
-    const irPath = path.resolve(irPathEnv || "./dist/agent-knowledge-ir.json");
+    const bundleRoot = path.resolve(
+      process.env["AKCP_BUNDLE_PATH"] || "./.okf",
+    );
+    const irPath = path.resolve(
+      process.env["AKCP_IR_PATH"] || "./dist/agent-knowledge-ir.json",
+    );
 
     console.error(
       `[AKCP Automation Server] Initializing bundle at: ${bundleRoot}`,
@@ -59,7 +49,7 @@ async function main() {
         const irContent = fs.readFileSync(irPath, "utf-8");
         const ir = JSON.parse(irContent);
         repo = new OKFCachedRepository(repo, ir);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error(
           `[AKCP Automation Server] Failed to load IR, falling back to disk-only: ${err.message}`,
