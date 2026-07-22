@@ -12,7 +12,8 @@ vi.mock("@modelcontextprotocol/sdk/server/mcp.js", () => {
 });
 
 describe("AKCPProfileServer", () => {
-  let warnSpy: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let warnSpy: any;
 
   beforeEach(() => {
     vi.clearAllMocks();

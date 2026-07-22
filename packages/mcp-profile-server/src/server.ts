@@ -106,7 +106,8 @@ export class AKCPProfileServer {
     // Filter out only tools
 
     const tools = capabilities.filter(
-      (cap: unknown) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (cap: any) =>
         cap.kind === "tool" ||
         cap.kind === "mcp-tool" ||
         cap.type === "tool" ||
@@ -189,7 +190,8 @@ export class AKCPProfileServer {
 
     for (const cap of tools) {
       if (cap.name) {
-        const rawCap = cap as unknown;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawCap = cap as any;
         const schema =
           cap.inputsSchema || rawCap.inputSchema || rawCap.parameters || {};
 
@@ -197,9 +199,8 @@ export class AKCPProfileServer {
         const zodShape: Record<string, z.ZodTypeAny> = {};
 
         if (schema.properties) {
-          for (const [key, prop] of Object.entries<unknown>(
-            schema.properties,
-          )) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          for (const [key, prop] of Object.entries<any>(schema.properties)) {
             let zType: z.ZodTypeAny = z.any();
             if (prop.type === "string") zType = z.string();
             else if (prop.type === "number") zType = z.number();
@@ -325,7 +326,8 @@ export class AKCPProfileServer {
                   },
                 ],
               };
-            } catch (err: unknown) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (err: any) {
               mcpToolFailuresCounter.add(1);
               return {
                 isError: true,

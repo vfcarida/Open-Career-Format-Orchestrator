@@ -1,6 +1,7 @@
 import type { CapabilityRequest } from "./request.js";
 import type { PolicyCard } from "../policy/types.js";
-import { evaluatePolicy } from "../policy/evaluate.js";
+import { evaluatePolicies } from "../policies/engine.js";
+import { adaptPolicyCardToRules } from "../policies/adapter.js";
 import type { IApprovalStore } from "./approval-store.js";
 import { authenticate, type AuthConfig } from "./auth.js";
 import { createPiiDetector } from "../privacy/create-detector.js";
@@ -80,6 +81,8 @@ export class MCPGateway {
       );
     }
 
+    let activeScopes: string[] = [];
+
     // Authentication check
     if (this.config.auth) {
       const authResult = authenticate(request.apiKey, this.config.auth, {
@@ -109,6 +112,7 @@ export class MCPGateway {
 
       // Check scope restriction
       if (authResult.scopes && authResult.scopes.length > 0) {
+        activeScopes = authResult.scopes;
         const hasScope = authResult.scopes.some(
           (s) =>
             s === "*" ||
@@ -149,13 +153,22 @@ export class MCPGateway {
       );
     }
 
-    // Evaluate Policy
-    const evalResult = evaluatePolicy(policy, {
-      toolName: request.toolName,
+    // Extract token
+    const payloadObj = (request.payload as Record<string, unknown>) || {};
+    const token = payloadObj._approvalToken as string | undefined;
+
+    // Evaluate Policies
+    const rules = adaptPolicyCardToRules(policy);
+    const evalResult = evaluatePolicies(rules, {
+      tool: request.toolName,
+      agentId: request.agentId || "anonymous",
+      riskLevel: "medium", // Default to medium risk if not specified
+      scopes: activeScopes,
+      approvalToken: token,
       sideEffect: request.sideEffect,
     });
 
-    if (!evalResult.allowed) {
+    if (evalResult.effect === "deny") {
       if (this.config.auditLogService) {
         await this.config.auditLogService.logEvent({
           action: "policy.evaluate",
@@ -193,7 +206,10 @@ export class MCPGateway {
     }
 
     // Evaluate HITL requirement
-    if (evalResult.requirements?.approvalRequired) {
+    const requiresApproval = evalResult.obligations.some(
+      (o) => o.type === "require_approval",
+    );
+    if (requiresApproval) {
       if (!this.config.approvalStore) {
         throw new MCPGatewayError(
           `[LLM06: Excessive Agency] Policy Violation: Tool requires approval, but no ApprovalStore is configured.`,
@@ -201,8 +217,7 @@ export class MCPGateway {
         );
       }
 
-      const payloadObj = (request.payload as Record<string, unknown>) || {};
-      const token = payloadObj._approvalToken as string | undefined;
+      // Token already extracted above
 
       // Clean up token from payload so it doesn't affect hash verification
       const cleanPayload = { ...payloadObj };
@@ -295,11 +310,16 @@ export class MCPGateway {
       const result = await executor();
 
       // Post-execution sanitization
-      if (evalResult.requirements?.piiHandling === "redact") {
+      const redactPii = evalResult.obligations.some(
+        (o) => o.type === "pii_redact",
+      );
+      const denyPii = evalResult.obligations.some((o) => o.type === "pii_deny");
+
+      if (redactPii) {
         return await this.sanitizeOutput(result);
       }
 
-      if (evalResult.requirements?.piiHandling === "deny") {
+      if (denyPii) {
         if (await this.containsPII(result)) {
           throw new MCPGatewayError(
             `[LLM06: Sensitive Information] Policy Violation: PII detected in output for tool '${request.toolName}' while policy dictates 'deny'.`,

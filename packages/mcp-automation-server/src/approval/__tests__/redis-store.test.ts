@@ -46,12 +46,14 @@ vi.mock("ioredis", () => {
 
 describe("RedisApprovalStore", () => {
   let store: RedisApprovalStore;
-  let clientMock: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let clientMock: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
     store = new RedisApprovalStore();
-    clientMock = (store as unknown).redis;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    clientMock = (store as any).redis;
     clientMock._reset();
   });
 
