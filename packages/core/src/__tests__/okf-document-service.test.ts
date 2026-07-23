@@ -5,21 +5,18 @@ import type {
   IIndexService,
   ILogService,
 } from "../domain/interfaces.js";
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+
 import type { OKFDocument, LogEntry } from "../domain/types.js";
 import { OKFDocumentService } from "../services/okf-document-service.js";
 
 describe("OKFDocumentService", () => {
   let mockRepository: {
-    // eslint-disable-next-line no-unused-vars
     [K in keyof IOKFRepository]: ReturnType<typeof vi.fn>;
   };
   let mockIndexService: {
-    // eslint-disable-next-line no-unused-vars
     [K in keyof IIndexService]: ReturnType<typeof vi.fn>;
   };
   let mockLogService: {
-    // eslint-disable-next-line no-unused-vars
     [K in keyof ILogService]: ReturnType<typeof vi.fn>;
   };
   let service: OKFDocumentService;
@@ -184,5 +181,57 @@ describe("OKFDocumentService", () => {
 
     expect(mockRepository.findById).toHaveBeenCalledWith("skills/typescript");
     expect(result).toEqual(doc);
+  });
+
+  it("should create document when passing separate arguments", async () => {
+    const frontmatter = { type: "Skill", title: "TS" };
+    const body = "Body";
+    const conceptId = "skills/ts";
+
+    await service.createDocument(frontmatter, body, conceptId);
+
+    expect(mockRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        frontmatter,
+        body,
+        conceptId,
+      }),
+    );
+  });
+
+  it("should throw when passing separate arguments without body and conceptId", async () => {
+    const frontmatter = { type: "Skill", title: "TS" };
+
+    await expect(service.createDocument(frontmatter as any)).rejects.toThrow(
+      "body and conceptId are required when passing frontmatter separately",
+    );
+  });
+
+  it("should update document passing separate arguments", async () => {
+    const doc = makeDocument();
+    mockRepository.findById.mockResolvedValue(doc);
+
+    const updates = { title: "New TS" };
+    const bodyUpdate = "New Body";
+    await service.updateDocument("skills/typescript", updates, bodyUpdate);
+
+    expect(mockRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conceptId: "skills/typescript",
+        body: "New Body",
+        frontmatter: expect.objectContaining({
+          type: "Skill",
+          title: "New TS",
+        }),
+      }),
+    );
+  });
+
+  it("should throw OKFFileNotFoundError if document not found on update", async () => {
+    mockRepository.findById.mockResolvedValue(null);
+
+    await expect(
+      service.updateDocument("skills/not-found", {}),
+    ).rejects.toThrow();
   });
 });

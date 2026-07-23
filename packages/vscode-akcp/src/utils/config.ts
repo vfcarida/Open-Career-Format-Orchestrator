@@ -4,9 +4,10 @@ export interface AKCPExtensionConfig {
 }
 
 export function parseExtensionConfig(rawConfig: unknown): AKCPExtensionConfig {
+  const config = rawConfig as Record<string, any> | undefined;
   return {
-    akcpExecutable: rawConfig?.akcpExecutable || "npx akcp",
-    defaultProfile: rawConfig?.defaultProfile || "software",
+    akcpExecutable: config?.akcpExecutable || "npx akcp",
+    defaultProfile: config?.defaultProfile || "software",
   };
 }
 

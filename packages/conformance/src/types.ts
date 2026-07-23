@@ -20,3 +20,11 @@ export interface ConformanceReport {
   warnings: number;
   details: ConformanceDetail[];
 }
+
+export interface CheckResult {
+  check: string;
+  target?: string;
+  passed: boolean;
+  message?: string;
+  severity?: "error" | "warning";
+}

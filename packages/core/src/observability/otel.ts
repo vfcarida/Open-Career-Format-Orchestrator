@@ -5,7 +5,7 @@
 
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import api from "@opentelemetry/api";
+import { trace, metrics, SpanStatusCode } from "@opentelemetry/api";
 
 let sdk: NodeSDK | null = null;
 
@@ -59,7 +59,7 @@ export async function stopTelemetry(): Promise<void> {
 
 // ─── Custom Metrics Definitions ───────────────────────────────────────────────
 
-const meter = api.metrics.getMeter("akcp");
+const meter = metrics.getMeter("akcp");
 
 // Metrics counters
 export const mcpToolCallsCounter = meter.createCounter(
@@ -143,7 +143,7 @@ export const mcpToolDurationHistogram = meter.createHistogram(
 
 // ─── Tracing Helpers ─────────────────────────────────────────────────────────
 
-export const tracer = api.trace.getTracer("akcp");
+export const tracer = trace.getTracer("akcp");
 
 /**
  * Wraps an async function with an OpenTelemetry span and records duration.
@@ -166,16 +166,15 @@ export async function withToolTracing<T>(
       const durationMs = end - start;
       mcpToolDurationHistogram.record(durationMs, { toolName });
       span.setAttribute("tool.duration_ms", durationMs);
-      span.setStatus({ code: api.SpanStatusCode.OK });
+      span.setStatus({ code: SpanStatusCode.OK });
       return { data, durationMs };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const end = performance.now();
       const durationMs = end - start;
       mcpToolDurationHistogram.record(durationMs, { toolName });
       span.setAttribute("tool.duration_ms", durationMs);
       span.recordException(err);
-      span.setStatus({ code: api.SpanStatusCode.ERROR, message: err.message });
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
       throw err;
     } finally {
       span.end();

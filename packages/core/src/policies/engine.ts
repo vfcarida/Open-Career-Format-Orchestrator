@@ -164,3 +164,87 @@ function isWithinTimeWindow(params: {
     return false;
   return true;
 }
+
+import type { PolicyTrace, RuleEvaluation, PolicyConflict } from "./trace.js";
+
+export function evaluatePoliciesWithTrace(
+  rules: PolicyRule[],
+  request: PolicyRequest,
+): { decision: PolicyDecision; trace: PolicyTrace } {
+  const sorted = [...rules].sort((a, b) => a.priority - b.priority);
+  const evaluatedRules: RuleEvaluation[] = [];
+  const conflicts: PolicyConflict[] = [];
+
+  let finalDecision: PolicyDecision | null = null;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const rule = sorted[i]!;
+
+    const ruleMatched = matchesRule(rule, request);
+    let condMet = false;
+
+    if (ruleMatched) {
+      condMet = meetsConditions(rule.conditions, request);
+      evaluatedRules.push({
+        rule,
+        matched: true,
+        conditionsMet: condMet,
+      });
+
+      if (condMet && !finalDecision) {
+        finalDecision = {
+          effect: rule.effect,
+          matchedRule: rule,
+          obligations: rule.obligations ?? [],
+          reason: `Matched rule "${rule.id}" (priority ${rule.priority})`,
+        };
+
+        // Check for conflicts
+        for (let j = i + 1; j < sorted.length; j++) {
+          const lowerRule = sorted[j]!;
+
+          if (
+            lowerRule.effect !== rule.effect &&
+            matchesRule(lowerRule, request) &&
+            meetsConditions(lowerRule.conditions, request)
+          ) {
+            conflicts.push({
+              allowRule: rule.effect === "allow" ? rule : lowerRule,
+              denyRule: rule.effect === "deny" ? rule : lowerRule,
+              resolution: "priority-wins",
+              explanation: `Higher priority rule ${rule.id} won over ${lowerRule.id}`,
+            });
+            break;
+          }
+        }
+      }
+    } else {
+      evaluatedRules.push({
+        rule,
+        matched: false,
+        conditionsMet: false,
+        skipReason: "Match criteria failed",
+      });
+    }
+  }
+
+  if (!finalDecision) {
+    finalDecision = {
+      effect: "deny",
+      matchedRule: DEFAULT_DENY_RULE,
+      obligations: [],
+      reason: "No matching rule found. Default: deny.",
+    };
+  }
+
+  return {
+    decision: finalDecision,
+    trace: {
+      request,
+      evaluatedRules,
+      decision: finalDecision,
+      conflicts,
+      timestamp: new Date().toISOString(),
+    },
+  };
+}

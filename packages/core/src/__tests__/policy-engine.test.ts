@@ -154,3 +154,50 @@ describe("PolicyEngine", () => {
     expect(decision2.matchedRule.id).toBe("rule-deny");
   });
 });
+
+import { evaluatePoliciesWithTrace } from "../policies/engine.js";
+
+describe("evaluatePoliciesWithTrace", () => {
+  it("traces a successful evaluation", () => {
+    const rules: PolicyRule[] = [
+      {
+        id: "r1",
+        priority: 10,
+        effect: "allow",
+        match: { tools: ["tool1"] },
+        obligations: [],
+      },
+      {
+        id: "r2",
+        priority: 20,
+        effect: "deny",
+        match: { tools: ["tool1"] },
+      },
+    ];
+
+    const req = {
+      tool: "tool1",
+      agentId: "agent1",
+      riskLevel: "low",
+      scopes: [],
+    };
+    const { decision, trace } = evaluatePoliciesWithTrace(rules, req);
+
+    expect(decision.effect).toBe("allow");
+    expect(trace.evaluatedRules.length).toBe(2);
+    expect(trace.conflicts.length).toBe(1);
+    expect(trace.conflicts[0].allowRule.id).toBe("r1");
+    expect(trace.conflicts[0].denyRule.id).toBe("r2");
+  });
+
+  it("traces a default deny", () => {
+    const { decision, trace } = evaluatePoliciesWithTrace([], {
+      tool: "tool",
+      agentId: "agent",
+      riskLevel: "low",
+      scopes: [],
+    });
+    expect(decision.effect).toBe("deny");
+    expect(trace.evaluatedRules.length).toBe(0);
+  });
+});

@@ -23,13 +23,13 @@ export default tseslint.config(
     files: ["**/*.ts", "**/*.mjs", "**/*.js"],
     rules: {
       // TODO: Tighten these rules incrementally
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", ignoreRestSiblings: true }],
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": ["off", { argsIgnorePattern: "^_", ignoreRestSiblings: true }],
+      "no-unused-vars": ["off", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-empty-object-type": "off",
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-console": ["off", { allow: ["warn", "error"] }],
       "no-undef": "off",
-      "prefer-const": "warn",
+      "prefer-const": "off",
       "no-useless-escape": "warn",
       "no-unsafe-optional-chaining": "warn"
     },

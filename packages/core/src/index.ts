@@ -133,6 +133,9 @@ export { evaluatePolicy } from "./policy/evaluate.js";
 export * from "./policy/evaluate.js";
 export * from "./policy/explain.js";
 export * from "./policy/load.js";
+export * from "./policies/engine.js";
+export * from "./policies/adapter.js";
+export * from "./policies/trace.js";
 
 // Identity & Capabilities
 export * from "./identity/types.js";
@@ -150,7 +153,10 @@ export * from "./capabilities/approval-store.js";
 /**
  * Token bucket rate limiter for controlling agent MCP capability usage.
  */
-export { TokenBucketRateLimiter, type RateLimiterConfig } from "./capabilities/rate-limiter.js";
+export {
+  TokenBucketRateLimiter,
+  type RateLimiterConfig,
+} from "./capabilities/rate-limiter.js";
 export {
   authenticate,
   hashApiKey,
@@ -202,7 +208,12 @@ export { runCompilerPipeline } from "./compiler/run-pipeline.js";
 export * from "./domain/result.js";
 
 // Compiler (Result-based API)
-export { compile, type CompileResult, type CompilerWarning, type CompileStats } from "./compiler/compile.js";
+export {
+  compile,
+  type CompileResult,
+  type CompilerWarning,
+  type CompileStats,
+} from "./compiler/compile.js";
 export type { CompilerError } from "./compiler/errors.js";
 
 // Privacy
