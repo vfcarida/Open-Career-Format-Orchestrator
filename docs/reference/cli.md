@@ -467,9 +467,7 @@ akcp policy explain [options] <file>
 
 ### `akcp conformance run`
 
-**Status**: Planned
-
-Not yet implemented. Returns NOT_IMPLEMENTED error.
+**Status**: Beta
 
 Run conformance suite on a target bundle
 
